@@ -9,7 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class Client extends Authenticatable
 {
     use Notifiable;
-
+    protected $table ='client';
     /**
      * The attributes that are mass assignable.
      *
@@ -36,4 +36,16 @@ class Client extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function chats(){
+      return $this->belongsToMany('App\Chat');
+    }
+
+    public function ratings(){
+      return $this->hasMany('App\UserRating');
+    }
+
+    public function campaigns(){
+      return $this->hasMany('App\ClientCampaign');
+    }
 }

@@ -105108,8 +105108,8 @@ var pageList = [{
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! D:\C BackUp\htdocs\tapads\resources\js\index.js */"./resources/js/index.js");
-module.exports = __webpack_require__(/*! D:\C BackUp\htdocs\tapads\resources\sass\styles.scss */"./resources/sass/styles.scss");
+__webpack_require__(/*! D:\xampp\htdocs\tapads\resources\js\index.js */"./resources/js/index.js");
+module.exports = __webpack_require__(/*! D:\xampp\htdocs\tapads\resources\sass\styles.scss */"./resources/sass/styles.scss");
 
 
 /***/ })

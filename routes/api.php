@@ -19,8 +19,8 @@ Route::middleware('json.response')->group(function(){
   Route::post('register', 'API\AuthController@register');
 
 
-  Route::middleware('auth:api')->group(function(){
-    Route::get('user', 'UserController@details');
+  Route::middleware('auth:api')->prefix('user')->group(function(){
+    Route::get('details', 'UserController@details');
 
   });
 

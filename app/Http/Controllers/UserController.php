@@ -19,4 +19,6 @@ class UserController extends Controller
   public function details(Request $request){
       return response()->json($request->user());
   }
+
+  
 }
