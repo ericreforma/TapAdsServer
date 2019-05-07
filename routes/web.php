@@ -16,5 +16,3 @@ Route::get('/{path?}', function () {
 })->where('path','.*');
 
 Auth::routes();
-
-Route::get('/home', 'HomeController@index')->name('home');

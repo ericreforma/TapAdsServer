@@ -100292,7 +100292,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 function App() {
-  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["BrowserRouter"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Switch"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Route"], {
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["BrowserRouter"], {
+    basename: "/tapads/public"
+  }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Switch"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Route"], {
     component: _views_layout_Dashboard__WEBPACK_IMPORTED_MODULE_2__["default"]
   })));
 }
@@ -100607,7 +100609,7 @@ function ChatDisplay(_ref3) {
   }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
     className: "pull-left w-32 m-r-sm"
   }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
-    src: currentUserImage,
+    src: '.' + currentUserImage,
     alt: ".",
     className: "w-full img-circle"
   })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(ChatMessage, {
@@ -101773,7 +101775,7 @@ function Avatar(_ref) {
   }, initials && !image && react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     className: "user-initials"
   }, initials), image && react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
-    src: image,
+    src: '.' + image,
     className: "avatar-image",
     alt: ""
   }));
@@ -104038,7 +104040,7 @@ function (_Component) {
       }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_5__["Card"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_5__["CardBody"], {
         className: "display-flex"
       }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
-        src: _img_react_feature_svg__WEBPACK_IMPORTED_MODULE_1___default.a,
+        src: '.' + _img_react_feature_svg__WEBPACK_IMPORTED_MODULE_1___default.a,
         style: {
           width: 70,
           height: 70
@@ -104056,7 +104058,7 @@ function (_Component) {
       }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_5__["Card"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_5__["CardBody"], {
         className: "display-flex"
       }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
-        src: _img_bootstrap_feature_svg__WEBPACK_IMPORTED_MODULE_3___default.a,
+        src: '.' + _img_bootstrap_feature_svg__WEBPACK_IMPORTED_MODULE_3___default.a,
         style: {
           width: 70,
           height: 70
@@ -104074,7 +104076,7 @@ function (_Component) {
       }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_5__["Card"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_5__["CardBody"], {
         className: "display-flex"
       }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
-        src: _img_sass_feature_svg__WEBPACK_IMPORTED_MODULE_2___default.a,
+        src: '.' + _img_sass_feature_svg__WEBPACK_IMPORTED_MODULE_2___default.a,
         style: {
           width: 70,
           height: 70
@@ -104092,7 +104094,7 @@ function (_Component) {
       }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_5__["Card"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_5__["CardBody"], {
         className: "display-flex"
       }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
-        src: _img_responsive_feature_svg__WEBPACK_IMPORTED_MODULE_4___default.a,
+        src: '.' + _img_responsive_feature_svg__WEBPACK_IMPORTED_MODULE_4___default.a,
         style: {
           width: 70,
           height: 70
@@ -104326,7 +104328,7 @@ function (_Component) {
         width: "50",
         alt: "",
         className: "invoice-logo",
-        src: _img_apple_png__WEBPACK_IMPORTED_MODULE_2___default.a
+        src: '.' + _img_apple_png__WEBPACK_IMPORTED_MODULE_2___default.a
       }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("address", {
         className: "m-t-10"
       }, "Apple Enterprise Sales", react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("br", null), "(123) 411-4321.", react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("br", null))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
@@ -104411,7 +104413,7 @@ function (_Component) {
         width: "150",
         alt: "",
         className: "invoice-signature",
-        src: _img_microsoft_png__WEBPACK_IMPORTED_MODULE_3___default.a
+        src: '.' + _img_microsoft_png__WEBPACK_IMPORTED_MODULE_3___default.a
       }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Designer\u2019s Identity")), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
         className: "p-a b-t b-b m-b-lg"
       }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
@@ -104660,7 +104662,7 @@ function ProfileWidget() {
   }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     className: "m-b"
   }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
-    src: _img_avatar2_jpeg__WEBPACK_IMPORTED_MODULE_2___default.a,
+    src: '.' + _img_avatar2_jpeg__WEBPACK_IMPORTED_MODULE_2___default.a,
     style: {
       width: 100
     },

@@ -29,7 +29,7 @@ class Dashboard extends Component {
             <Card>
               <CardBody className="display-flex">
                 <img
-                  src={reactFeature}
+                  src={'.'+reactFeature}
                   style={{ width: 70, height: 70 }}
                   alt="react.js"
                   aria-hidden={true}
@@ -47,7 +47,7 @@ class Dashboard extends Component {
             <Card>
               <CardBody className="display-flex">
                 <img
-                  src={bootstrapFeature}
+                  src={'.'+bootstrapFeature}
                   style={{ width: 70, height: 70 }}
                   alt="Bootstrap"
                   aria-hidden={true}
@@ -67,7 +67,7 @@ class Dashboard extends Component {
             <Card>
               <CardBody className="display-flex">
                 <img
-                  src={sassFeature}
+                  src={'.'+sassFeature}
                   style={{ width: 70, height: 70 }}
                   alt="Sass"
                   aria-hidden={true}
@@ -85,7 +85,7 @@ class Dashboard extends Component {
             <Card>
               <CardBody className="display-flex">
                 <img
-                  src={responsiveFeature}
+                  src={'.'+responsiveFeature}
                   style={{ width: 70, height: 70 }}
                   alt="Responsive"
                   aria-hidden={true}

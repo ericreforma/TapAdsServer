@@ -18,10 +18,12 @@ Route::middleware('json.response')->group(function(){
   Route::post('login', 'API\AuthController@login');
   Route::post('register', 'API\AuthController@register');
 
-
   Route::middleware('auth:api')->prefix('user')->group(function(){
-    Route::get('details', 'UserController@details');
+    // USER details
+    Route::get('/', 'UserController@details');
+    Route::get('logout', 'UserController@logout');
 
+    
   });
 
 });

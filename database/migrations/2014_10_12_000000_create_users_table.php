@@ -17,8 +17,8 @@ class CreateUsersTable extends Migration
             $table->bigIncrements('id');
             $table->string('name');
             $table->string('username');
-            $table->integer('media_id');
-            $table->text('description');
+            $table->integer('media_id')->nullable();
+            $table->text('description')->nullable();
             $table->date('birthdate');
             $table->string('contact_number');
             $table->string('location');

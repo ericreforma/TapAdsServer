@@ -11,7 +11,7 @@ export default class Invoice extends Component {
           <CardBody>
             <div className="m-b">
               <div className="pull-left">
-                <img width="50" alt="" className="invoice-logo" src={AppleLogo} />
+                <img width="50" alt="" className="invoice-logo" src={'.'+AppleLogo} />
                 <address className="m-t-10">
                   Apple Enterprise Sales
                   <br />
@@ -105,7 +105,7 @@ export default class Invoice extends Component {
               </table>
             </div>
             <div className="m-b">
-              <img width="150" alt="" className="invoice-signature" src={MSLogo} />
+              <img width="150" alt="" className="invoice-signature" src={'.'+MSLogo} />
               <p>Designer’s Identity</p>
             </div>
             <div className="p-a b-t b-b m-b-lg">

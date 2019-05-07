@@ -14,10 +14,10 @@ class DatabaseSeeder extends Seeder
 
       $user = factory(App\User::class, 3)->create();
       $client = factory(App\Client::class, 3)->create();
-      $chat = factory(App\Chat::class, 200)->create();
-      $userRating = factory(App\UserRating::class, 200)->create();
-      $userVehicle = factory(App\UserVehicle::class, 200)->create();
-      $userVehiclePhoto = factory(App\UserVehiclePhoto::class, 200)->create();
+      $chat = factory(App\Chat::class, 60)->create();
+      $userRating = factory(App\UserRating::class, 40)->create();
+      $userVehicle = factory(App\UserVehicle::class, 5)->create();
+      $userVehiclePhoto = factory(App\UserVehiclePhoto::class, 10)->create();
       $Vehicle = factory(App\Vehicle::class, 30)->create();
 
       $client->each(function($client){

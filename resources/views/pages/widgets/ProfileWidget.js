@@ -7,7 +7,7 @@ export default function ProfileWidget() {
     <Card body>
       <div className="text-center">
         <div className="m-b">
-          <img src={avatar2} style={{ width: 100 }} className="b-circle" alt="profile" />
+          <img src={'.'+avatar2} style={{ width: 100 }} className="b-circle" alt="profile" />
         </div>
         <div>
           <h2 className="h4">Jason Smith</h2>
