@@ -2,32 +2,12 @@ export default {
   top: [
     {
       name: 'Dashboard',
-      url: '/apps/analytics',
+      url: '/dashboard',
       icon: 'Home',
     },
     {
-      name: 'Campaigns',
-      url: '/campaigns',
-      icon: 'Star'
-    },
-    {
-      name: 'Gallery',
-      url: '/gallery',
-      icon: 'Image'
-    },
-    {
-      name: 'Settings',
-      url: '/settings',
-      icon: 'Settings'
-    },
-    {
-      divider: true,
-    }
-  ],
-  bottom: [
-    {
-      name: 'Theme Samples',
-      icon: 'Package',
+      name: 'UI Elements',
+      icon: 'Layers',
       children: [
         {
           name: 'Buttons',
@@ -85,6 +65,12 @@ export default {
           name: 'Pagination',
           url: '/elements/pagination',
         },
+      ],
+    },
+    {
+      name: 'Pages',
+      icon: 'File',
+      children: [
         {
           name: 'Blank',
           url: '/pages/blank',
@@ -97,6 +83,12 @@ export default {
           name: '404',
           url: '/pages/404',
         },
+      ],
+    },
+    {
+      name: 'Apps',
+      icon: 'Cloud',
+      children: [
         {
           name: 'Analytics',
           url: '/apps/analytics',
@@ -113,14 +105,26 @@ export default {
           name: 'CMS',
           url: '/apps/cms',
         },
-        {
-          name: 'Widgets',
-          url: '/widgets',
-          badge: {
-            text: 'NEW',
-          },
-        },
       ],
+    },
+    {
+      divider: true,
+    },
+    {
+      name: 'Widgets',
+      url: '/widgets',
+      icon: 'Package',
+      badge: {
+        text: 'NEW',
+      },
+    },
+  ],
+  bottom: [
+    {
+      name: 'Get Vibe',
+      url: 'https://github.com/NiceDash/Vibe',
+      icon: 'GitHub',
+      external: true,
     },
     {
       name: 'Account',

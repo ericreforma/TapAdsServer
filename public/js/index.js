@@ -85193,7 +85193,7 @@ var safeInvoke = function safeInvoke(fn) {
 /*!***************************************************************!*\
   !*** ./node_modules/react-router-dom/esm/react-router-dom.js ***!
   \***************************************************************/
-/*! exports provided: BrowserRouter, HashRouter, Link, NavLink, MemoryRouter, Prompt, Redirect, Route, Router, StaticRouter, Switch, generatePath, matchPath, withRouter, __RouterContext */
+/*! exports provided: MemoryRouter, Prompt, Redirect, Route, Router, StaticRouter, Switch, generatePath, matchPath, withRouter, __RouterContext, BrowserRouter, HashRouter, Link, NavLink */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -103509,11 +103509,26 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   top: [{
     name: 'Dashboard',
-    url: '/dashboard',
+    url: '/apps/analytics',
     icon: 'Home'
   }, {
-    name: 'UI Elements',
-    icon: 'Layers',
+    name: 'Campaigns',
+    url: '/campaigns',
+    icon: 'Star'
+  }, {
+    name: 'Gallery',
+    url: '/gallery',
+    icon: 'Image'
+  }, {
+    name: 'Settings',
+    url: '/settings',
+    icon: 'Settings'
+  }, {
+    divider: true
+  }],
+  bottom: [{
+    name: 'Theme Samples',
+    icon: 'Package',
     children: [{
       name: 'Buttons',
       url: '/elements/buttons'
@@ -103556,11 +103571,7 @@ __webpack_require__.r(__webpack_exports__);
     }, {
       name: 'Pagination',
       url: '/elements/pagination'
-    }]
-  }, {
-    name: 'Pages',
-    icon: 'File',
-    children: [{
+    }, {
       name: 'Blank',
       url: '/pages/blank'
     }, {
@@ -103569,11 +103580,7 @@ __webpack_require__.r(__webpack_exports__);
     }, {
       name: '404',
       url: '/pages/404'
-    }]
-  }, {
-    name: 'Apps',
-    icon: 'Cloud',
-    children: [{
+    }, {
       name: 'Analytics',
       url: '/apps/analytics'
     }, {
@@ -103585,22 +103592,13 @@ __webpack_require__.r(__webpack_exports__);
     }, {
       name: 'CMS',
       url: '/apps/cms'
+    }, {
+      name: 'Widgets',
+      url: '/widgets',
+      badge: {
+        text: 'NEW'
+      }
     }]
-  }, {
-    divider: true
-  }, {
-    name: 'Widgets',
-    url: '/widgets',
-    icon: 'Package',
-    badge: {
-      text: 'NEW'
-    }
-  }],
-  bottom: [{
-    name: 'Get Vibe',
-    url: 'https://github.com/NiceDash/Vibe',
-    icon: 'GitHub',
-    external: true
   }, {
     name: 'Account',
     url: '/dashboard',
