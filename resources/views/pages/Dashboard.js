@@ -24,6 +24,7 @@ class Dashboard extends Component {
             </div>
           </Col>
         </Row>
+
         <Row>
           <Col md={6}>
             <Card>

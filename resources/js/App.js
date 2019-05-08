@@ -4,7 +4,7 @@ import DashboardLayout from '../views/layout/Dashboard';
 
 export default function App() {
   return (
-    <BrowserRouter basename={"/tapads/public"}>
+    <BrowserRouter>
       <Switch>
         <Route component={DashboardLayout} />
       </Switch>

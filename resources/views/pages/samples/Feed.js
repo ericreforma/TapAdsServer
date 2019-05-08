@@ -1,6 +1,6 @@
 import React from 'react';
 import FA from 'react-fontawesome';
-import { Avatar } from '../components';
+import { Avatar } from '../../components';
 import { Row, Button, Col, Card, CardBody, CardHeader, CardFooter, Container } from 'reactstrap';
 
 function PostActions() {

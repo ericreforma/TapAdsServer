@@ -10,7 +10,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
-
+    protected $guard = 'api';
     /**
      * The attributes that are mass assignable.
      *

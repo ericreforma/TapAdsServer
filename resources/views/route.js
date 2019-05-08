@@ -10,17 +10,17 @@ import Breadcrumbs from './elements/Breadcrumbs';
 import Forms from './elements/Forms';
 import Loaders from './elements/Loaders';
 import Avatars from './elements/Avatars';
-import Invoice from './pages/Invoice';
-import Analytics from './pages/Analytics';
-import CmsPage from './pages/Cms';
-import Widgets from './pages/Widgets';
-import BlankPage from './pages/BlankPage';
-import SubNav from './pages/SubNav';
-import Feed from './pages/Feed';
+import Invoice from './pages/samples/Invoice';
+import Analytics from './pages/samples/Analytics';
+import CmsPage from './pages/samples/Cms';
+import Widgets from './pages/samples/Widgets';
+import BlankPage from './pages/samples/BlankPage';
+import SubNav from './pages/samples/SubNav';
+import Feed from './pages/samples/Feed';
 import Modals from './elements/Modals';
 import ProgressBars from './elements/ProgressBars';
 import PaginationPage from './elements/Pagination';
-import ErrorPage from './pages/404';
+import ErrorPage from './pages/samples/404';
 
 const pageList = [
   {
@@ -28,6 +28,7 @@ const pageList = [
     path: '/dashboard',
     component: Dashboard
   },
+
   {
     name: 'Buttons',
     path: '/elements/buttons',

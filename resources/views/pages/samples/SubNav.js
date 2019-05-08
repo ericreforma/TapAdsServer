@@ -1,5 +1,5 @@
 import React from 'react';
-import { SubNavigation } from '../components';
+import { SubNavigation } from '../../components';
 
 const NAV = [
   {

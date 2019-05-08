@@ -8,7 +8,7 @@ import {
   Progress,
   Button
 } from 'reactstrap';
-import { Switch } from '../components';
+import { Switch } from '../../components';
 import { Doughnut, Line } from 'react-chartjs-2';
 
 export default class AnalyticsPage extends Component {

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use App\User;
 use Hash;
 
-class AuthController extends Controller
+class AuthUserController extends Controller
 {
     public function __construct(){
       auth()->setDefaultDriver('api_auth');
@@ -26,7 +26,7 @@ class AuthController extends Controller
       } else {
           return response()->json(['error' => 'UnAuthorised'], 401);
       }
-      
+
     }
 
     public function register (Request $request){

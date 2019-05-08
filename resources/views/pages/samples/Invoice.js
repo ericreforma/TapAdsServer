@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Container, Card, CardBody } from 'reactstrap';
-import AppleLogo from '../../img/apple.png';
-import MSLogo from '../../img/microsoft.png';
+import AppleLogo from '../../../img/apple.png';
+import MSLogo from '../../../img/microsoft.png';
 
 export default class Invoice extends Component {
   render() {

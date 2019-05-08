@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
+use App\Client;
+use Hash;
 
 class ClientController extends Controller
 {
@@ -13,7 +17,7 @@ class ClientController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth:web_api');
     }
 
     /**
@@ -25,4 +29,22 @@ class ClientController extends Controller
     {
         return view('home');
     }
+
+    public function details(Request $request){
+      $client = $request->user();
+
+      return response()->json($client);
+    }
+
+    
+    public function logout (Request $request) {
+
+      $token = $request->user()->token();
+      $token->revoke();
+
+      $response = 'You have been succesfully logged out!';
+      return response($response, 200);
+    }
+
+
 }

@@ -15,15 +15,32 @@ use Illuminate\Http\Request;
 
 Route::middleware('json.response')->group(function(){
 
-  Route::post('login', 'API\AuthController@login');
-  Route::post('register', 'API\AuthController@register');
+  // USER
+  Route::prefix('user')->group(function(){
 
-  Route::middleware('auth:api')->prefix('user')->group(function(){
-    // USER details
-    Route::get('/', 'UserController@details');
-    Route::get('logout', 'UserController@logout');
+    Route::post('login', 'API\AuthUserController@login')->name('user_login');
+    Route::post('register', 'API\AuthUserController@register')->name('user_register');
 
-    
+    Route::middleware('auth:api')->group(function(){
+      // USER details
+      Route::get('/', 'UserController@details');
+      Route::get('logout', 'UserController@logout')->name('user_logout');
+    });
+
   });
+
+  // CLIENT
+  Route::prefix('client')->group(function(){
+
+      Route::post('login', 'API\AuthClientController@login');
+      Route::post('register', 'API\AuthClientController@register');
+
+      Route::middleware('auth:web_api')->group(function(){
+
+        Route::get('/','ClientController@details');
+        
+      });
+  });
+
 
 });

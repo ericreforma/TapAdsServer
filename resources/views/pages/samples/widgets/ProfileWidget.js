@@ -1,6 +1,6 @@
 import React from 'react';
 import { Row, Col, Card, Button } from 'reactstrap';
-import avatar2 from '../../../img/avatar2.jpeg';
+import avatar2 from '../../../../img/avatar2.jpeg';
 
 export default function ProfileWidget() {
   return (
