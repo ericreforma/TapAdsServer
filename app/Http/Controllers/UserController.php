@@ -29,11 +29,11 @@ class UserController extends Controller
 
       $user = $request->user();
       $user->ratings;
-      $user->vehicles;
-
-      foreach($user->vehicles as $v){
-        $v->photos;
-      };
+      // $user->vehicles;
+      //
+      // foreach($user->vehicles as $v){
+      //   $v->photos;
+      // };
 
       return response()->json($user);
   }
