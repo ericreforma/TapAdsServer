@@ -31,12 +31,12 @@ Route::middleware('json.response')->group(function(){
 
   // CLIENT
   Route::prefix('client')->group(function(){
-
+      Route::get('home', 'API\AuthClientController@index');
       Route::post('login', 'API\AuthClientController@login');
       Route::post('register', 'API\AuthClientController@register');
 
       Route::middleware('auth:web_api')->group(function(){
-
+        
         Route::get('/','ClientController@details');
 
       });
