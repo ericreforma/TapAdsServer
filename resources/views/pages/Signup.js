@@ -38,7 +38,6 @@ export default class Signup extends Component {
         }
         axios.post('/api/client/register',data,headers
         ).then( (res) => {
-            console.log(res.data.token);
             localStorage.setItem('client_token',res.data.token);
             /*this.props.authenticate(() => {
                 this.setState(() => ({

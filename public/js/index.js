@@ -102004,7 +102004,6 @@ function App() {
     path: "/signup",
     component: _views_pages_Signup__WEBPACK_IMPORTED_MODULE_4__["default"]
   }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Route"], {
-    path: "/dashboard",
     component: _views_layout_Dashboard__WEBPACK_IMPORTED_MODULE_2__["default"]
   })));
 }
@@ -105629,7 +105628,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
- //import "./sass/styles.css";
+
 
 var Login =
 /*#__PURE__*/
@@ -105663,7 +105662,6 @@ function (_Component) {
           }); //console.log('error'+res.data.error);
 
         } else {
-          console.log(res.data.token);
           localStorage.setItem('client_token', res.data.token);
           /*this.props.authenticate( () => {
           	this.setState(() => ({
@@ -105840,7 +105838,6 @@ function (_Component) {
         "Access-Control-Allow-Origin": "*"
       };
       axios__WEBPACK_IMPORTED_MODULE_3___default.a.post('/api/client/register', data, headers).then(function (res) {
-        console.log(res.data.token);
         localStorage.setItem('client_token', res.data.token);
         /*this.props.authenticate(() => {
             this.setState(() => ({

@@ -11,7 +11,7 @@ export default function App() {
 			<Switch>
 				<Route path="/login" component={LoginLayout} />
 				<Route path="/signup" component={SignupLayout} />
-				<Route path="/dashboard" component={DashboardLayout} />
+				<Route component={DashboardLayout} />
 				{/*<PrivateRoute path="/dashboard" component={DashboardLayout} />*/}
 			</Switch>
 		</BrowserRouter>

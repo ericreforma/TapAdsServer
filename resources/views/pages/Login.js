@@ -4,7 +4,6 @@ import {Link} from 'react-router-dom';
 import axios from 'axios';
 import Auth from '../../views/functions/Authenticate';
 
-//import "./sass/styles.css";
 export default class Login extends Component {
   constructor(props) {
     super(props);
@@ -34,7 +33,6 @@ export default class Login extends Component {
 				this.setState({error:'Invalid Email or Password'});
 			//console.log('error'+res.data.error);
 			}else{
-				console.log(res.data.token);
 				localStorage.setItem('client_token',res.data.token);
 				/*this.props.authenticate( () => {
 					this.setState(() => ({

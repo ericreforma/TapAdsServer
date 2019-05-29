@@ -30,7 +30,8 @@ class AuthClientController extends Controller
 			$token = auth()->user()->createToken('tapads')->accessToken;
 			return response()->json(['token' => $token], 200);
 		} else {
-			return response()->json(['error' => 'UnAuthorised'], 401);
+			//return response()->json(['error' => 'UnAuthorised'], 401);
+			return response()->json(['error' => 'UnAuthorised']);
 		}
     }
 
@@ -46,7 +47,8 @@ class AuthClientController extends Controller
 		]);
 
 		if($validator->fails()){
-			return response()->json($validator->errors()->all(), 400);
+			//return response()->json($validator->errors()->all(), 400);
+			return response()->json($validator->errors()->all());
 		}
 
 		$request['password']=Hash::make($request['password']);
