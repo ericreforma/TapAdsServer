@@ -85193,7 +85193,7 @@ var safeInvoke = function safeInvoke(fn) {
 /*!***************************************************************!*\
   !*** ./node_modules/react-router-dom/esm/react-router-dom.js ***!
   \***************************************************************/
-/*! exports provided: BrowserRouter, HashRouter, Link, NavLink, MemoryRouter, Prompt, Redirect, Route, Router, StaticRouter, Switch, generatePath, matchPath, withRouter, __RouterContext */
+/*! exports provided: MemoryRouter, Prompt, Redirect, Route, Router, StaticRouter, Switch, generatePath, matchPath, withRouter, __RouterContext, BrowserRouter, HashRouter, Link, NavLink */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -100204,7 +100204,7 @@ module.exports = "/images/avatar6.jpeg?caaf65af168e65f0465fa49cf60169c1";
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "/images/bootstrap-feature.svg?2fca69b6bb96516c28ab47656561a6cb";
+module.exports = "/images/bootstrap-feature.svg?69a7012b0542453d6bc2f43f7766a2c5";
 
 /***/ }),
 
@@ -100237,7 +100237,7 @@ module.exports = "/images/microsoft.png?64cc8c4fae9886667bc59b39493c4b2d";
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "/images/react-feature.svg?d39764fe69d38399c3f910794a58227f";
+module.exports = "/images/react-feature.svg?08484fa4ba6308a7a5d3d19122ac5c56";
 
 /***/ }),
 
@@ -100248,7 +100248,7 @@ module.exports = "/images/react-feature.svg?d39764fe69d38399c3f910794a58227f";
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "/images/responsive-feature.svg?3a6289fc6dd93ee6b850c21e604ead26";
+module.exports = "/images/responsive-feature.svg?a7b5f5aafbc9c3c2fbec4c339b6e070e";
 
 /***/ }),
 
@@ -100259,7 +100259,7 @@ module.exports = "/images/responsive-feature.svg?3a6289fc6dd93ee6b850c21e604ead2
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "/images/sass-feature.svg?ef06be682e46b84ab0f5c70dd37c0c34";
+module.exports = "/images/sass-feature.svg?4d7802134fbf299ad828bf130bd46695";
 
 /***/ }),
 
@@ -100270,7 +100270,7 @@ module.exports = "/images/sass-feature.svg?ef06be682e46b84ab0f5c70dd37c0c34";
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "/images/vibe-logo.svg?d65d6b8d9ce266736b48e4d25cff9fd7";
+module.exports = "/images/vibe-logo.svg?db10a10dc0288f66d7003641bebbad91";
 
 /***/ }),
 
@@ -100887,7 +100887,7 @@ function Loader(_ref) {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "/images/bars.svg?f4e64106c2249e89fe92aa75bec86afc";
+module.exports = "/images/bars.svg?febae3c6a394c8a50fd5f4a788b28af4";
 
 /***/ }),
 
@@ -100898,7 +100898,7 @@ module.exports = "/images/bars.svg?f4e64106c2249e89fe92aa75bec86afc";
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "/images/dots.svg?f8ea5dda2d2a3ad1844087d924d352ef";
+module.exports = "/images/dots.svg?3fd8845e8372f00349f61b6b1c24007d";
 
 /***/ }),
 
@@ -100909,7 +100909,7 @@ module.exports = "/images/dots.svg?f8ea5dda2d2a3ad1844087d924d352ef";
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "/images/puff.svg?4143001088bc0165d264f03b156398ae";
+module.exports = "/images/puff.svg?b61fecc3e00410ddbaa02a2fde8718ae";
 
 /***/ }),
 
@@ -100920,7 +100920,7 @@ module.exports = "/images/puff.svg?4143001088bc0165d264f03b156398ae";
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "/images/spin.svg?74e1c3eea6f6ddda6f0b19fa7d830b7d";
+module.exports = "/images/spin.svg?71fa438ecc49974c1af4a35aa3626fa9";
 
 /***/ }),
 
@@ -103511,8 +103511,12 @@ __webpack_require__.r(__webpack_exports__);
     icon: 'Home'
   }, {
     name: 'Campaigns',
-    url: '/campaigns',
-    icon: 'Star'
+    //url: '/campaigns',
+    icon: 'Star',
+    children: [{
+      name: 'Create Campaign',
+      url: '/campaigns/create'
+    }]
   }, {
     name: 'Gallery',
     url: '/gallery',
@@ -103759,6 +103763,219 @@ function (_Component) {
 }(react__WEBPACK_IMPORTED_MODULE_0__["Component"]);
 
 /* harmony default export */ __webpack_exports__["default"] = (Dashboard);
+
+/***/ }),
+
+/***/ "./resources/views/pages/campaigns/CreateCampaign.js":
+/*!***********************************************************!*\
+  !*** ./resources/views/pages/campaigns/CreateCampaign.js ***!
+  \***********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return CreateCampainpage; });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var reactstrap__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! reactstrap */ "./node_modules/reactstrap/es/index.js");
+/* harmony import */ var _components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../components */ "./resources/views/components/index.js");
+/* harmony import */ var react_chartjs_2__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-chartjs-2 */ "./node_modules/react-chartjs-2/es/index.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+
+
+var CreateCampainpage =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(CreateCampainpage, _Component);
+
+  function CreateCampainpage(props) {
+    var _this;
+
+    _classCallCheck(this, CreateCampainpage);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(CreateCampainpage).call(this, props));
+    _this.state = {
+      name: '',
+      description: '',
+      location: '',
+      slots: '',
+      pay_additional: 0,
+      pay_additional_km: 0,
+      pay_basic: 0,
+      vehicle_type: 0,
+      facebook: true,
+      twitter: false
+    };
+    return _this;
+  }
+
+  _createClass(CreateCampainpage, [{
+    key: "render",
+    value: function render() {
+      var _this2 = this;
+
+      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "create-campaign-form"
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardHeader"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h2", null, "Create Campaign Form")), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Form"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["FormGroup"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Label"], {
+        "for": "name"
+      }, "Campaign Name"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Input"], {
+        type: "text",
+        name: "name",
+        id: "name",
+        onChange: function onChange(text) {
+          return _this2.setState({
+            name: text.target.value
+          });
+        },
+        value: this.state.email,
+        required: true
+      })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["FormGroup"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Label"], {
+        "for": "description"
+      }, "Campaign Description"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Input"], {
+        type: "textarea",
+        name: "description",
+        id: "description",
+        onChange: function onChange(text) {
+          return _this2.setState({
+            description: text.target.value
+          });
+        },
+        value: this.state.description,
+        required: true
+      })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Row"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+        md: 4,
+        sm: 12
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["FormGroup"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Label"], {
+        "for": "description"
+      }, "Location"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Input"], {
+        type: "text",
+        name: "location",
+        id: "location",
+        onChange: function onChange(text) {
+          return _this2.setState({
+            location: text.target.value
+          });
+        },
+        value: this.state.location,
+        required: true
+      }))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+        md: 4,
+        sm: 12
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["FormGroup"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Label"], {
+        "for": "vehicle_type"
+      }, "Vehicle Type"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Input"], {
+        type: "select",
+        name: "vehicle_type",
+        id: "vehicle_type",
+        onChange: function onChange(text) {
+          return _this2.setState({
+            vehicle_type: text.target.value
+          });
+        },
+        value: this.state.vehicle_type,
+        required: true
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("option", {
+        value: 0
+      }, "Private"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("option", {
+        value: 1
+      }, "Public"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("option", {
+        value: 2
+      }, "Mixed")))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+        md: 4,
+        sm: 12
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["FormGroup"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Label"], {
+        "for": "slots"
+      }, "Slots"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Input"], {
+        type: "number",
+        name: "slots",
+        id: "slots",
+        onChange: function onChange(text) {
+          return _this2.setState({
+            slots: text.target.value
+          });
+        },
+        value: this.state.slots,
+        required: true
+      })))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Row"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+        md: 6,
+        sm: 12
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["FormGroup"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Label"], {
+        "for": "pay_additional"
+      }, "Additional Payment Price"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["InputGroup"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["InputGroupAddon"], {
+        addonType: "prepend"
+      }, "\u200E\u20B1"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Input"], {
+        type: "number",
+        name: "pay_additional",
+        id: "pay_additional",
+        onChange: function onChange(text) {
+          return _this2.setState({
+            pay_additional: text.target.value
+          });
+        },
+        value: this.state.pay_additional,
+        required: true
+      })))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+        md: 6,
+        sm: 12
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["FormGroup"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Label"], {
+        "for": "pay_additional_km"
+      }, "Additional Payment Distance"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["InputGroup"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Input"], {
+        type: "number",
+        name: "pay_additional_km",
+        id: "pay_additional_km",
+        onChange: function onChange(text) {
+          return _this2.setState({
+            pay_additional_km: text.target.value
+          });
+        },
+        value: this.state.pay_additional_km,
+        required: true
+      }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["InputGroupAddon"], {
+        addonType: "append"
+      }, "\u200Ekm"))))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["FormGroup"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Label"], {
+        "for": "pay_basic"
+      }, "Basic Payment"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["InputGroup"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["InputGroupAddon"], {
+        addonType: "prepend"
+      }, "\u200E\u20B1"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Input"], {
+        type: "number",
+        name: "pay_basic",
+        id: "pay_basic",
+        onChange: function onChange(text) {
+          return _this2.setState({
+            pay_basic: text.target.value
+          });
+        },
+        value: this.state.pay_basic,
+        required: true
+      }))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], null, "Create")))));
+    }
+  }]);
+
+  return CreateCampainpage;
+}(react__WEBPACK_IMPORTED_MODULE_0__["Component"]);
+
+
 
 /***/ }),
 
@@ -104957,28 +105174,30 @@ function TrafficWidget() {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _pages_Dashboard__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pages/Dashboard */ "./resources/views/pages/Dashboard.js");
-/* harmony import */ var _elements_Buttons__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./elements/Buttons */ "./resources/views/elements/Buttons.js");
-/* harmony import */ var _elements_Alerts__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./elements/Alerts */ "./resources/views/elements/Alerts.js");
-/* harmony import */ var _elements_Grid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./elements/Grid */ "./resources/views/elements/Grid.js");
-/* harmony import */ var _elements_Typography__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./elements/Typography */ "./resources/views/elements/Typography.js");
-/* harmony import */ var _elements_Cards__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./elements/Cards */ "./resources/views/elements/Cards.js");
-/* harmony import */ var _elements_Tabs__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./elements/Tabs */ "./resources/views/elements/Tabs.js");
-/* harmony import */ var _elements_Tables__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./elements/Tables */ "./resources/views/elements/Tables.js");
-/* harmony import */ var _elements_Breadcrumbs__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./elements/Breadcrumbs */ "./resources/views/elements/Breadcrumbs.js");
-/* harmony import */ var _elements_Forms__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./elements/Forms */ "./resources/views/elements/Forms.js");
-/* harmony import */ var _elements_Loaders__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./elements/Loaders */ "./resources/views/elements/Loaders.js");
-/* harmony import */ var _elements_Avatars__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./elements/Avatars */ "./resources/views/elements/Avatars.js");
-/* harmony import */ var _pages_samples_Invoice__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./pages/samples/Invoice */ "./resources/views/pages/samples/Invoice.js");
-/* harmony import */ var _pages_samples_Analytics__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./pages/samples/Analytics */ "./resources/views/pages/samples/Analytics.js");
-/* harmony import */ var _pages_samples_Cms__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./pages/samples/Cms */ "./resources/views/pages/samples/Cms.js");
-/* harmony import */ var _pages_samples_Widgets__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./pages/samples/Widgets */ "./resources/views/pages/samples/Widgets.js");
-/* harmony import */ var _pages_samples_BlankPage__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./pages/samples/BlankPage */ "./resources/views/pages/samples/BlankPage.js");
-/* harmony import */ var _pages_samples_SubNav__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./pages/samples/SubNav */ "./resources/views/pages/samples/SubNav.js");
-/* harmony import */ var _pages_samples_Feed__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./pages/samples/Feed */ "./resources/views/pages/samples/Feed.js");
-/* harmony import */ var _elements_Modals__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./elements/Modals */ "./resources/views/elements/Modals.js");
-/* harmony import */ var _elements_ProgressBars__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./elements/ProgressBars */ "./resources/views/elements/ProgressBars.js");
-/* harmony import */ var _elements_Pagination__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./elements/Pagination */ "./resources/views/elements/Pagination.js");
-/* harmony import */ var _pages_samples_404__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./pages/samples/404 */ "./resources/views/pages/samples/404.js");
+/* harmony import */ var _pages_campaigns_CreateCampaign__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./pages/campaigns/CreateCampaign */ "./resources/views/pages/campaigns/CreateCampaign.js");
+/* harmony import */ var _elements_Buttons__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./elements/Buttons */ "./resources/views/elements/Buttons.js");
+/* harmony import */ var _elements_Alerts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./elements/Alerts */ "./resources/views/elements/Alerts.js");
+/* harmony import */ var _elements_Grid__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./elements/Grid */ "./resources/views/elements/Grid.js");
+/* harmony import */ var _elements_Typography__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./elements/Typography */ "./resources/views/elements/Typography.js");
+/* harmony import */ var _elements_Cards__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./elements/Cards */ "./resources/views/elements/Cards.js");
+/* harmony import */ var _elements_Tabs__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./elements/Tabs */ "./resources/views/elements/Tabs.js");
+/* harmony import */ var _elements_Tables__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./elements/Tables */ "./resources/views/elements/Tables.js");
+/* harmony import */ var _elements_Breadcrumbs__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./elements/Breadcrumbs */ "./resources/views/elements/Breadcrumbs.js");
+/* harmony import */ var _elements_Forms__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./elements/Forms */ "./resources/views/elements/Forms.js");
+/* harmony import */ var _elements_Loaders__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./elements/Loaders */ "./resources/views/elements/Loaders.js");
+/* harmony import */ var _elements_Avatars__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./elements/Avatars */ "./resources/views/elements/Avatars.js");
+/* harmony import */ var _pages_samples_Invoice__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./pages/samples/Invoice */ "./resources/views/pages/samples/Invoice.js");
+/* harmony import */ var _pages_samples_Analytics__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./pages/samples/Analytics */ "./resources/views/pages/samples/Analytics.js");
+/* harmony import */ var _pages_samples_Cms__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./pages/samples/Cms */ "./resources/views/pages/samples/Cms.js");
+/* harmony import */ var _pages_samples_Widgets__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./pages/samples/Widgets */ "./resources/views/pages/samples/Widgets.js");
+/* harmony import */ var _pages_samples_BlankPage__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./pages/samples/BlankPage */ "./resources/views/pages/samples/BlankPage.js");
+/* harmony import */ var _pages_samples_SubNav__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./pages/samples/SubNav */ "./resources/views/pages/samples/SubNav.js");
+/* harmony import */ var _pages_samples_Feed__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./pages/samples/Feed */ "./resources/views/pages/samples/Feed.js");
+/* harmony import */ var _elements_Modals__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./elements/Modals */ "./resources/views/elements/Modals.js");
+/* harmony import */ var _elements_ProgressBars__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./elements/ProgressBars */ "./resources/views/elements/ProgressBars.js");
+/* harmony import */ var _elements_Pagination__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./elements/Pagination */ "./resources/views/elements/Pagination.js");
+/* harmony import */ var _pages_samples_404__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./pages/samples/404 */ "./resources/views/pages/samples/404.js");
+
 
 
 
@@ -105007,93 +105226,97 @@ var pageList = [{
   path: '/dashboard',
   component: _pages_Dashboard__WEBPACK_IMPORTED_MODULE_0__["default"]
 }, {
+  name: 'Create Campaign',
+  path: '/campaigns/create',
+  component: _pages_campaigns_CreateCampaign__WEBPACK_IMPORTED_MODULE_1__["default"]
+}, {
   name: 'Buttons',
   path: '/elements/buttons',
-  component: _elements_Buttons__WEBPACK_IMPORTED_MODULE_1__["default"]
+  component: _elements_Buttons__WEBPACK_IMPORTED_MODULE_2__["default"]
 }, {
   name: 'Alerts',
   path: '/elements/alerts',
-  component: _elements_Alerts__WEBPACK_IMPORTED_MODULE_2__["default"]
+  component: _elements_Alerts__WEBPACK_IMPORTED_MODULE_3__["default"]
 }, {
   name: 'Grid',
   path: '/elements/grid',
-  component: _elements_Grid__WEBPACK_IMPORTED_MODULE_3__["default"]
+  component: _elements_Grid__WEBPACK_IMPORTED_MODULE_4__["default"]
 }, {
   name: 'Typography',
   path: '/elements/typography',
-  component: _elements_Typography__WEBPACK_IMPORTED_MODULE_4__["default"]
+  component: _elements_Typography__WEBPACK_IMPORTED_MODULE_5__["default"]
 }, {
   name: 'Cards',
   path: '/elements/cards',
-  component: _elements_Cards__WEBPACK_IMPORTED_MODULE_5__["default"]
+  component: _elements_Cards__WEBPACK_IMPORTED_MODULE_6__["default"]
 }, {
   name: 'Tabs',
   path: '/elements/tabs',
-  component: _elements_Tabs__WEBPACK_IMPORTED_MODULE_6__["default"]
+  component: _elements_Tabs__WEBPACK_IMPORTED_MODULE_7__["default"]
 }, {
   name: 'Tables',
   path: '/elements/tables',
-  component: _elements_Tables__WEBPACK_IMPORTED_MODULE_7__["default"]
+  component: _elements_Tables__WEBPACK_IMPORTED_MODULE_8__["default"]
 }, {
   name: 'Progress Bars',
   path: '/elements/progressbars',
-  component: _elements_ProgressBars__WEBPACK_IMPORTED_MODULE_20__["default"]
+  component: _elements_ProgressBars__WEBPACK_IMPORTED_MODULE_21__["default"]
 }, {
   name: 'Pagination',
   path: '/elements/pagination',
-  component: _elements_Pagination__WEBPACK_IMPORTED_MODULE_21__["default"]
+  component: _elements_Pagination__WEBPACK_IMPORTED_MODULE_22__["default"]
 }, {
   name: 'Modals',
   path: '/elements/modals',
-  component: _elements_Modals__WEBPACK_IMPORTED_MODULE_19__["default"]
+  component: _elements_Modals__WEBPACK_IMPORTED_MODULE_20__["default"]
 }, {
   name: 'Breadcrumbs',
   path: '/elements/breadcrumbs',
-  component: _elements_Breadcrumbs__WEBPACK_IMPORTED_MODULE_8__["default"]
+  component: _elements_Breadcrumbs__WEBPACK_IMPORTED_MODULE_9__["default"]
 }, {
   name: 'Forms',
   path: '/elements/forms',
-  component: _elements_Forms__WEBPACK_IMPORTED_MODULE_9__["default"]
+  component: _elements_Forms__WEBPACK_IMPORTED_MODULE_10__["default"]
 }, {
   name: 'Loaders',
   path: '/elements/loaders',
-  component: _elements_Loaders__WEBPACK_IMPORTED_MODULE_10__["default"]
+  component: _elements_Loaders__WEBPACK_IMPORTED_MODULE_11__["default"]
 }, {
   name: 'Avatars',
   path: '/elements/avatars',
-  component: _elements_Avatars__WEBPACK_IMPORTED_MODULE_11__["default"]
+  component: _elements_Avatars__WEBPACK_IMPORTED_MODULE_12__["default"]
 }, {
   name: 'Blank',
   path: '/pages/blank',
-  component: _pages_samples_BlankPage__WEBPACK_IMPORTED_MODULE_16__["default"]
+  component: _pages_samples_BlankPage__WEBPACK_IMPORTED_MODULE_17__["default"]
 }, {
   name: 'Sub Navigation',
   path: '/pages/subnav',
-  component: _pages_samples_SubNav__WEBPACK_IMPORTED_MODULE_17__["default"]
+  component: _pages_samples_SubNav__WEBPACK_IMPORTED_MODULE_18__["default"]
 }, {
   name: '404',
   path: '/pages/404',
-  component: _pages_samples_404__WEBPACK_IMPORTED_MODULE_22__["default"]
+  component: _pages_samples_404__WEBPACK_IMPORTED_MODULE_23__["default"]
 }, {
   name: 'Analytics',
   path: '/apps/analytics',
-  component: _pages_samples_Analytics__WEBPACK_IMPORTED_MODULE_13__["default"]
+  component: _pages_samples_Analytics__WEBPACK_IMPORTED_MODULE_14__["default"]
 }, {
   name: 'Activity Feed',
   path: '/apps/feed',
-  component: _pages_samples_Feed__WEBPACK_IMPORTED_MODULE_18__["default"]
+  component: _pages_samples_Feed__WEBPACK_IMPORTED_MODULE_19__["default"]
 }, {
   name: 'Invoice',
   path: '/apps/invoice',
-  component: _pages_samples_Invoice__WEBPACK_IMPORTED_MODULE_12__["default"]
+  component: _pages_samples_Invoice__WEBPACK_IMPORTED_MODULE_13__["default"]
 }, {
   name: 'CMS',
   path: '/apps/cms',
-  component: _pages_samples_Cms__WEBPACK_IMPORTED_MODULE_14__["default"]
+  component: _pages_samples_Cms__WEBPACK_IMPORTED_MODULE_15__["default"]
 }, {
   name: 'Widgets',
   path: '/widgets',
-  component: _pages_samples_Widgets__WEBPACK_IMPORTED_MODULE_15__["default"]
+  component: _pages_samples_Widgets__WEBPACK_IMPORTED_MODULE_16__["default"]
 }];
 /* harmony default export */ __webpack_exports__["default"] = (pageList);
 
@@ -105106,8 +105329,8 @@ var pageList = [{
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! D:\xampp\htdocs\tapads\resources\js\index.js */"./resources/js/index.js");
-module.exports = __webpack_require__(/*! D:\xampp\htdocs\tapads\resources\sass\styles.scss */"./resources/sass/styles.scss");
+__webpack_require__(/*! C:\xampp\htdocs\TapAdsServer-master\TapAdsServer\resources\js\index.js */"./resources/js/index.js");
+module.exports = __webpack_require__(/*! C:\xampp\htdocs\TapAdsServer-master\TapAdsServer\resources\sass\styles.scss */"./resources/sass/styles.scss");
 
 
 /***/ })

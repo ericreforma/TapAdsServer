@@ -1,4 +1,5 @@
 import Dashboard from './pages/Dashboard';
+import CreateCampaign from './pages/campaigns/CreateCampaign';
 import Buttons from './elements/Buttons';
 import Alerts from './elements/Alerts';
 import Grid from './elements/Grid';
@@ -28,7 +29,11 @@ const pageList = [
     path: '/dashboard',
     component: Dashboard
   },
-
+  {
+    name: 'Create Campaign',
+    path:'/campaigns/create',
+    component: CreateCampaign
+  },
   {
     name: 'Buttons',
     path: '/elements/buttons',
