@@ -16,6 +16,9 @@ class UserVehicle extends Model
     }
 
     public function photos(){
-      return $this->hasMany('App\UserVehiclePhoto');
+      $media = $this
+        ->hasMany('App\UserVehiclePhoto');
+
+      return $media;
     }
 }

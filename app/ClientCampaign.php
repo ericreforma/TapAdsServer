@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ClientCampaign extends Model
 {
     protected $table = 'client_campaign';
-    
+
     public function client(){
       return $this->belongsTo('App\Client');
     }
@@ -15,4 +15,5 @@ class ClientCampaign extends Model
     public function userCampaign(){
       return $this->hasMany('App\UserCampaign');
     }
+    
 }

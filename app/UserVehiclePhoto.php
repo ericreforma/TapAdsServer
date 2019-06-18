@@ -13,4 +13,8 @@ class UserVehiclePhoto extends Model
 
     }
 
+    public function photo(){
+      return $this->belongsTo('App\Media');
+    }
+
 }
