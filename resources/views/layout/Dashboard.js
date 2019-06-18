@@ -14,6 +14,8 @@ export default class Dashboard extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoggedIn:false,
+      clientEmail:'',
       sidebarCollapsed: false,
       isMobile: window.innerWidth <= MOBILE_SIZE,
       showChat1: true,

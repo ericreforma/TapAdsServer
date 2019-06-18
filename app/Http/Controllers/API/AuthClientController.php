@@ -10,49 +10,51 @@ use Hash;
 
 class AuthClientController extends Controller
 {
-    public function __construct(){
-      auth()->setDefaultDriver('web');
-    }
+	public function __construct(){
+		auth()->setDefaultDriver('web');
+	}
 
-    public function index(){
-      return redirect('/dashboard');
-    }
+	public function index(){
+		return redirect('/login');
+		//return response()->json(['account_needed' => 'login'], 401);
+	}
 
     public function login(Request $request){
 
-      $credentials = [
-          'email' => $request->email,
-          'password' => $request->password
-      ];
+		$credentials = [
+			'email' => $request->email,
+			'password' => $request->password
+		];
 
-      if (auth()->attempt($credentials)) {
-          $token = auth()->user()->createToken('tapads')->accessToken;
-          return response()->json(['token' => $token], 200);
-      } else {
-          return response()->json(['error' => 'UnAuthorised'], 401);
-      }
+		if (auth()->attempt($credentials)) {
+			$token = auth()->user()->createToken('tapads')->accessToken;
+			return response()->json(['token' => $token], 200);
+		} else {
+			//return response()->json(['error' => 'UnAuthorised'], 401);
+			return response()->json(['error' => 'UnAuthorised']);
+		}
     }
 
-
+    
     public function register (Request $request){
-      $validator = Validator::make($request->all(),[
-        'name' => 'required|string|max:255',
-        'username' => 'required|string|max:100',
-        'birthdate' => 'required|date',
-        'location' => 'required',
-        'email' => 'required|email',
-        'password' => 'required',
-        'contact_number' => 'required'
-      ]);
+		$validator = Validator::make($request->all(),[
+			'name' => 'required|string|max:255',
+			'business_name' => 'required|string|max:255',
+			'business_nature' => 'required|string|max:255',
+			'email' => 'required|email',
+			'password' => 'required',
+			'contact_number' => 'required'
+		]);
 
-      if($validator->fails()){
-        return response()->json($validator->errors()->all(), 400);
-      }
+		if($validator->fails()){
+			//return response()->json($validator->errors()->all(), 400);
+			return response()->json($validator->errors()->all());
+		}
 
-      $request['password']=Hash::make($request['password']);
-      $user = User::create($request->toArray());
+		$request['password']=Hash::make($request['password']);
+		$user = Client::create($request->toArray());
 
-      $token = $user->createToken('tapads')->accessToken;
-      return response()->json(['token' => $token], 200);
+		$token = $user->createToken('tapads')->accessToken;
+		return response()->json(['token' => $token], 200);
     }
 }
