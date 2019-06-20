@@ -25,6 +25,14 @@ Route::middleware('json.response')->group(function(){
       // USER details
       Route::get('/', 'UserController@details');
       Route::get('logout', 'UserController@logout')->name('user_logout');
+
+      // My campaigns
+      Route::get('/campaign/mylist','UserController@getMyCampaigns');
+      Route::post('/campaign/addmylist','UserController@addMyCampaigns');
+
+      // Campaigns
+      Route::get('/campaign/browse','ClientCampaignController@campaigns');
+
     });
 
   });
@@ -32,16 +40,17 @@ Route::middleware('json.response')->group(function(){
   // CLIENT
   Route::prefix('client')->group(function(){
 
+      Route::get('home', 'API\AuthClientController@index');
       Route::post('login', 'API\AuthClientController@login');
       Route::post('register', 'API\AuthClientController@register');
 
       Route::middleware('auth:web_api')->group(function(){
-
+        
         Route::get('/','ClientController@details');
+        Route::get('logout', 'UserController@logout')->name('user_logout');
 
       });
-      
+
+
   });
-
-
 });

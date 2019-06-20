@@ -7,8 +7,18 @@ export default {
     },
     {
       name: 'Campaigns',
-      url: '/campaigns',
-      icon: 'Star'
+      //url: '/campaigns',
+      icon: 'Star',
+      children:[
+        {
+          name:'List',
+          url: '/campaigns/list',
+        },
+        {
+          name:'Create Campaign',
+          url: '/campaigns/create',
+        }
+      ]
     },
     {
       name: 'Gallery',

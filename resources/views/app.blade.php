@@ -12,7 +12,7 @@
     <link rel="shortcut icon" href="favicon.png" />
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
     <link rel="stylesheet" href="{{ asset('css/vendor/fontawesome.min.css') }}">
-    
+      
   </head>
   <body>
     <div id="app"></div>

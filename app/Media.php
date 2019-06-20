@@ -10,4 +10,11 @@ class Media extends Model
     public function user(){
       return $this->belongsTo('App\User');
     }
+
+    public function vehiclePhoto(){
+      return $this->belongsTo('App\UserVehiclePhoto');
+    }
+    public function vehiclePhotoUrl(){
+      return $this->belongsTo('App\UserVehiclePhoto')->select('url');
+    }
 }

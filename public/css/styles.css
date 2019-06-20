@@ -14037,3 +14037,174 @@ img.img-circle {
   overflow: hidden;
 }
 
+@font-face {
+  font-family: "Avenir LT Std 85 Heavy";
+  font-style: normal;
+  font-weight: normal;
+  src: local("Avenir LT Std 85 Heavy"), url(/fonts/AvenirLTStd-Heavy.woff?b997fee54ed6b4a9d397dcaee5b08bbb) format("woff");
+}
+
+@font-face {
+  font-family: "Avenir LT Std 35 Light";
+  font-style: normal;
+  font-weight: normal;
+  src: local("Avenir LT Std 35 Light"), url(/fonts/AvenirLTStd-Light.woff?4a3e0c4011dfa60d118374f6322d4c33) format("woff");
+}
+
+@font-face {
+  font-family: "Avenir LT Std 55 Roman";
+  font-style: normal;
+  font-weight: normal;
+  src: local("Avenir LT Std 55 Roman"), url(/fonts/AvenirLTStd-Roman.woff?43666b5e46a5d44b8c9457955a403041) format("woff");
+}
+
+body {
+  height: 100vh;
+}
+
+#app {
+  height: 100%;
+}
+
+#app .login-container {
+  height: 100%;
+}
+
+#app .login-container .login-form {
+  width: 100%;
+  padding: 30px;
+  box-shadow: 1px 1px 30px 0px #ADADAD;
+}
+
+#app .login-container .login-form .app-logo {
+  width: 80%;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+#app .login-container .login-form label,
+#app .login-container .login-form input {
+  font-family: "Avenir LT Std 35 Light";
+  color: black;
+}
+
+#app .login-container .login-form input {
+  border: 1px solid #0079ff;
+  border-radius: 0px;
+}
+
+#app .login-container .login-form span.input-group-text {
+  border: 1px solid #0079ff;
+  border-right: 0px;
+  border-radius: 0px;
+}
+
+#app .login-container .login-form span.input-group-text i {
+  color: #0079ff;
+}
+
+#app .login-container .login-form span.error {
+  color: #de1828;
+  margin-bottom: 10px;
+  display: block;
+}
+
+#app .login-container .login-form button {
+  display: block;
+  margin: auto;
+  margin-bottom: 20px;
+  font-family: "Avenir LT Std 55 Roman";
+  background: none;
+  background-color: #0079ff;
+  color: white;
+  padding: 5px 20px;
+}
+
+#app .login-container .login-form button:hover,
+#app .login-container .login-form button:active {
+  background: none !important;
+  background-color: #00cfff !important;
+}
+
+#app .signup-container {
+  height: 100%;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+#app .signup-container .signup-form label,
+#app .signup-container .signup-form input {
+  font-family: "Avenir LT Std 35 Light";
+  color: black;
+}
+
+#app .signup-container .signup-form input {
+  border: 1px solid #0079ff;
+  border-radius: 0px;
+}
+
+#app .signup-container .signup-form span {
+  color: #de1828;
+  margin-bottom: 10px;
+  display: block;
+}
+
+#app .signup-container .signup-form .app-logo {
+  width: 80%;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+#app .signup-container .signup-form button {
+  display: block;
+  margin: auto;
+  margin-bottom: 20px;
+  font-family: "Avenir LT Std 55 Roman";
+  background: none;
+  background-color: #0079ff;
+  color: white;
+  padding: 5px 20px;
+}
+
+#app .signup-container .signup-form button:hover,
+#app .signup-container .signup-form button:active {
+  background: none !important;
+  background-color: #00cfff !important;
+}
+
+#app .create-campaign-form h2,
+#app .create-campaign-form label,
+#app .create-campaign-form input,
+#app .create-campaign-form select,
+#app .create-campaign-form textarea {
+  color: black;
+}
+
+#app .create-campaign-form input,
+#app .create-campaign-form select,
+#app .create-campaign-form textarea,
+#app .create-campaign-form .input-group-text {
+  border-radius: 0px;
+  border: 1px solid #0079ff;
+}
+
+#app .create-campaign-form .input-group-text {
+  background-color: #0079ff;
+  color: white;
+}
+
+#app .create-campaign-form button {
+  display: block;
+  margin: auto;
+  border-radius: 5px;
+  color: white;
+  background: none !important;
+  background-color: #0079ff !important;
+}
+
+#app .create-campaign-form button:hover {
+  color: #0079ff;
+  background: none !important;
+  border-color: #0079ff;
+}
+
