@@ -11,6 +11,10 @@ export default {
       icon: 'Star',
       children:[
         {
+          name:'List',
+          url: '/campaigns/list',
+        },
+        {
           name:'Create Campaign',
           url: '/campaigns/create',
         }

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+
 import {
     Row,
     Col,
@@ -13,22 +14,20 @@ import {
     InputGroup,
     InputGroupAddon
 } from 'reactstrap';
-import { Switch } from '../../components';
-import { Doughnut, Line } from 'react-chartjs-2';
 
 export default class CreateCampainpage extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-        name:'',
-        description:'',
-        location:'',
-        slots:'',
-        pay_additional:0,
-        pay_additional_km:0,
-        pay_basic:0,
-        vehicle_type:0,
+        name: '',
+        description: '',
+        location: '',
+        slots: '',
+        pay_additional: 0,
+        pay_additional_km: 0,
+        pay_basic: 0,
+        vehicle_type: 0,
         facebook: true,
         twitter: false
     };
@@ -47,8 +46,8 @@ export default class CreateCampainpage extends Component {
                             <Label for="name">Campaign Name</Label>
                             <Input
                                 type="text"
-                                name="name" 
-                                id="name" 
+                                name="name"
+                                id="name"
                                 onChange = {(text) => this.setState({name:text.target.value})}
                                 value={this.state.email}
                                 required
@@ -58,8 +57,8 @@ export default class CreateCampainpage extends Component {
                             <Label for="description">Campaign Description</Label>
                             <Input
                                 type="textarea"
-                                name="description" 
-                                id="description" 
+                                name="description"
+                                id="description"
                                 onChange = {(text) => this.setState({description:text.target.value})}
                                 value={this.state.description}
                                 required
@@ -71,8 +70,8 @@ export default class CreateCampainpage extends Component {
                                     <Label for="description">Location</Label>
                                     <Input
                                         type="text"
-                                        name="location" 
-                                        id="location" 
+                                        name="location"
+                                        id="location"
                                         onChange = {(text) => this.setState({location:text.target.value})}
                                         value={this.state.location}
                                         required
@@ -84,8 +83,8 @@ export default class CreateCampainpage extends Component {
                                     <Label for="vehicle_type">Vehicle Type</Label>
                                     <Input
                                         type="select"
-                                        name="vehicle_type" 
-                                        id="vehicle_type" 
+                                        name="vehicle_type"
+                                        id="vehicle_type"
                                         onChange = {(text) => this.setState({vehicle_type:text.target.value})}
                                         value={this.state.vehicle_type}
                                         required
@@ -101,8 +100,8 @@ export default class CreateCampainpage extends Component {
                                     <Label for="slots">Slots</Label>
                                     <Input
                                         type="number"
-                                        name="slots" 
-                                        id="slots" 
+                                        name="slots"
+                                        id="slots"
                                         onChange = {(text) => this.setState({slots:text.target.value})}
                                         value={this.state.slots}
                                         required
@@ -118,8 +117,8 @@ export default class CreateCampainpage extends Component {
                                         <InputGroupAddon addonType="prepend">‎₱</InputGroupAddon>
                                         <Input
                                             type="number"
-                                            name="pay_additional" 
-                                            id="pay_additional" 
+                                            name="pay_additional"
+                                            id="pay_additional"
                                             onChange = {(text) => this.setState({pay_additional:text.target.value})}
                                             value={this.state.pay_additional}
                                             required
@@ -133,8 +132,8 @@ export default class CreateCampainpage extends Component {
                                     <InputGroup>
                                         <Input
                                             type="number"
-                                            name="pay_additional_km" 
-                                            id="pay_additional_km" 
+                                            name="pay_additional_km"
+                                            id="pay_additional_km"
                                             onChange = {(text) => this.setState({pay_additional_km:text.target.value})}
                                             value={this.state.pay_additional_km}
                                             required
@@ -150,8 +149,8 @@ export default class CreateCampainpage extends Component {
                                     <InputGroupAddon addonType="prepend">‎₱</InputGroupAddon>
                                     <Input
                                         type="number"
-                                        name="pay_basic" 
-                                        id="pay_basic" 
+                                        name="pay_basic"
+                                        id="pay_basic"
                                         onChange = {(text) => this.setState({pay_basic:text.target.value})}
                                         value={this.state.pay_basic}
                                         required

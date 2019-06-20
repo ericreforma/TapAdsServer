@@ -16,12 +16,13 @@ class ClientCampaignController extends Controller
     public function campaigns(Request $request){
 
       if($request->rec){
-        $campaigns = ClientCampaign::inRandomOrder()->limit(2)->get();
+        $campaigns = ClientCampaign::inRandomOrder()->limit(5)->get();
       } else {
+
         $campaigns = ClientCampaign::
           where('vehicle_classification',$request->cl)
           ->latest()
-          ->paginate(2);
+          ->paginate(4);
       }
 
       foreach ($campaigns as $c) {
@@ -36,7 +37,13 @@ class ClientCampaignController extends Controller
           ->toArray();
       }
 
-
       return response()->json($campaigns);
+
+    }
+
+    public function campaign_store(Request $request){
+      
+
+
     }
 }
