@@ -38,19 +38,19 @@ export default class Signup extends Component {
         }
         axios.post('/api/client/register',data,headers
         ).then( (res) => {
-            localStorage.setItem('client_token',res.data.token);
-            /*this.props.authenticate(() => {
-                this.setState(() => ({
-                    redirectToReferrer: true
-                }))
-            });*/
-            this.props.history.push("/dashboard");
-        }).catch((err) => {
-            console.log(err);
-            if(err.status==400){
-                alert(err);
+            if(res.data.token){
+                localStorage.setItem('client_token',res.data.token);
+                this.props.history.push("/dashboard");
+            }else{
+
             }
-            console.log(err.response);
+            console.log(res);
+        }).catch(error => {
+            console.log(error.response.data.errors);
+            if(error.status==422){
+                alert(error);
+            }
+            //console.log(err.response);
         })
     }
     render(){

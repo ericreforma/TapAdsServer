@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use App\Client;
+use App\Media;
 use Hash;
 
 class AuthClientController extends Controller
@@ -41,19 +42,27 @@ class AuthClientController extends Controller
 			'name' => 'required|string|max:255',
 			'business_name' => 'required|string|max:255',
 			'business_nature' => 'required|string|max:255',
-			'email' => 'required|email',
+			'email' => 'required|email|unique:client,email',
 			'password' => 'required',
-			'contact_number' => 'required'
+			'contact_number' => 'required|regex:/(09)[0-9]{9}/'
 		]);
 
 		if($validator->fails()){
-			//return response()->json($validator->errors()->all(), 400);
-			return response()->json($validator->errors()->all());
+			return response()->json(['errors'=>$validator->errors()],422);
 		}
 
 		$request['password']=Hash::make($request['password']);
-		$user = Client::create($request->toArray());
 
+		$media_id = 1;
+		$user = Client::create([
+			'name' => $request->name,
+			'business_name' => $request->business_name,
+			'business_nature' => $request->business_nature,
+			'email' => $request->email,
+			'password' => $request->password,
+			'contact_number' => $request->contact_number,
+			'media_id' => $media_id
+		]);
 		$token = $user->createToken('tapads')->accessToken;
 		return response()->json(['token' => $token], 200);
     }

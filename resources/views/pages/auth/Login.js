@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Container, Row, Col, Button, Form, FormGroup, Label, Input, InputGroup } from 'reactstrap';
 import {Link} from 'react-router-dom';
 import axios from 'axios';
-import Auth from '../../views/functions/Authenticate';
 
 export default class Login extends Component {
   constructor(props) {
@@ -31,7 +30,6 @@ export default class Login extends Component {
 		).then( (res) => {
 			if(res.data.error){
 				this.setState({error:'Invalid Email or Password'});
-			//console.log('error'+res.data.error);
 			}else{
 				localStorage.setItem('client_token',res.data.token);
 				/*this.props.authenticate( () => {

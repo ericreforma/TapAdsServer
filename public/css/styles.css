@@ -14058,6 +14058,35 @@ img.img-circle {
   src: local("Avenir LT Std 55 Roman"), url(/fonts/AvenirLTStd-Roman.woff?43666b5e46a5d44b8c9457955a403041) format("woff");
 }
 
+.table {
+  color: black !important;
+}
+
+.vehicle-type {
+  margin-right: 20px;
+}
+
+.vehicle-type img {
+  height: 50px;
+  width: 50px;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
+.campaign-img {
+  margin-right: 20px;
+}
+
+.campaign-img img {
+  border: 1px solid black;
+  border-radius: 200px;
+  box-sizing: border-box;
+  height: 50px;
+  width: 50px;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
 body {
   height: 100vh;
 }
@@ -14170,41 +14199,5 @@ body {
 #app .signup-container .signup-form button:active {
   background: none !important;
   background-color: #00cfff !important;
-}
-
-#app .create-campaign-form h2,
-#app .create-campaign-form label,
-#app .create-campaign-form input,
-#app .create-campaign-form select,
-#app .create-campaign-form textarea {
-  color: black;
-}
-
-#app .create-campaign-form input,
-#app .create-campaign-form select,
-#app .create-campaign-form textarea,
-#app .create-campaign-form .input-group-text {
-  border-radius: 0px;
-  border: 1px solid #0079ff;
-}
-
-#app .create-campaign-form .input-group-text {
-  background-color: #0079ff;
-  color: white;
-}
-
-#app .create-campaign-form button {
-  display: block;
-  margin: auto;
-  border-radius: 5px;
-  color: white;
-  background: none !important;
-  background-color: #0079ff !important;
-}
-
-#app .create-campaign-form button:hover {
-  color: #0079ff;
-  background: none !important;
-  border-color: #0079ff;
 }
 
