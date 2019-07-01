@@ -11593,8 +11593,8 @@ code {
    ----------------------------- */
 
 .loader {
-  width: 50px;
-  height: 50px;
+  width: 200px;
+  height: 200px;
   text-indent: -9999em;
   margin: 0 auto;
   background-size: 100% auto;
@@ -14058,6 +14058,20 @@ img.img-circle {
   src: local("Avenir LT Std 55 Roman"), url(/fonts/AvenirLTStd-Roman.woff?43666b5e46a5d44b8c9457955a403041) format("woff");
 }
 
+.google-map-modal {
+  max-width: 60% !important;
+}
+
+.create-campaign-section input[type=number]::-webkit-inner-spin-button,
+.create-campaign-section input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.create-campaign-section textarea {
+  height: 200px;
+}
+
 body {
   height: 100vh;
 }
@@ -14170,41 +14184,5 @@ body {
 #app .signup-container .signup-form button:active {
   background: none !important;
   background-color: #00cfff !important;
-}
-
-#app .create-campaign-form h2,
-#app .create-campaign-form label,
-#app .create-campaign-form input,
-#app .create-campaign-form select,
-#app .create-campaign-form textarea {
-  color: black;
-}
-
-#app .create-campaign-form input,
-#app .create-campaign-form select,
-#app .create-campaign-form textarea,
-#app .create-campaign-form .input-group-text {
-  border-radius: 0px;
-  border: 1px solid #0079ff;
-}
-
-#app .create-campaign-form .input-group-text {
-  background-color: #0079ff;
-  color: white;
-}
-
-#app .create-campaign-form button {
-  display: block;
-  margin: auto;
-  border-radius: 5px;
-  color: white;
-  background: none !important;
-  background-color: #0079ff !important;
-}
-
-#app .create-campaign-form button:hover {
-  color: #0079ff;
-  background: none !important;
-  border-color: #0079ff;
 }
 

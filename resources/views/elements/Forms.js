@@ -30,7 +30,7 @@ export default class FormsPage extends Component {
         </FormGroup>
         <FormGroup>
           <Label for="exampleSelectMulti">Select Multiple</Label>
-          <Input type="select" name="selectMulti" id="exampleSelectMulti" multiple>
+          <Input type="select" name="selectMulti" id="exampleSelectMulti" onInput={(e) => console.log(e.target.options)} multiple>
             <option>1</option>
             <option>2</option>
             <option>3</option>

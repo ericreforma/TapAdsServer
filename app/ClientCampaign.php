@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ClientCampaign extends Model
 {
     protected $table = 'client_campaign';
+    public $timestamps = false;
 
     public function client(){
       return $this->belongsTo('App\Client');

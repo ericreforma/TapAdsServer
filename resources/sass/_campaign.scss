@@ -1,0 +1,14 @@
+.google-map-modal {
+    max-width: 60% !important;
+}
+
+.create-campaign-section {
+    input[type='number']::-webkit-inner-spin-button, 
+    input[type='number']::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+    }
+    textarea {
+        height: 200px;
+    }
+}

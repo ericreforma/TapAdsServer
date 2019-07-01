@@ -30,9 +30,10 @@
         ]
     },
     "dependencies": {
-        "chart.js": "^2.8.0",
-        "react-scripts": "^3.0.1",
         "axios": "^0.19.0",
+        "bootstrap": "^4.0.0",
+        "chart.js": "^2.8.0",
+        "google-map-react": "^1.1.4",
         "jquery": "^3.2",
         "laravel-mix": "^4.0.7",
         "lodash": "^4.17.5",
@@ -43,10 +44,10 @@
         "react-feather": "^1.1.6",
         "react-fontawesome": "^1.6.1",
         "react-router-dom": "^5.0.0",
+        "react-scripts": "^3.0.1",
         "reactstrap": "^8.0.0",
         "resolve-url-loader": "^2.3.1",
         "sass": "^1.15.2",
-        "sass-loader": "^7.1.0",
-        "bootstrap": "^4.0.0"
+        "sass-loader": "^7.1.0"
     }
 }
