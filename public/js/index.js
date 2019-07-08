@@ -107223,7 +107223,8 @@ __webpack_require__.r(__webpack_exports__);
     createCampaign: '/api/client/campaign/create',
     campaignDashboard: '/api/client/campaign/dashboard/',
     createGeoLocation: '/api/client/campaign/new/geolocation',
-    getGeoLocation: '/api/client/campaign/geolocation'
+    getGeoLocation: '/api/client/campaign/geolocation',
+    submitRateUser: '/api/client/user/rating'
   },
   apiKey: {
     googleApiKey: 'AIzaSyBwXTceRsEryqeySF0HtM66cVwwWa9rW0w'
@@ -109705,10 +109706,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var reactstrap__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! reactstrap */ "./node_modules/reactstrap/es/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../components */ "./resources/views/components/index.js");
-/* harmony import */ var react_chartjs_2__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-chartjs-2 */ "./node_modules/react-chartjs-2/es/index.js");
+/* harmony import */ var react_chartjs_2__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-chartjs-2 */ "./node_modules/react-chartjs-2/es/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _components__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../components */ "./resources/views/components/index.js");
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../config */ "./resources/views/config.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -109737,7 +109738,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
-
 var CampaignDashboard =
 /*#__PURE__*/
 function (_Component) {
@@ -109757,12 +109757,41 @@ function (_Component) {
     });
 
     _defineProperty(_assertThisInitialized(_this), "getCampaignData", function (id) {
-      axios__WEBPACK_IMPORTED_MODULE_2___default.a.get(_config__WEBPACK_IMPORTED_MODULE_5__["default"].api.campaignDashboard + id).then(function (response) {
+      axios__WEBPACK_IMPORTED_MODULE_3___default.a.get(_config__WEBPACK_IMPORTED_MODULE_5__["default"].api.campaignDashboard + id).then(function (response) {
         if (response.data.status == 'success') {
+          var userData = [],
+              campaign = response.data.message.campaign,
+              basicPay = parseFloat(campaign.pay_basic),
+              basicPayKm = parseFloat(campaign.pay_basic_km),
+              addPay = parseFloat(campaign.pay_additional),
+              addPayKm = parseFloat(campaign.pay_additional_km),
+              userRating = response.data.message.userRating;
+          userData = response.data.message.userData.map(function (user) {
+            var returnUser = user,
+                distance = parseFloat(user.distance_traveled),
+                totalCost = 0;
+
+            if (distance >= basicPayKm) {
+              var perKm = Math.floor(distance / addPayKm),
+                  totalCost = perKm * addPay + basicPayKm;
+            }
+
+            var filteredRating = userRating.filter(function (rate) {
+              return rate.user_id == user.user_id;
+            });
+            returnUser.rate = filteredRating.length !== 0 ? filteredRating[0].rate : null;
+            returnUser.totalCost = totalCost.toFixed(2);
+            return returnUser;
+          });
+
           _this.setState({
-            campaign: response.data.message.campaign,
-            userData: response.data.message.userData,
-            loaderShow: false
+            campaign: campaign,
+            userData: userData,
+            modalUserData: userData,
+            loaderShow: false,
+            geoLocation: response.data.message.geoLocation,
+            totalUser: response.data.message.totalUser,
+            paginationLength: Math.ceil(userData.length / _this.state.tableRowLength)
           });
         } else {
           alert('Error occured please try again later');
@@ -109772,6 +109801,232 @@ function (_Component) {
       })["catch"](function (error) {
         _this.getCampaignData(id);
       });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "userTotalCost", function () {
+      var userData = _this.state.userData,
+          totalKm = 0,
+          basicCost = 0,
+          addCost = 0,
+          basicPay = parseFloat(_this.state.campaign.pay_basic),
+          basicPayKm = parseFloat(_this.state.campaign.pay_basic_km),
+          addPay = parseFloat(_this.state.campaign.pay_additional),
+          addPayKm = parseFloat(_this.state.campaign.pay_additional_km);
+      userData.map(function (data) {
+        var distance = parseFloat(data.distance_traveled);
+        totalKm += distance;
+
+        if (distance >= basicPayKm) {
+          var perKm = Math.floor(distance / addPayKm);
+          basicCost += basicPayKm;
+          addCost += perKm * addPay;
+        }
+      });
+      return {
+        km: Math.round(totalKm * 100) / 100,
+        basicCost: Math.round(basicCost * 100) / 100,
+        addCost: Math.round(addCost * 100) / 100,
+        totalCost: Math.round((basicCost + addCost) * 100) / 100
+      };
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "userModalToggle", function () {
+      var userData = _this.state.userData;
+      userData.sort(function (a, b) {
+        // ascending
+        return parseFloat(a.id) - parseFloat(b.id);
+      });
+
+      _this.setState({
+        userModal: !_this.state.userModal,
+        sorting: {
+          name: false,
+          distance: false
+        },
+        currentPage: 0,
+        paginationLength: Math.ceil(_this.state.userData.length / _this.state.tableRowLength),
+        modalUserData: userData,
+        userData: userData
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "paginationClick", function (currentPage) {
+      return function (e) {
+        _this.setState({
+          currentPage: currentPage
+        });
+      };
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "paginationNextPrev", function (action) {
+      return function (e) {
+        var currentPage = _this.state.currentPage;
+
+        if (action == 'next') {
+          currentPage = currentPage == _this.state.paginationLength - 1 ? _this.state.paginationLength - 1 : currentPage + 1;
+        } else if (action == 'previous') {
+          currentPage = currentPage == 0 ? 0 : currentPage - 1;
+        } else if (action == 'first') {
+          currentPage = 0;
+        } else if (action == 'last') {
+          currentPage = _this.state.paginationLength - 1;
+        }
+
+        _this.setState({
+          currentPage: currentPage
+        });
+      };
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "sortUserData", function (sortName) {
+      return function (e) {
+        var modalUserData = _this.state.modalUserData;
+
+        if (sortName == 'name') {
+          if (!_this.state.sorting.name || _this.state.sorting.name == 'desc') {
+            modalUserData.sort(function (a, b) {
+              // ascending
+              if (a.name < b.name) {
+                return -1;
+              }
+
+              if (a.name > b.name) {
+                return 1;
+              }
+
+              return 0;
+            });
+          } else {
+            modalUserData.sort(function (a, b) {
+              // descending
+              if (a.name < b.name) {
+                return 1;
+              }
+
+              if (a.name > b.name) {
+                return -1;
+              }
+
+              return 0;
+            });
+          }
+
+          _this.setState({
+            sorting: {
+              name: _this.state.sorting.name ? _this.state.sorting.name == 'asc' ? 'desc' : 'asc' : 'asc',
+              distance: false
+            }
+          });
+        } else if (sortName == 'distance') {
+          if (!_this.state.sorting.distance || _this.state.sorting.distance == 'desc') {
+            modalUserData.sort(function (a, b) {
+              // ascending
+              return parseFloat(a.distance_traveled) - parseFloat(b.distance_traveled);
+            });
+          } else {
+            modalUserData.sort(function (a, b) {
+              // descending
+              return parseFloat(b.distance_traveled) - parseFloat(a.distance_traveled);
+            });
+          }
+
+          _this.setState({
+            sorting: {
+              name: false,
+              distance: _this.state.sorting.distance ? _this.state.sorting.distance == 'asc' ? 'desc' : 'asc' : 'asc'
+            }
+          });
+        }
+
+        _this.setState({
+          modalUserData: modalUserData
+        });
+      };
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "modalSearchInput", function (text) {
+      var _this$state = _this.state,
+          userData = _this$state.userData,
+          modalUserData = _this$state.modalUserData,
+          searchValue = text.target.value;
+
+      if (searchValue == '') {
+        modalUserData = userData;
+        var paginationLength = Math.ceil(_this.state.userData.length / _this.state.tableRowLength);
+      } else {
+        modalUserData = userData.filter(function (m) {
+          return m.name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1;
+        });
+        var paginationLength = Math.ceil(modalUserData.length / _this.state.tableRowLength);
+      }
+
+      _this.setState({
+        currentPage: 0,
+        modalUserData: modalUserData,
+        paginationLength: paginationLength
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "userRateModalToggle", function (uid) {
+      if (_this.state.userModal) {
+        _this.userModalToggle();
+      }
+
+      _this.setState({
+        userRateModal: !_this.state.userRateModal,
+        currentUserID: uid,
+        starRating: 0,
+        commentValue: ''
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "saveUserRating", function (e) {
+      e.preventDefault();
+      var _this$state2 = _this.state,
+          starRating = _this$state2.starRating,
+          commentValue = _this$state2.commentValue,
+          form = {
+        rate: starRating,
+        comment: commentValue,
+        userId: _this.state.currentUserID
+      };
+      var alertMessage = '',
+          proceed = true;
+
+      if (starRating == 0) {
+        alertMessage = 'Rate user';
+        proceed = false;
+      }
+
+      if (proceed) {
+        axios__WEBPACK_IMPORTED_MODULE_3___default.a.post(_config__WEBPACK_IMPORTED_MODULE_5__["default"].api.submitRateUser, form).then(function (response) {
+          if (response.data.status == 'success') {
+            var userData = _this.state.userData;
+            userData = userData.map(function (user) {
+              if (user.user_id == form.userId) {
+                user.rate = form.rate;
+              }
+
+              return user;
+            });
+
+            _this.setState({
+              userData: userData,
+              modalUserData: userData
+            });
+          }
+
+          alert(response.data.message);
+
+          _this.userRateModalToggle();
+        })["catch"](function (error) {
+          alert('Error occured try again later.');
+
+          _this.userRateModalToggle();
+        });
+      } else {
+        alert(alertMessage);
+      }
     });
 
     _defineProperty(_assertThisInitialized(_this), "reconstructDate", function (dates, timeInclude) {
@@ -109798,65 +110053,473 @@ function (_Component) {
       return parts.join(".");
     });
 
+    _defineProperty(_assertThisInitialized(_this), "progressColor", function (percentage) {
+      if (percentage <= 50) {
+        return 'success';
+      } else if (percentage <= 80) {
+        return 'warning';
+      } else {
+        return 'danger';
+      }
+    });
+
     _this.state = {
       loaderShow: true,
       //icons
       vehicleClass: ['/images/icons/car_small_icon.png', '/images/icons/car_mid_icon.png', '/images/icons/car_large_icon.png', '/images/icons/motorcycle_icon.png'],
+      sortIcon: '/images/icons/sort_icon.png',
+      chatIcon: '/images/icons/chat_icon.png',
       campaign: {},
-      userData: []
+      modalUserData: [],
+      userData: [],
+      geoLocation: [],
+      totalUser: 0,
+      // modal
+      userModal: false,
+      sorting: {
+        name: false,
+        distance: false
+      },
+      userRateModal: false,
+      currentUserID: 0,
+      ratingOnMouseOver: 0,
+      starRating: 0,
+      commentValue: '',
+      // modal pagination
+      tableRowLength: 7,
+      currentPage: 0,
+      paginationLength: 0
     };
     return _this;
   }
 
   _createClass(CampaignDashboard, [{
     key: "render",
+    // end additional function >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     value: function render() {
-      var vehicleType = ['Private', 'Public', 'Mixed'];
+      var _this2 = this;
+
+      var vehicleType = ['Private', 'Public', 'Mixed'],
+          stickerArea = ['Front', 'Left', 'Left - Front', 'Left - Back', 'Right', 'Right - Front', 'Right - Back', 'Back', 'Top'],
+          chartColors = {
+        red: 'rgb(233, 30, 99)',
+        danger: 'rgb(233, 30, 99)',
+        dangerTransparent: 'rgba(233, 30, 99, .8)',
+        orange: 'rgb(255, 159, 64)',
+        yellow: 'rgb(255, 180, 0)',
+        green: 'rgb(34, 182, 110)',
+        blue: 'rgb(68, 159, 238)',
+        primary: 'rgb(68, 159, 238)',
+        primaryTransparent: 'rgba(68, 159, 238, .8)',
+        purple: 'rgb(153, 102, 255)',
+        grey: 'rgb(201, 203, 207)',
+        primaryShade1: 'rgb(68, 159, 238)',
+        primaryShade2: 'rgb(23, 139, 234)',
+        primaryShade3: 'rgb(14, 117, 202)',
+        primaryShade4: 'rgb(9, 85, 148)',
+        primaryShade5: 'rgb(12, 70, 117)'
+      },
+          donutData = {
+        labels: ['Q1', 'Q2', 'Q3'],
+        datasets: [{
+          data: [300, 50, 100],
+          backgroundColor: [chartColors.primaryShade1, chartColors.primaryShade2, chartColors.primaryShade3],
+          hoverBackgroundColor: [chartColors.primaryShade4, chartColors.primaryShade4, chartColors.primaryShade4]
+        }]
+      },
+          line = {
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+          datasets: [{
+            label: '# of Votes',
+            data: [3, 6, 4, 10, 8, 12],
+            borderColor: 'transparent',
+            backgroundColor: chartColors.primary,
+            pointBackgroundColor: 'rgba(0,0,0,0)',
+            pointBorderColor: 'rgba(0,0,0,0)',
+            borderWidth: 4
+          }]
+        },
+        options: {
+          scales: {
+            xAxes: [{
+              display: false
+            }],
+            yAxes: [{
+              display: false
+            }]
+          },
+          legend: {
+            display: false
+          },
+          tooltips: {
+            enabled: false
+          }
+        }
+      };
 
       if (this.state.loaderShow) {
-        return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_components__WEBPACK_IMPORTED_MODULE_3__["Loader"], {
+        return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_components__WEBPACK_IMPORTED_MODULE_4__["Loader"], {
           type: "puff"
         });
       } else {
-        return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-          className: "m-b"
-        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h2", null, this.state.campaign.name), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], {
-          color: "light"
-        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("strong", null, "Description"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
-          className: "text-muted"
-        }, this.state.campaign.description), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-          className: "row form-group"
+        return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "campaign-dashboard-section"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Modal"], {
+          isOpen: this.state.userModal,
+          toggle: this.userModalToggle,
+          className: "modal-xl"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["ModalHeader"], {
+          toggle: this.userModalToggle,
+          className: "modal-title-user-data"
         }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-          className: "col align-self-center"
-        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("strong", null, "Vehicle:"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
+          className: "h3"
+        }, "Users Data"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Row"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          lg: 6
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Input"], {
+          type: "text",
+          placeholder: "Search user..",
+          onChange: this.modalSearchInput
+        })))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["ModalBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           style: {
-            marginLeft: 15,
-            marginRight: 10,
+            height: '700px'
+          }
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("table", {
+          className: "cds-campaign-table table-striped"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("thead", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "d-flex align-items-center cds-sort-cursor",
+          onClick: this.sortUserData('name')
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h5", {
+          className: "mb-0"
+        }, "User Info"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
+          className: "cds-ct-sort-icons ml-2",
+          src: this.state.sortIcon
+        }))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "d-flex align-items-center cds-sort-cursor",
+          onClick: this.sortUserData('distance')
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h5", {
+          className: "mb-0"
+        }, "Distance ", react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("small", null, "(Km)")), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
+          className: "cds-ct-sort-icons ml-2",
+          src: this.state.sortIcon
+        }))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h5", {
+          className: "mb-0"
+        }, "Completed ", react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("small", null, "(min distance)"))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h5", {
+          className: "mb-0"
+        }, "Total Cost ", react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("small", null, "(PhP)"))))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tbody", null, this.state.modalUserData.length !== 0 ? this.state.modalUserData.map(function (user, index) {
+          return (_this2.state.currentPage + 1) * _this2.state.tableRowLength > index && _this2.state.currentPage * _this2.state.tableRowLength <= index ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", {
+            key: user.id
+          }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+            align: "center"
+          }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
+            className: "cds-ct-user-image",
+            src: "/images/avatar".concat((index + 1) % 6 == 0 ? 6 : (index + 1) % 6, ".jpeg")
+          })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
+            className: "cds-ct-user-name"
+          }, user.name), user.rate ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, Array(5).fill('/images/icons/').map(function (star, starIndex) {
+            return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
+              key: starIndex,
+              className: "cds-ct-user-rate",
+              src: star + (starIndex < parseInt(user.rate) ? 'star_active.png' : 'star_inactive.png')
+            });
+          })) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
+            className: "cds-ct-user-rate-button text-primary",
+            onClick: function onClick(e) {
+              return _this2.userRateModalToggle(user.user_id);
+            }
+          }, "Rate user")), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
+            className: "cds-ct-user-otherinfo text-muted"
+          }, user.email), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
+            className: "cds-ct-user-otherinfo text-muted"
+          }, user.contact_number)), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, user.distance_traveled), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, user.completed == 1 ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
+            className: "text-success"
+          }, "Completed") : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
+            className: "text-danger"
+          }, "Not completed")), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, _this2.numberWithCommas(user.totalCost))) : null;
+        }) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", {
+          colSpan: "5",
+          className: "text-center"
+        }, "-- No user found --"))))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "p-3"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Pagination"], {
+          "aria-label": "Page navigation example"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["PaginationItem"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["PaginationLink"], {
+          first: true,
+          href: "javascript:void(0)",
+          onClick: this.paginationNextPrev('first')
+        })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["PaginationItem"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["PaginationLink"], {
+          previous: true,
+          href: "javascript:void(0)",
+          onClick: this.paginationNextPrev('previous')
+        })), Array(this.state.paginationLength).fill(null).map(function (p, pIndex) {
+          return pIndex - 1 == _this2.state.currentPage || pIndex == 2 && _this2.state.currentPage == 0 || pIndex == _this2.state.currentPage - 2 && _this2.state.currentPage == _this2.state.paginationLength - 1 || pIndex + 1 == _this2.state.currentPage || pIndex == _this2.state.currentPage ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["PaginationItem"], {
+            active: _this2.state.currentPage == pIndex ? true : false,
+            key: pIndex
+          }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["PaginationLink"], {
+            href: "javascript:void(0)",
+            onClick: _this2.paginationClick(pIndex)
+          }, pIndex + 1)) : null;
+        }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["PaginationItem"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["PaginationLink"], {
+          next: true,
+          href: "javascript:void(0)",
+          onClick: this.paginationNextPrev('next')
+        })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["PaginationItem"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["PaginationLink"], {
+          last: true,
+          href: "javascript:void(0)",
+          onClick: this.paginationNextPrev('last')
+        })))))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Modal"], {
+          isOpen: this.state.userRateModal,
+          toggle: function toggle(e) {
+            return _this2.userRateModalToggle(0);
+          }
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["ModalHeader"], {
+          toggle: function toggle(e) {
+            return _this2.userRateModalToggle(0);
+          }
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "h3"
+        }, "Rate User")), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["ModalBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "cds-ct-user-rating text-center"
+        }, this.state.userData.filter(function (user) {
+          return user.user_id == _this2.state.currentUserID;
+        }).map(function (user, index) {
+          return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+            className: "cds-ct-ur-border-bottom",
+            key: user.id
+          }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Row"], {
+            className: "align-items-center"
+          }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+            xl: 5,
+            className: "text-center text-xl-center p-1"
+          }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
+            className: "cds-ct-user-image",
+            src: "/images/avatar".concat((index + 1) % 6 == 0 ? 6 : (index + 1) % 6, ".jpeg")
+          })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+            xl: 7,
+            className: "text-center text-xl-left p-1"
+          }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
+            className: "cds-ct-user-name"
+          }, user.name), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
+            className: "cds-ct-user-otherinfo text-muted"
+          }, user.email), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
+            className: "cds-ct-user-otherinfo text-muted"
+          }, user.contact_number))));
+        }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "mt-3"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["FormGroup"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Row"], {
+          className: "align-items-center"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 4,
+          className: "text-center text-xl-right pb-1"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
+          className: "text-muted mb-0"
+        }, "Rating")), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 8,
+          className: "text-center text-xl-left pb-1"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, Array(5).fill('/images/icons/star.png').map(function (star, starIndex) {
+          return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
+            key: starIndex,
+            className: "cds-ct-ur-star " + (_this2.state.starRating > starIndex ? 'bg-warning' : _this2.state.ratingOnMouseOver > starIndex ? 'bg-warning' : 'bg-secondary'),
+            src: star,
+            onClick: function onClick(e) {
+              return _this2.setState({
+                starRating: starIndex + 1
+              });
+            },
+            onMouseOver: function onMouseOver(e) {
+              return _this2.setState({
+                ratingOnMouseOver: starIndex
+              });
+            },
+            onMouseOut: function onMouseOut(e) {
+              return _this2.setState({
+                ratingOnMouseOver: 0
+              });
+            }
+          });
+        }))))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["FormGroup"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Row"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 4,
+          className: "text-center text-xl-right pb-1"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("label", {
+          className: "text-muted mb-0 mt-1"
+        }, "Comment")), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 7,
+          className: "text-center text-xl-left pb-1"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Input"], {
+          type: "textarea",
+          className: "cds-ct-user-textarea",
+          value: this.state.commentValue,
+          onChange: function onChange(value) {
+            return _this2.setState({
+              commentValue: value.target.value
+            });
+          }
+        })))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Row"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: {
+            size: 8,
+            order: 1,
+            offset: 4
+          },
+          className: "text-center text-xl-left"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], {
+          size: "sm",
+          color: "success",
+          onClick: this.saveUserRating
+        }, "Submit"))))))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Row"], {
+          className: "pt-3 pr-3 pl-3"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 6
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "d-flex align-items-center"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
+          className: "cds-campaign-image mr-3",
+          src: "/images/sample_campaign_img.png"
+        }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h2", {
+          className: "cds-campaign-underline"
+        }, this.state.campaign.name), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("small", {
+          className: "text-muted"
+        }, this.reconstructDate(this.state.campaign.created_at, false)))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "mt-4 pr-2"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], {
+          color: "light"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, this.state.campaign.description))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("hr", null)), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 6
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("strong", {
+          className: "cds-card-header cds-campaign-underline"
+        }, "VEHICLE INFORMATION"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Row"], {
+          className: "mt-3"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 4
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+          className: "text-muted"
+        }, "Type"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], {
+          color: "light",
+          className: "text-center"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h4", {
+          className: "mb-0"
+        }, vehicleType[this.state.campaign.vehicle_type])))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 4
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+          className: "text-muted"
+        }, "Classification"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], {
+          color: "light",
+          className: "text-center"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
+          style: {
             height: 60,
             width: 60
           },
           src: this.state.vehicleClass[this.state.campaign.vehicle_classification]
-        }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
-          className: "text-success"
-        }, vehicleType[this.state.campaign.vehicle_type]))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-          className: "row form-group"
+        })))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 4
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+          className: "text-muted"
+        }, "Sticker Area"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], {
+          color: "light",
+          className: "text-center"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h4", {
+          className: "mb-0"
+        }, stickerArea[this.state.campaign.vehicle_stickerArea]))))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("hr", null), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Row"], {
+          className: "mt-4"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 6
         }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-          className: "col align-self-center"
-        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("strong", null, "Created:"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
-          className: "ml-3"
-        }, this.reconstructDate(this.state.campaign.created_at, false)))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-          className: "row form-group"
+          className: "cds-campaign-underline-blue"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("strong", {
+          className: "cds-card-header"
+        }, "BASIC PAY"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "h2 mt-3"
+        }, '₱' + this.numberWithCommas(this.state.campaign.pay_basic)), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("small", {
+          className: "text-muted"
+        }, "in ", this.state.campaign.pay_basic_km + 'km'))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 6
         }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-          className: "col align-self-center"
-        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("strong", null, "Basic Pay:"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
-          className: "ml-3"
-        }, '₱ ' + this.numberWithCommas(this.state.campaign.pay_basic), " / ", this.state.campaign.pay_basic_km + 'km'))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-          className: "row"
+          className: "cds-campaign-underline-blue"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("strong", {
+          className: "cds-card-header"
+        }, "ADDITIONAL PAY"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "h2 mt-3"
+        }, '₱' + this.numberWithCommas(this.state.campaign.pay_additional)), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("small", {
+          className: "text-muted"
+        }, "per ", this.state.campaign.pay_additional_km + 'km')))))))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], {
+          size: "sm",
+          className: "float-right",
+          onClick: this.userModalToggle
+        }, "View"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Row"], {
+          className: "pt-3 pr-3 pl-3"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 4
         }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-          className: "col align-self-center"
-        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("strong", null, "Additional Pay:"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
-          className: "ml-3"
-        }, '₱ ' + this.numberWithCommas(this.state.campaign.pay_additional), " / ", this.state.campaign.pay_additional_km + 'km')))))));
+          className: "cds-campaign-underline-blue"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h5", null, "Total Distance Travelled"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "h2"
+        }, this.userTotalCost().km, " km"))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 4
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "cds-campaign-underline-blue"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h5", null, "Completed User Total Cost"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "h2"
+        }, "\u20B1", this.numberWithCommas(this.userTotalCost().basicCost)))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 4
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "cds-campaign-underline-blue"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h5", null, "Additional Km Total Cost"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "h2"
+        }, "\u20B1", this.numberWithCommas(this.userTotalCost().addCost))))))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Row"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          md: 8,
+          sm: 12
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardHeader"], null, "Traffic"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "full-bleed"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_chartjs_2__WEBPACK_IMPORTED_MODULE_2__["Line"], {
+          data: line.data,
+          width: 2068,
+          height: 846,
+          legend: {
+            display: false
+          },
+          options: line.options
+        }))))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          md: 4,
+          sm: 12
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardHeader"], null, "Product Views"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_chartjs_2__WEBPACK_IMPORTED_MODULE_2__["Doughnut"], {
+          data: donutData,
+          width: 908,
+          height: 768,
+          legend: {
+            display: false
+          }
+        }))))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Row"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 4
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h5", null, "Interested Users"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "h2 inline-block"
+        }, this.state.userData.length), ' ', react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("small", {
+          className: "text-muted"
+        }, "out of ", this.state.totalUser), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Progress"], _defineProperty({
+          value: this.state.userData.length / this.state.totalUser * 100,
+          color: "success"
+        }, "color", "info"))))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 4
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h5", null, "Slots Remaining"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "h2 inline-block"
+        }, this.state.campaign.slots - this.state.userData.length), ' ', react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("small", {
+          className: "text-muted"
+        }, "out of ", this.state.campaign.slots), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Progress"], {
+          value: this.state.userData.length / this.state.campaign.slots * 100,
+          color: this.progressColor(this.state.userData.length / this.state.campaign.slots * 100)
+        })))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Col"], {
+          xl: 4
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h5", null, "Completed Users"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "h2 inline-block"
+        }, this.state.userData.filter(function (u) {
+          return u.completed == 1;
+        }).length), ' ', react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("small", {
+          className: "text-muted"
+        }, "out of ", this.state.userData.length), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Progress"], _defineProperty({
+          value: this.state.userData.filter(function (u) {
+            return u.completed == 1;
+          }).length / this.state.userData.length * 100,
+          color: "success"
+        }, "color", "primary")))))));
       }
     }
   }]);

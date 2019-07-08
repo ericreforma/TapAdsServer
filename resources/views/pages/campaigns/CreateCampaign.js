@@ -5,7 +5,6 @@ import {
 	FormGroup,
 	Label,
 	Input,
-	Modal,
 	InputGroup,
 	InputGroupAddon,
 	Col,
@@ -13,7 +12,7 @@ import {
 	Card,
 	CardBody
 } from 'reactstrap';
-import GoogleMapReact, { Marker } from 'google-map-react';
+import GoogleMapReact from 'google-map-react';
 import axios from 'axios';
 
 //components

@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\ClientCampaign;
+use App\ClientCampaignLocation;
 use App\UserCampaign;
+use App\UserRating;
 use App\Media;
 use App\Client;
+use App\User;
 use DB;
 
 class ClientCampaignController extends Controller
@@ -45,7 +48,7 @@ class ClientCampaignController extends Controller
 
     public function campaign_store(Request $request){
 		$campaign = new ClientCampaign;
-		$campaign->client_id = 1; // >>>>>>>>>> change this to user id
+		$campaign->client_id = 3; // >>>>>>>>>> change this to user id
 		$campaign->name = $request->name;
 		$campaign->description = $request->description;
 		$campaign->location_id = $request->location_id;
@@ -77,13 +80,34 @@ class ClientCampaignController extends Controller
 		$campaign = ClientCampaign::find($id);
 
 		if($campaign) {
-			$userData = UserCampaign::where('campaign_id', '=', $id)->get();
+			$userData = UserCampaign::where('campaign_id', '=', $id)
+									->leftJoin('users as u', 'u.id', 'user_campaign.user_id')
+									->select(
+										'user_campaign.*',
+										'u.name',
+										'u.username',
+										'u.media_id',
+										'u.birthdate',
+										'u.contact_number',
+										'u.location',
+										'u.email'
+									)
+									->get();
+
+			$userRating = UserRating::whereIn('user_id', $userData->pluck('user_id')->all())
+									->where('client_id', '=', $campaign->client_id)
+									->get();
+
+			$geoLocation = ClientCampaignLocation::whereIn('id', $campaign->location_id)->get();
 
 			return response()->json([
 				'status' => 'success',
 				'message' => [
 					'campaign' => $campaign,
-					'userData' => $userData
+					'userData' => $userData,
+					'totalUser' => User::count(),
+					'geoLocation' => $geoLocation,
+					'userRating' => $userRating
 				]
 			]);
 		} else {

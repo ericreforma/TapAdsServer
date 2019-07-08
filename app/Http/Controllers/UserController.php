@@ -9,6 +9,7 @@ use App\Media;
 use App\UserVehiclePhoto;
 use App\Vehicle;
 use App\UserCampaign;
+use App\UserRating;
 use App\ClientCampaign;
 
 class UserController extends Controller
@@ -19,9 +20,9 @@ class UserController extends Controller
      * @return void
      */
 
-  public function __construct()  {
-      $this->middleware('auth:api');
-  }
+  // public function __construct()  {
+  //     $this->middleware('auth:api');
+  // }
 
   public function logout (Request $request) {
 
@@ -90,5 +91,24 @@ class UserController extends Controller
 
   }
 
+  public function submitUserRating(Request $request) {
+    $rating            = new UserRating;
+    $rating->user_id   = $request->userId;
+    $rating->client_id = 3; // change this to current user ID
+    $rating->rate      = $request->rate;
+    $rating->comment   = $request->comment;
+    $rating->save();
 
+    if($rating) {
+      return response()->json([
+        'status'  => 'success',
+        'message'    => 'Rating saved!'
+      ]);
+    } else {
+      return response()->json([
+        'status'  => 'error',
+        'message' => 'Error occured! Try again later.'
+      ]);
+    }
+  }
 }

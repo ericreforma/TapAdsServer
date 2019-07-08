@@ -8,6 +8,10 @@ class ClientCampaign extends Model
 {
     protected $table = 'client_campaign';
     public $timestamps = false;
+    
+    protected $casts = [
+      'location_id' => 'array'
+    ];
 
     public function client(){
       return $this->belongsTo('App\Client');

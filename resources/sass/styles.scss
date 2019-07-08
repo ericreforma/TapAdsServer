@@ -3,7 +3,8 @@
 @import 'variables';
 
 // scss every section
-@import '_campaign';
+@import 'campaign/_campaign';
+@import 'campaign/_campaign_dashboard';
 
 body{
     height:100vh;
