@@ -14058,31 +14058,65 @@ img.img-circle {
   src: local("Avenir LT Std 55 Roman"), url(/fonts/AvenirLTStd-Roman.woff?43666b5e46a5d44b8c9457955a403041) format("woff");
 }
 
-.table {
+.mycampaigns_card label,
+.mycampaigns_card a {
+  color: #000 !important;
+}
+
+.mycampaigns_card .table {
   color: black !important;
 }
 
-.vehicle-type {
+.mycampaigns_card .table th {
+  background-color: #0079ff;
+  color: #fff;
+  border-bottom: 1px solid #fff !important;
+}
+
+.mycampaigns_card .table tbody td a {
+  margin-bottom: 10px;
+  color: #fff !important;
+}
+
+.mycampaigns_card .flex-wrap {
+  margin-bottom: -20px;
+}
+
+.mycampaigns_card .flex-wrap .vehicle-type,
+.mycampaigns_card .flex-wrap .campaign-img,
+.mycampaigns_card .flex-wrap p {
+  margin-bottom: 20px;
+}
+
+.mycampaigns_card .vehicle-type {
+  display: inline-block;
   margin-right: 20px;
 }
 
-.vehicle-type img {
+.mycampaigns_card .vehicle-type img {
   height: 50px;
   width: 50px;
   -o-object-fit: cover;
      object-fit: cover;
 }
 
-.campaign-img {
+.mycampaigns_card .campaign-img {
+  display: inline-block;
+  height: 100%;
+  width: 100%;
+  min-height: 50px;
+  min-width: 50px;
+  max-height: 70px;
+  max-width: 70px;
   margin-right: 20px;
 }
 
-.campaign-img img {
+.mycampaigns_card .campaign-img img {
   border: 1px solid black;
-  border-radius: 200px;
+  border-radius: 50%;
   box-sizing: border-box;
-  height: 50px;
-  width: 50px;
+  height: 100%;
+  width: 100%;
   -o-object-fit: cover;
      object-fit: cover;
 }

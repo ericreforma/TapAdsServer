@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use App\Client;
 use App\ClientCampaign;
+use App\ClientCampaignLocation;
+use App\UserCampaign;
 use Carbon\Carbon;
 use Hash;
 
@@ -51,6 +53,9 @@ class ClientController extends Controller
 	public function getMyCampaigns (Request $request){
 		$client_id = $request->user()->id;
 
+		// DB::table('client_campaign')->where('client_campaign.client_id',$client_id)
+		// ->join('client_campaign_location', 'client_campaign.location_id', '=', 'friends.friend_id');
+
 		$mycampaigns = ClientCampaign::where('client_id',$client_id)
 		// ->select('name','created_at','location','slots')
 		->get();
@@ -70,8 +75,17 @@ class ClientController extends Controller
 					$mc->vehicle_type = 'Mixed';
 				break;
 			}
-			// $mc->created_at;
-			// $mc->created_at = $mc->created_at->format('M d Y H:i:s');
+			$location="";
+			$loc_arr = json_decode($mc->location_id);
+			foreach ($loc_arr as $locid) {
+				$mc->location_id=$locid;
+				$loc = ClientCampaignLocation::where('id',$locid)->select('name')->first();
+				$location .= $loc->name." , ";
+			}
+			$location = rtrim(trim($location), ',');
+			$mc->location_id=$location;
+			$slots_avail = UserCampaign::where('campaign_id',$mc->id)->count();
+			$mc->slots = $slots_avail." of ".$mc->slots;
 		}
 		$mycampaigns->toArray();
 		return response()->json($mycampaigns);

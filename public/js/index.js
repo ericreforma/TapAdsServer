@@ -105303,7 +105303,7 @@ __webpack_require__.r(__webpack_exports__);
     //url: '/campaigns',
     icon: 'Star',
     children: [{
-      name: 'List',
+      name: 'Campaign List',
       url: '/campaigns/list'
     }, {
       name: 'Create Campaign',
@@ -106043,7 +106043,7 @@ function (_Component) {
         });
 
         var script = document.createElement("script");
-        var scriptText = document.createTextNode("$('#mycampaigns').DataTable();");
+        var scriptText = document.createTextNode("$('#mycampaigns').DataTable({responsive: true});");
         script.appendChild(scriptText);
         document.body.appendChild(script);
       })["catch"](function (error) {
@@ -106092,33 +106092,42 @@ function (_Component) {
     value: function render() {
       var _this2 = this;
 
-      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardHeader"], null, "List"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Table"], {
+      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Card"], {
+        className: "mycampaigns_card"
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["CardBody"], null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Table"], {
         hover: true,
         id: "mycampaigns"
-      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("thead", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Campaign"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Date"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Vehicle"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Location"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Slots"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Payment"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Actions"))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tbody", null, this.state.campaigns.map(function (campaign, id) {
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("thead", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Campaign"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Date"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Vehicle"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Location"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Slots"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Basic Pay"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Additional Pay"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("th", null, "Actions"))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tbody", null, this.state.campaigns.map(function (campaign, id) {
         return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("tr", {
           key: id
         }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-          className: "d-flex flex-row justify-content-start align-items-center"
+          className: "d-flex flex-row justify-content-start align-items-center flex-wrap"
         }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           className: "campaign-img"
         }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
           src: sampleimg
-        })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
-          className: "mb-0"
-        }), campaign.name)), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, _this2.formatDate(campaign.created_at, true)), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-          className: "d-flex flex-row justify-content-start align-items-center"
+        })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, campaign.name))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, _this2.formatDate(campaign.created_at, true)), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "d-flex flex-row justify-content-start align-items-center flex-wrap"
         }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           className: "vehicle-type"
         }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("img", {
           src: vtype[campaign.vehicle_classification]
-        })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
-          className: "mb-0"
-        }, campaign.vehicle_type))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, campaign.location), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, campaign.slots), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, campaign.vehicle_type))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, campaign.location_id), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, campaign.slots), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           className: "d-flex flex-column"
-        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Basic Pay: \u200E\u20B1 ", campaign.pay_basic), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Additional: \u200E\u20B1 ", campaign.pay_additional), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Every: ", campaign.pay_additional_km, " km"))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("strong", null, "Cost:"), " \u200E\u20B1 ", campaign.pay_basic), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("strong", null, "Prerequisite:"), " ", campaign.pay_basic_km, " km"))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
           className: "d-flex flex-column"
-        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], null, "View"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], null, "Update"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(reactstrap__WEBPACK_IMPORTED_MODULE_1__["Button"], null, "Remove"))));
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("strong", null, "Cost:"), " \u200E\u20B1 ", campaign.pay_additional), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("strong", null, "Prerequisite:"), " ", campaign.pay_additional_km, " km"))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("td", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+          className: "d-flex flex-column"
+        }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
+          className: "btn btn-success",
+          href: "campaign/dashboard/" + campaign.id
+        }, "View"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
+          className: "btn btn-primary",
+          href: "campaign/dashboard/" + campaign.id
+        }, "Update"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
+          className: "btn btn-danger",
+          href: "campaign/dashboard/" + campaign.id
+        }, "Remove"))));
       }))))));
     }
   }]);

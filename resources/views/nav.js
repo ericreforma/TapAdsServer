@@ -11,7 +11,7 @@ export default {
       icon: 'Star',
       children:[
         {
-          name:'List',
+          name:'Campaign List',
           url: '/campaigns/list',
         },
         {

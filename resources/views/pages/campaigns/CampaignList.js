@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+   import React, { Component } from 'react';
 import {
 	Card,
 	CardHeader,
@@ -27,7 +27,6 @@ export default class CampaignList extends Component {
 	}
 	componentWillMount(){
 		this.LoadCampaign();
-		
 	}
 
 	LoadCampaign = (page) => {
@@ -43,7 +42,7 @@ export default class CampaignList extends Component {
 				campaigns:res.data
 			});
 			const script = document.createElement("script");
-			const scriptText = document.createTextNode("$('#mycampaigns').DataTable();");
+			const scriptText = document.createTextNode("$('#mycampaigns').DataTable({responsive: true});");
 			script.appendChild(scriptText);
 			document.body.appendChild(script);
         }).catch(error => {
@@ -82,8 +81,8 @@ export default class CampaignList extends Component {
 	render() {
 		return (
 		<div>
-			<Card>
-			<CardHeader>List</CardHeader>
+			<Card className="mycampaigns_card">
+			{/* <CardHeader>List</CardHeader> */}
 			<CardBody>
 				<Table hover id="mycampaigns">
 				<thead>
@@ -93,7 +92,8 @@ export default class CampaignList extends Component {
 					<th>Vehicle</th>
 					<th>Location</th>
 					<th>Slots</th>
-					<th>Payment</th>
+					<th>Basic Pay</th>
+					<th>Additional Pay</th>
 					<th>Actions</th>
 					</tr>
 				</thead>
@@ -101,33 +101,38 @@ export default class CampaignList extends Component {
 					{this.state.campaigns.map((campaign,id) =>
 						<tr key={id}>
 							<td>
-								<div className="d-flex flex-row justify-content-start align-items-center">
+								<div className="d-flex flex-row justify-content-start align-items-center flex-wrap">
 									<div className="campaign-img"><img src={sampleimg}></img></div>
-									<p className="mb-0"></p>{campaign.name}
+									<p>{campaign.name}</p>
 								</div>
 							</td>
 							<td>{this.formatDate(campaign.created_at,true)}</td>
 							<td>
-								<div className="d-flex flex-row justify-content-start align-items-center">
+								<div className="d-flex flex-row justify-content-start align-items-center flex-wrap">
 									<div className="vehicle-type"><img  src={vtype[campaign.vehicle_classification]}></img></div>
-									<p className="mb-0">{campaign.vehicle_type}</p>
+									<p>{campaign.vehicle_type}</p>
 								{/* <p>{campaign.vehicle_stickerArea}</p> */}
 								</div>
 							</td>
-							<td>{campaign.location}</td>
+							<td>{campaign.location_id}</td>
 							<td>{campaign.slots}</td>
 							<td>
 								<div className="d-flex flex-column">
-									<p>Basic Pay: ‎₱ {campaign.pay_basic}</p>
-									<p>Additional: ‎₱ {campaign.pay_additional}</p>
-									<p>Every: {campaign.pay_additional_km} km</p>
+									<p><strong>Cost:</strong> ‎₱ {campaign.pay_basic}</p>
+									<p><strong>Prerequisite:</strong> {campaign.pay_basic_km} km</p>
 								</div>
 							</td>
 							<td>
 								<div className="d-flex flex-column">
-									<Button>View</Button>
-									<Button>Update</Button>
-									<Button>Remove</Button>
+									<p><strong>Cost:</strong> ‎₱ {campaign.pay_additional}</p>
+									<p><strong>Prerequisite:</strong> {campaign.pay_additional_km} km</p>
+								</div>
+							</td>
+							<td>
+								<div className="d-flex flex-column">
+									<a className="btn btn-success" href={"campaign/dashboard/"+campaign.id}>View</a>
+									<a className="btn btn-primary" href={"campaign/dashboard/"+campaign.id}>Update</a>
+									<a className="btn btn-danger" href={"campaign/dashboard/"+campaign.id}>Remove</a>
 								</div>
 							</td>
 						</tr>
