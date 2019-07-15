@@ -24,6 +24,7 @@ import config from '../../config';
 export default class CreateCampainpage extends Component {
     state = {
 		loaderShow: true,
+		token: '',
 		
 		// forms
 		formData: [
@@ -164,11 +165,17 @@ export default class CreateCampainpage extends Component {
 
 	// init functions >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	componentWillMount = () => {
+		var token =  localStorage.getItem('client_token');
+		this.setState({token});
 		this.getGeoLocation();
 	}
 
 	getGeoLocation = () => {
-		axios.get(config.api.getGeoLocation).then(response => {
+		axios.get(config.api.getGeoLocation, {
+			headers: {
+				Authorization: 'Bearer ' + this.state.token
+			}
+		}).then(response => {
 			if(response.data.status == 'success') {
 				this.setState({
 					loaderShow: false,
@@ -332,7 +339,11 @@ export default class CreateCampainpage extends Component {
 							name: this.state.customLocationName
 						};
 					
-					axios.post(config.api.createGeoLocation, form).then(response => {
+					axios.post(config.api.createGeoLocation, form, {
+						headers: {
+							Authorization: 'Bearer ' + this.state.token
+						}
+					}).then(response => {
 
 						if(response.data.status == 'success') {
 							var { defaultGeoLocations } = this.state;
@@ -345,7 +356,8 @@ export default class CreateCampainpage extends Component {
 								customLocationName: '',
 								customLocationError: false,
 								hideMarkers: false,
-								defaultGeoLocations: defaultGeoLocations
+								defaultGeoLocations: defaultGeoLocations,
+								selectedGeoLocationId: []
 							});
 
 							alert(response.data.message.message);
@@ -433,13 +445,17 @@ export default class CreateCampainpage extends Component {
 			proceed = false;
 			this.setState({locationInvalid: true});
 		} else {
-			sentForm['location_id'] = JSON.stringify(this.state.selectedGeoLocationId);
+			sentForm['location_id'] = this.state.selectedGeoLocationId;
 			this.setState({locationInvalid: false});
 		}
 
 		if(proceed) {
 			this.setState({formData});
-			axios.post(config.api.createCampaign, sentForm).then(response => {
+			axios.post(config.api.createCampaign, sentForm, {
+				headers: {
+					Authorization: 'Bearer ' + this.state.token
+				}
+			}).then(response => {
 				if(response.data.status == 'success') {
 					document.getElementById('createCampaignForm').reset();
 					this.removeCurrentMarkers();

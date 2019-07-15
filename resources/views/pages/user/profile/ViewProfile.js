@@ -18,6 +18,7 @@ export default class ViewProfile extends Component {
 
         this.state = {
             loader: true,
+            token: '',
 
             userData: {},
             userCampaigns: [],
@@ -30,6 +31,8 @@ export default class ViewProfile extends Component {
     }
 
     componentWillMount = () => {
+		var token =  localStorage.getItem('client_token');
+        this.setState({token});
         this.getUserProfile();
     }
 
@@ -41,7 +44,11 @@ export default class ViewProfile extends Component {
         apiRoute.splice(1, 0, id);
         url = apiRoute.join('');
         
-        axios.get(url).then(response => {
+        axios.get(url, {
+            headers: {
+				Authorization: 'Bearer ' + this.state.token
+            }
+        }).then(response => {
             if(response.data.status == 'success') {
                 var {
                         userData,

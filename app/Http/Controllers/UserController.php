@@ -96,7 +96,7 @@ class UserController extends Controller
   public function submitUserRating(Request $request) {
     $rating            = new UserRating;
     $rating->user_id   = $request->userId;
-    $rating->client_id = 3; // change this to current user ID
+    $rating->client_id = $request->user()->id;
     $rating->rate      = $request->rate;
     $rating->comment   = $request->comment;
     $rating->save();
@@ -115,11 +115,7 @@ class UserController extends Controller
   }
 
   public function viewProfile($id) {
-		$userData = User::leftJoin(
-									DB::raw(
-										"(SELECT * FROM media WHERE owner = 2) as m"
-									), 'm.owner_id', 'users.id'
-								)
+		$userData = User::leftJoin('media as m', 'm.id', 'users.media_id')
 								->where('users.id', '=', $id)
 								->select(
 									'users.id',
@@ -137,16 +133,8 @@ class UserController extends Controller
     $userCampaigns = UserCampaign::where('user_id', '=', $id)
                                 ->leftJoin('client_campaign as cc', 'cc.id', 'user_campaign.campaign_id')
                                 ->leftJoin('client as c', 'c.id', 'cc.client_id')
-                                ->leftJoin(
-                                  DB::raw(
-                                    "(SELECT * FROM media WHERE owner = 1) as mclient"
-                                  ), 'mclient.owner_id', 'cc.client_id'
-                                )
-                                ->leftJoin(
-                                  DB::raw(
-                                    "(SELECT * FROM media WHERE owner = 3) as mcampaign"
-                                  ), 'mcampaign.owner_id', 'user_campaign.campaign_id'
-                                )
+                                ->leftJoin('media as mclient', 'mclient.id', 'c.media_id')
+                                ->leftJoin('media as mcampaign', 'mcampaign.id', 'cc.media_id')
                                 ->select(
                                   'user_campaign.*',
                                   'cc.name as campaign_name',
@@ -159,12 +147,8 @@ class UserController extends Controller
                                 )
 																->get();
 		$userRating = UserRating::leftJoin('client as c', 'c.id', 'user_rating.client_id')
-													->where('user_id', '=', $id)
-													->leftJoin(
-														DB::raw(
-															"(SELECT * FROM media WHERE owner = 1) as m"
-														), 'm.id', 'c.media_id'
-													)
+                          ->where('user_id', '=', $id)
+													->leftJoin('media as m', 'm.id', 'c.media_id')
 													->select(
 														'user_rating.*',
 														'c.business_name',

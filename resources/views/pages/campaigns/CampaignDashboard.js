@@ -28,6 +28,7 @@ export default class CampaignDashboard extends Component {
 
         this.state = {
             loaderShow: true,
+            token: '',
 
             //icons
             vehicleClass: [
@@ -65,12 +66,21 @@ export default class CampaignDashboard extends Component {
     }
 
     componentWillMount = () => {
+        const token = localStorage.getItem('client_token');
+        this.setState({token});
+    }
+
+    componentDidMount = () => {
         const { id } = this.props.match.params;
         this.getCampaignData(id);
     }
 
     getCampaignData = (id) => {
-        axios.get(config.api.campaignDashboard + id).then(response => {
+        axios.get(config.api.campaignDashboard + id, {
+			headers: {
+				Authorization: 'Bearer ' + this.state.token
+            }
+        }).then(response => {
             if(response.data.status == 'success') {
                 var userData = [],
                     campaign = response.data.message.campaign,
@@ -90,7 +100,7 @@ export default class CampaignDashboard extends Component {
                             totalCost = (perKm * addPay) + basicPayKm;
                     }
 
-                    var filteredRating = userRating.filter(rate => rate.user_id == user.user_id && rate.client_id == 3),
+                    var filteredRating = userRating.filter(rate => rate.user_id == user.user_id),
                         arrayRates = userRating.filter(rate => rate.user_id == user.user_id).map(r => {return r.rate;});
                         
                     returnUser.rate = filteredRating.length !== 0 ? arrayRates.reduce((a,b) => a + b) / arrayRates.length : null;
@@ -109,11 +119,14 @@ export default class CampaignDashboard extends Component {
                 });
             } else {
                 alert('Error occured please try again later');
-                setTimeout(this.getCampaignData(id), 1000);
-                
+                setTimeout(() => {
+                    this.getCampaignData(id);
+                }, 1000);
             }
         }).catch(error => {
-            setTimeout(this.getCampaignData(id), 1000);
+            setTimeout(() => {
+                this.getCampaignData(id);
+            }, 1000);
         });
     }
 
@@ -133,17 +146,17 @@ export default class CampaignDashboard extends Component {
             totalKm += distance;
             
             if(distance >= basicPayKm) {
-                var perKm = Math.floor(distance / addPayKm);
-                basicCost += basicPayKm;
+                var perKm = Math.floor((distance - basicPayKm) / addPayKm);
+                basicCost += basicPay;
                 addCost += (perKm * addPay);
             }
         });
 
         return {
-            km: Math.round(totalKm * 100) / 100,
-            basicCost: Math.round(basicCost * 100) / 100,
-            addCost: Math.round(addCost * 100) / 100,
-            totalCost: Math.round((basicCost + addCost) * 100) / 100
+            km: (Math.round(totalKm * 100) / 100).toFixed(2),
+            basicCost: (Math.round(basicCost * 100) / 100).toFixed(2),
+            addCost: (Math.round(addCost * 100) / 100).toFixed(2),
+            totalCost: (Math.round((basicCost + addCost) * 100) / 100).toFixed(2)
         };
     }
     // end dashboard functions >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -291,7 +304,11 @@ export default class CampaignDashboard extends Component {
         }
 
         if(proceed) {
-            axios.post(config.api.submitRateUser, form).then(response => {
+            axios.post(config.api.submitRateUser, form, {
+                headers: {
+                    Authorization: 'Bearer ' + this.state.token
+                }
+            }).then(response => {
                 if(response.data.status == 'success') {
                     var userData = this.state.userData;
 
@@ -456,9 +473,7 @@ export default class CampaignDashboard extends Component {
             };
             
         if(this.state.loaderShow) {
-            return (
-                <Loader type="puff" />
-            );
+            return <Loader type="puff" />;
         } else {
             return (
                 <div className="campaign-dashboard-section">
@@ -526,7 +541,7 @@ export default class CampaignDashboard extends Component {
                                                         <td align="center">
                                                             <img
                                                                 className="cds-ct-user-image cds-ct-user-hover"
-                                                                src={`/images/avatar${(index + 1) % 6 == 0 ? 6 : (index + 1) % 6}.jpeg`}
+                                                                src={user.url ? user.url : `/images/default_avatar.png`}
                                                                 onClick={e => this.props.history.push(`/user/profile/${user.user_id}`)}
                                                             />
                                                         </td>
@@ -655,7 +670,7 @@ export default class CampaignDashboard extends Component {
                                             >
                                                 <img
                                                     className="cds-ct-user-image"
-                                                    src={`/images/avatar${(index + 1) % 6 == 0 ? 6 : (index + 1) % 6}.jpeg`}
+                                                    src={user.url ? user.url : `/images/default_avatar.png`}
                                                 />
                                             </Col>
                                             
@@ -755,7 +770,7 @@ export default class CampaignDashboard extends Component {
                                     <div className="d-flex align-items-center">
                                         <img
                                             className="cds-campaign-image mr-3"
-                                            src="/images/sample_campaign_img.png"
+                                            src={this.state.campaign.url ? this.state.campaign.url : '/images/sample_campaign_img.png'}
                                         />
                                         <div>
                                             <h2 className="cds-campaign-underline">
@@ -971,7 +986,7 @@ export default class CampaignDashboard extends Component {
                                         {this.state.campaign.slots - this.state.userData.length}
                                     </div>{' '}<small className="text-muted">out of {this.state.campaign.slots}</small>
                                     <Progress
-                                        value={(this.state.userData.length / this.state.campaign.slots) * 100}
+                                        value={((this.state.campaign.slots - this.state.userData.length) / this.state.campaign.slots) * 100}
                                         color={this.progressColor((this.state.userData.length / this.state.campaign.slots) * 100)}
                                     />
                                 </CardBody>

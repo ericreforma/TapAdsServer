@@ -38,7 +38,7 @@ class ClientController extends Controller
 		$client = $request->user();
 
 		return response()->json($client);
-		}
+	}
 
 	
 	public function logout (Request $request) {
@@ -76,7 +76,7 @@ class ClientController extends Controller
 				break;
 			}
 			$location="";
-			$loc_arr = json_decode($mc->location_id);
+			$loc_arr = $mc->location_id;
 			foreach ($loc_arr as $locid) {
 				$mc->location_id=$locid;
 				$loc = ClientCampaignLocation::where('id',$locid)->select('name')->first();
