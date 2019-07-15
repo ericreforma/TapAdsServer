@@ -473,7 +473,7 @@ export default class CreateCampainpage extends Component {
 					) : (
 						<Row>
 							<Col
-								lg={{
+								xl={{
 									size: 8,
 									offset: 2
 								}}

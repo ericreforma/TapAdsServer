@@ -9,8 +9,10 @@ use App\Media;
 use App\UserVehiclePhoto;
 use App\Vehicle;
 use App\UserCampaign;
+use App\UserVehicle;
 use App\UserRating;
 use App\ClientCampaign;
+use DB;
 
 class UserController extends Controller
 {
@@ -103,6 +105,84 @@ class UserController extends Controller
       return response()->json([
         'status'  => 'success',
         'message'    => 'Rating saved!'
+      ]);
+    } else {
+      return response()->json([
+        'status'  => 'error',
+        'message' => 'Error occured! Try again later.'
+      ]);
+    }
+  }
+
+  public function viewProfile($id) {
+		$userData = User::leftJoin(
+									DB::raw(
+										"(SELECT * FROM media WHERE owner = 2) as m"
+									), 'm.owner_id', 'users.id'
+								)
+								->where('users.id', '=', $id)
+								->select(
+									'users.id',
+									'users.name',
+									'users.media_id',
+									'users.birthdate',
+									'users.contact_number',
+									'users.location',
+									'users.email',
+									'users.created_at',
+									'users.updated_at',
+									'm.url'
+								)
+								->first();
+    $userCampaigns = UserCampaign::where('user_id', '=', $id)
+                                ->leftJoin('client_campaign as cc', 'cc.id', 'user_campaign.campaign_id')
+                                ->leftJoin('client as c', 'c.id', 'cc.client_id')
+                                ->leftJoin(
+                                  DB::raw(
+                                    "(SELECT * FROM media WHERE owner = 1) as mclient"
+                                  ), 'mclient.owner_id', 'cc.client_id'
+                                )
+                                ->leftJoin(
+                                  DB::raw(
+                                    "(SELECT * FROM media WHERE owner = 3) as mcampaign"
+                                  ), 'mcampaign.owner_id', 'user_campaign.campaign_id'
+                                )
+                                ->select(
+                                  'user_campaign.*',
+                                  'cc.name as campaign_name',
+                                  'cc.description as campaign_description',
+                                  'cc.client_id',
+                                  'c.business_name',
+                                  'c.business_nature',
+                                  'mclient.url as media_client_url',
+																	'mcampaign.url as media_campaign_url'
+                                )
+																->get();
+		$userRating = UserRating::leftJoin('client as c', 'c.id', 'user_rating.client_id')
+													->where('user_id', '=', $id)
+													->leftJoin(
+														DB::raw(
+															"(SELECT * FROM media WHERE owner = 1) as m"
+														), 'm.id', 'c.media_id'
+													)
+													->select(
+														'user_rating.*',
+														'c.business_name',
+														'c.business_nature',
+														'm.url'
+													)
+													->get();
+		$userVehicle = UserVehicle::where('user_id', '=', $id)->get();
+
+    if($userData) {
+      return response()->json([
+        'status'  => 'success',
+        'message' => [
+          'userData' 			=> $userData,
+					'userCampaigns' => $userCampaigns,
+					'userRating' 		=> $userRating,
+					'userVehicle'		=> $userVehicle
+        ]
       ]);
     } else {
       return response()->json([

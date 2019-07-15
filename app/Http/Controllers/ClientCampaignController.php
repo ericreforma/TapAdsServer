@@ -95,7 +95,6 @@ class ClientCampaignController extends Controller
 									->get();
 
 			$userRating = UserRating::whereIn('user_id', $userData->pluck('user_id')->all())
-									->where('client_id', '=', $campaign->client_id)
 									->get();
 
 			$geoLocation = ClientCampaignLocation::whereIn('id', $campaign->location_id)->get();

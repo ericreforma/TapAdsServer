@@ -21,7 +21,10 @@ import Modals from './elements/Modals';
 import ProgressBars from './elements/ProgressBars';
 import PaginationPage from './elements/Pagination';
 import ErrorPage from './pages/samples/404';
-import { CreateCampaign, CampaignList, CampaignDashboard } from './pages/campaigns/index';
+import { CreateCampaign, CampaignList, CampaignDashboard } from './pages/campaigns';
+import {
+  ViewProfile
+} from './pages/user';
 
 const pageList = [
   {
@@ -40,9 +43,14 @@ const pageList = [
     component: CampaignList
   },
   {
-    name: 'List',
+    name: 'Campaign Dashboard',
     path:'/campaign/dashboard/:id',
     component: CampaignDashboard
+  },
+  {
+    name: 'User Profile',
+    path:'/user/profile/:id',
+    component: ViewProfile
   },
   {
     name: 'Buttons',

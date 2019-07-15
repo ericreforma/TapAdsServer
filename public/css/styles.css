@@ -14168,6 +14168,10 @@ img.img-circle {
   background-color: #f0ae48;
 }
 
+.modal .cds-campaign-table tbody .cds-ct-user-hover:hover {
+  cursor: pointer;
+}
+
 .modal .cds-campaign-table tbody .cds-ct-user-name {
   display: block;
   font-size: 1rem;
@@ -14199,6 +14203,197 @@ img.img-circle {
 .modal .cds-campaign-table .cds-ct-sort-icons {
   width: 12px;
   height: 12px;
+}
+
+.user-profile-section .ups-personal-info {
+  margin-bottom: 1.5rem;
+}
+
+.user-profile-section .ups-personal-info .ups-pi-wrapper {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.user-profile-section .ups-personal-info .ups-pi-wrapper .ups-pi-user-image {
+  width: 130px;
+  height: 130px;
+  overflow: hidden;
+  border-radius: 100px;
+  margin: 1rem 2rem 1rem 0px;
+}
+
+.user-profile-section .ups-personal-info .ups-pi-wrapper .ups-pi-user-image img {
+  width: 100%;
+  height: auto;
+}
+
+.user-profile-section .ups-personal-info .ups-pi-wrapper .ups-pi-user-other-info {
+  flex-grow: 1;
+}
+
+.user-profile-section .ups-personal-info .ups-pi-wrapper .ups-pi-user-other-info .ups-pi-star-icon {
+  width: 25px;
+  height: 25px;
+  margin-right: 2px;
+  margin-left: 2px;
+}
+
+.user-profile-section .ups-personal-info .ups-pi-wrapper .ups-pi-user-other-info .ups-pi-star-icon:first-child {
+  margin-left: 0;
+}
+
+.user-profile-section .ups-personal-info .ups-pi-wrapper .ups-pi-user-other-info .ups-pi-star-icon:last-child {
+  margin-right: 0;
+}
+
+.user-profile-section .ups-div-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.user-profile-section .ups-div-header .ups-fc-h-horizontal {
+  margin-left: 1rem;
+  flex-grow: 1;
+  height: 2px;
+  background-color: #f0ae48;
+}
+
+.user-profile-section .ups-favorite-campaigns {
+  margin: 1rem 0;
+}
+
+.user-profile-section .ups-favorite-campaigns .ups-fc-card {
+  margin: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #f4f4f4;
+  box-shadow: 0px 0px 5px -2px #8c8c8c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 25px;
+  background-color: #f4f4f4;
+  flex-wrap: wrap;
+}
+
+.user-profile-section .ups-favorite-campaigns .ups-fc-card:first-child {
+  margin: 10px 20px 20px 20px;
+}
+
+.user-profile-section .ups-favorite-campaigns .ups-fc-card:last-child {
+  margin: 20px 20px 10px 20px;
+}
+
+.user-profile-section .ups-favorite-campaigns .ups-fc-card .ups-fc-c-client-image {
+  width: 70px;
+  height: 70px;
+  border-radius: 50px;
+  background-color: #7ed2bb;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  margin: 0.75rem 1rem 0.75rem 0px;
+}
+
+.user-profile-section .ups-favorite-campaigns .ups-fc-card .ups-fc-c-client-image img {
+  width: 100%;
+  height: auto;
+}
+
+.user-profile-section .ups-favorite-campaigns .ups-fc-card .ups-fc-c-lists {
+  flex-grow: 1;
+}
+
+.user-profile-section .ups-favorite-campaigns .ups-fc-card .ups-fc-c-lists .ups-fc-c-l-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.user-profile-section .ups-favorite-campaigns .ups-fc-card .ups-fc-c-lists .ups-fc-c-favorite-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.user-profile-section .ups-client-ratings {
+  margin: 1rem 0;
+}
+
+.user-profile-section .ups-client-ratings .ups-cr-card {
+  padding: 0.5rem;
+}
+
+.user-profile-section .ups-client-ratings .ups-cr-card:last-child {
+  margin-bottom: 0px;
+}
+
+.user-profile-section .ups-client-ratings .ups-cr-card .ups-cr-client-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-profile-section .ups-client-ratings .ups-cr-card .ups-cr-client-info .ups-cr-ci-image {
+  width: 70px;
+  height: 70px;
+  border-radius: 50px;
+  background-color: #7ed2bb;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  margin: 0.75rem 1rem 0.75rem 0px;
+}
+
+.user-profile-section .ups-client-ratings .ups-cr-card .ups-cr-client-info .ups-cr-ci-image img {
+  width: 100%;
+  height: auto;
+}
+
+.user-profile-section .ups-client-ratings .ups-cr-card .ups-cr-client-info .ups-cr-star-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.user-profile-section .ups-client-ratings .ups-cr-card .ups-cr-client-info .ups-cr-ci-wrapper {
+  flex-grow: 1;
+  flex-wrap: wrap;
+  text-align: right;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.user-profile-section .ups-client-ratings .ups-cr-comment-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.user-profile-section .ups-client-ratings .ups-cr-comment-header .ups-cr-ch-horizontal {
+  flex-grow: 1;
+  height: 1px;
+  background-color: #85939d;
+}
+
+.user-profile-section .ups-client-ratings .ups-cr-comment-header .ups-cr-ch-horizontal:first-child {
+  margin-right: 0.5rem;
+}
+
+.user-profile-section .ups-client-ratings .ups-cr-comment-header .ups-cr-ch-horizontal:last-child {
+  margin-left: 0.5rem;
+}
+
+.user-profile-section .ups-client-ratings .ups-cr-comment-wrapper {
+  background-color: #f4f4f4;
+  padding: 10px;
+}
+
+.user-profile-section .ups-client-ratings .ups-cr-comment-wrapper .ups-cr-comment-text {
+  text-align: justify;
+  margin-bottom: 0px;
 }
 
 body {

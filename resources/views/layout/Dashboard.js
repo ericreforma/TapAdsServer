@@ -59,6 +59,7 @@ export default class Dashboard extends Component {
       <ContextProviders>
         <div className={`app ${sidebarCollapsedClass}`}>
           <PageAlert />
+
           <div className="app-body">
             <SidebarNav
               nav={nav}
@@ -68,6 +69,7 @@ export default class Dashboard extends Component {
               toggleSidebar={this.toggleSideCollapse}
               {...this.props}
             />
+            
             <Page>
               <Header
                 toggleSidebar={this.toggleSideCollapse}
@@ -77,6 +79,7 @@ export default class Dashboard extends Component {
               >
                 <HeaderNav />
               </Header>
+
               <PageContent>
                 <Switch>
                   {routes.map((page, key) => (
@@ -87,22 +90,24 @@ export default class Dashboard extends Component {
               </PageContent>
             </Page>
           </div>
+
           <Footer>
             <span>
               <a href="#!">Terms</a> | <a href="#!">Privacy Policy</a>
             </span>
-            <span className="ml-auto hidden-xs">
+            {/* <span className="ml-auto hidden-xs">
               Made with{' '}
               <span role="img" aria-label="taco">
                 🌮
               </span>
-            </span>
+            </span> */}
           </Footer>
-          <Chat.Container>
+
+          {/* <Chat.Container>
             {this.state.showChat1 && (
               <Chat.ChatBox name="Messages" status="online" image={avatar1} close={this.closeChat} />
             )}
-          </Chat.Container>
+          </Chat.Container> */}
         </div>
       </ContextProviders>
     );

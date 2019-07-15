@@ -81,6 +81,11 @@
                 border-radius: 30px;
                 background-color: $palette_yellow;
             }
+            .cds-ct-user-hover {
+                &:hover {
+                    cursor: pointer;
+                }
+            }
             .cds-ct-user-name {
                 display: block;
                 font-size: 1rem;

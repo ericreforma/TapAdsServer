@@ -52,6 +52,7 @@ Route::middleware('json.response')->group(function(){
       Route::get('campaign/geolocation', 'LocationController@geo_location_get');
 
       Route::post('user/rating', 'UserController@submitUserRating');
+      Route::get('user/{id}/profile', 'UserController@viewProfile');
       // end
 
       // Route::middleware('auth:web_api')->group(function(){

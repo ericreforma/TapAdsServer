@@ -90,8 +90,10 @@ export default class CampaignDashboard extends Component {
                             totalCost = (perKm * addPay) + basicPayKm;
                     }
 
-                    var filteredRating = userRating.filter(rate => rate.user_id == user.user_id);
-                    returnUser.rate = filteredRating.length !== 0 ? filteredRating[0].rate : null;
+                    var filteredRating = userRating.filter(rate => rate.user_id == user.user_id && rate.client_id == 3),
+                        arrayRates = userRating.filter(rate => rate.user_id == user.user_id).map(r => {return r.rate;});
+                        
+                    returnUser.rate = filteredRating.length !== 0 ? arrayRates.reduce((a,b) => a + b) / arrayRates.length : null;
                     returnUser.totalCost = totalCost.toFixed(2);
                     return returnUser;
                 });
@@ -107,10 +109,11 @@ export default class CampaignDashboard extends Component {
                 });
             } else {
                 alert('Error occured please try again later');
-                this.getCampaignData(id);
+                setTimeout(this.getCampaignData(id), 1000);
+                
             }
         }).catch(error => {
-            this.getCampaignData(id);
+            setTimeout(this.getCampaignData(id), 1000);
         });
     }
 
@@ -522,13 +525,17 @@ export default class CampaignDashboard extends Component {
                                                     <tr key={user.id}>
                                                         <td align="center">
                                                             <img
-                                                                className="cds-ct-user-image"
+                                                                className="cds-ct-user-image cds-ct-user-hover"
                                                                 src={`/images/avatar${(index + 1) % 6 == 0 ? 6 : (index + 1) % 6}.jpeg`}
+                                                                onClick={e => this.props.history.push(`/user/profile/${user.user_id}`)}
                                                             />
                                                         </td>
 
                                                         <td>
-                                                            <span className="cds-ct-user-name">{user.name}</span>
+                                                            <span
+                                                                className="cds-ct-user-name cds-ct-user-hover"
+                                                                onClick={e => this.props.history.push(`/user/profile/${user.id}`)}
+                                                            >{user.name}</span>
                                                             {user.rate ? (
                                                                 <div>
                                                                     {Array(5).fill('/images/icons/').map((star, starIndex) =>
