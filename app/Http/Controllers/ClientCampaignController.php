@@ -14,23 +14,21 @@ use DB;
 
 class ClientCampaignController extends Controller
 {
-    // public function __construct() {
-    //   	$this->middleware('auth:api');
-    // }
+	public function __construct() {
+		$this->middleware('auth:api');
+	}
 
-    public function campaigns(Request $request){
-
+	public function campaigns(Request $request){
 		if($request->rec){
 			$campaigns = ClientCampaign::inRandomOrder()->limit(5)->get();
 		} else {
-
 			$campaigns = ClientCampaign::
 			where('vehicle_classification',$request->cl)
 			->latest()
 			->paginate(4);
-      	}
+		}
 
-      	foreach ($campaigns as $c) {
+		foreach ($campaigns as $c) {
 			$c->slots_used = 0;
 			$c->photo = Media::where('id',$c->media_id)
 			->select('url')
@@ -43,12 +41,11 @@ class ClientCampaignController extends Controller
 		}
 
 		return response()->json($campaigns);
+	}
 
-    }
-
-    public function campaign_store(Request $request){
+	public function campaign_store(Request $request){
 		$campaign = new ClientCampaign;
-		$campaign->client_id = 3; // >>>>>>>>>> change this to user id
+		$campaign->client_id = $request->user()->id;
 		$campaign->name = $request->name;
 		$campaign->description = $request->description;
 		$campaign->location_id = $request->location_id;
@@ -76,12 +73,16 @@ class ClientCampaignController extends Controller
 
 	}
 	
-	public function campaign_show($id) {
-		$campaign = ClientCampaign::find($id);
+	public function campaign_show(Request $request, $id) {
+		$campaign = ClientCampaign::where('client_campaign.id', '=', $id)
+															->leftJoin('media as m', 'm.id', 'client_campaign.media_id')
+															->select('client_campaign.*', 'm.url')
+															->first();
 
 		if($campaign) {
 			$userData = UserCampaign::where('campaign_id', '=', $id)
 									->leftJoin('users as u', 'u.id', 'user_campaign.user_id')
+									->leftJoin('media as m', 'm.id', 'u.media_id')
 									->select(
 										'user_campaign.*',
 										'u.name',
@@ -90,11 +91,13 @@ class ClientCampaignController extends Controller
 										'u.birthdate',
 										'u.contact_number',
 										'u.location',
-										'u.email'
+										'u.email',
+										'm.url'
 									)
 									->get();
 
 			$userRating = UserRating::whereIn('user_id', $userData->pluck('user_id')->all())
+									->where('client_id', '=', $request->user()->id)
 									->get();
 
 			$geoLocation = ClientCampaignLocation::whereIn('id', $campaign->location_id)->get();

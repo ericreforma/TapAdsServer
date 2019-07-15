@@ -12,7 +12,7 @@ class ClientCampaign extends Model
     protected $casts = [
       'location_id' => 'array'
     ];
-
+    protected $dates = ['created_at'];
     public function client(){
       return $this->belongsTo('App\Client');
     }

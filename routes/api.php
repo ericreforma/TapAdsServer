@@ -44,22 +44,20 @@ Route::middleware('json.response')->group(function(){
       Route::post('login', 'API\AuthClientController@login');
       Route::post('register', 'API\AuthClientController@register');
 
-      // move to middleware client
-      Route::post('campaign/create', 'ClientCampaignController@campaign_store'); // >>>> create campaign
-      Route::get('campaign/dashboard/{id}', 'ClientCampaignController@campaign_show'); // >>>> campaign details for dashboard
-
-      Route::post('campaign/new/geolocation', 'LocationController@geo_location_new');
-      Route::get('campaign/geolocation', 'LocationController@geo_location_get');
-
-      Route::post('user/rating', 'UserController@submitUserRating');
-      Route::get('user/{id}/profile', 'UserController@viewProfile');
-      // end
-
-      // Route::middleware('auth:web_api')->group(function(){
+      Route::middleware('auth:web_api')->group(function(){
         
-      //   Route::get('/','ClientController@details');
-      //   Route::get('logout', 'UserController@logout')->name('user_logout');
+        Route::get('/','ClientController@details');
+        Route::get('/campaigns','ClientController@getMyCampaigns');
+        Route::get('logout', 'UserController@logout')->name('user_logout');
 
-      // });
+        Route::post('campaign/create', 'ClientCampaignController@campaign_store'); // >>>> create campaign
+        Route::get('campaign/dashboard/{id}', 'ClientCampaignController@campaign_show'); // >>>> campaign details for dashboard
+  
+        Route::post('campaign/new/geolocation', 'LocationController@geo_location_new');
+        Route::get('campaign/geolocation', 'LocationController@geo_location_get');
+        Route::post('user/rating', 'UserController@submitUserRating');
+        Route::get('user/{id}/profile', 'UserController@viewProfile');
+
+      });
   });
 });
