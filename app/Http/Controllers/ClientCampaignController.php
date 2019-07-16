@@ -40,8 +40,11 @@ class ClientCampaignController extends Controller
 			->toArray();
 		}
 
+
 		return response()->json($campaigns);
 	}
+
+
 
 	public function campaign_store(Request $request){
 		$campaign = new ClientCampaign;
@@ -72,13 +75,14 @@ class ClientCampaignController extends Controller
 		}
 
 	}
-	
+
 	public function campaign_show(Request $request, $id) {
 		$campaign = ClientCampaign::where('client_campaign.id', '=', $id)
 															->leftJoin('media as m', 'm.id', 'client_campaign.media_id')
 															->select('client_campaign.*', 'm.url')
 															->first();
 
+<<<<<<< HEAD
 		if($campaign) {
 			$userData = UserCampaign::where('campaign_id', '=', $id)
 									->leftJoin('users as u', 'u.id', 'user_campaign.user_id')
@@ -95,6 +99,10 @@ class ClientCampaignController extends Controller
 										'm.url'
 									)
 									->get();
+=======
+    public function campaign_store(Request $request){
+
+>>>>>>> cc964aa7466d8047d7e0f425b033453908ce39e2
 
 			$userRating = UserRating::whereIn('user_id', $userData->pluck('user_id')->all())
 									->where('client_id', '=', $request->user()->id)
