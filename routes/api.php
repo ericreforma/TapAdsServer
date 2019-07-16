@@ -44,13 +44,14 @@ Route::middleware('json.response')->group(function(){
       Route::post('login', 'API\AuthClientController@login');
       Route::post('register', 'API\AuthClientController@register');
 
+
+
       Route::middleware('auth:web_api')->group(function(){
-        
+
         Route::get('/','ClientController@details');
         Route::get('logout', 'UserController@logout')->name('user_logout');
 
       });
-
-
   });
+
 });

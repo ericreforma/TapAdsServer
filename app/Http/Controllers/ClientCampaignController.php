@@ -26,6 +26,7 @@ class ClientCampaignController extends Controller
       }
 
       foreach ($campaigns as $c) {
+
         $c->slots_used = 0;
         $c->photo = Media::where('id',$c->media_id)
           ->select('url')
@@ -42,7 +43,7 @@ class ClientCampaignController extends Controller
     }
 
     public function campaign_store(Request $request){
-      
+
 
 
     }
