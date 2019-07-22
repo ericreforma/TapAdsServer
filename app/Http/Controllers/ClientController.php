@@ -40,7 +40,7 @@ class ClientController extends Controller
 		return response()->json($client);
 	}
 
-	
+
 	public function logout (Request $request) {
 
 		$token = $request->user()->token();

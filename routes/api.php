@@ -27,11 +27,15 @@ Route::middleware('json.response')->group(function(){
       Route::get('logout', 'UserController@logout')->name('user_logout');
 
       // My campaigns
-      Route::get('/campaign/mylist','UserController@getMyCampaigns');
-      Route::post('/campaign/addmylist','UserController@addMyCampaigns');
-
+      Route::get('/campaign/list','UserController@campaign_list');
+      Route::post('/campaign/add','UserController@campaign_add');
       // Campaigns
-      Route::get('/campaign/browse','ClientCampaignController@campaigns');
+      Route::get('/campaign/browse','ClientCampaignController@browse');
+
+      // Trip
+      Route::post('/campaign/trip/add','UserController@trip_create');
+      Route::post('/campaign/trip/map','UserController@trip_map_add');
+      Route::post('/campaign/trip/end', 'UserController@trip_end');
 
     });
 
@@ -45,14 +49,14 @@ Route::middleware('json.response')->group(function(){
       Route::post('register', 'API\AuthClientController@register');
 
       Route::middleware('auth:web_api')->group(function(){
-        
+
         Route::get('/','ClientController@details');
         Route::get('/campaigns','ClientController@getMyCampaigns');
         Route::get('logout', 'UserController@logout')->name('user_logout');
 
         Route::post('campaign/create', 'ClientCampaignController@campaign_store'); // >>>> create campaign
         Route::get('campaign/dashboard/{id}', 'ClientCampaignController@campaign_show'); // >>>> campaign details for dashboard
-  
+
         Route::post('campaign/new/geolocation', 'LocationController@geo_location_new');
         Route::get('campaign/geolocation', 'LocationController@geo_location_get');
         Route::post('user/rating', 'UserController@submitUserRating');

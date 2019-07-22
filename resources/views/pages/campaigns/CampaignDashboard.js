@@ -94,7 +94,7 @@ export default class CampaignDashboard extends Component {
                     var returnUser = user,
                         distance = parseFloat(user.distance_traveled),
                         totalCost = 0;
-            
+
                     if(distance >= basicPayKm) {
                         var perKm = Math.floor(distance / addPayKm),
                             totalCost = (perKm * addPay) + basicPayKm;
@@ -102,7 +102,7 @@ export default class CampaignDashboard extends Component {
 
                     var filteredRating = userRating.filter(rate => rate.user_id == user.user_id),
                         arrayRates = userRating.filter(rate => rate.user_id == user.user_id).map(r => {return r.rate;});
-                        
+
                     returnUser.rate = filteredRating.length !== 0 ? arrayRates.reduce((a,b) => a + b) / arrayRates.length : null;
                     returnUser.totalCost = totalCost.toFixed(2);
                     return returnUser;
@@ -144,7 +144,7 @@ export default class CampaignDashboard extends Component {
         userData.map(data => {
             var distance = parseFloat(data.distance_traveled);
             totalKm += distance;
-            
+
             if(distance >= basicPayKm) {
                 var perKm = Math.floor((distance - basicPayKm) / addPayKm);
                 basicCost += basicPay;
@@ -165,7 +165,7 @@ export default class CampaignDashboard extends Component {
     // modal functions >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     userModalToggle = () => {
         var {userData} = this.state;
-        
+
         userData.sort((a, b) => { // ascending
             return parseFloat(a.id) - parseFloat(b.id);
         });
@@ -262,9 +262,9 @@ export default class CampaignDashboard extends Component {
             modalUserData = userData.filter(m => m.name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1);
             var paginationLength = Math.ceil(modalUserData.length / this.state.tableRowLength);
         }
-        
+
         this.setState({
-            currentPage: 0,
+            currentPage: 0,[]
             modalUserData: modalUserData,
             paginationLength: paginationLength
         });
@@ -356,7 +356,7 @@ export default class CampaignDashboard extends Component {
                     ((hour - 12) < 10 ? '0' + (hour - 12).toString() : (hour - 12)) + ':' + min + ' PM'
                 )
             );
-    
+
         if(timeInclude) {
             return time + ' - ' + months[month] + '. ' + date + ', ' + year;
         } else {
@@ -410,7 +410,7 @@ export default class CampaignDashboard extends Component {
                 primaryTransparent: 'rgba(68, 159, 238, .8)',
                 purple: 'rgb(153, 102, 255)',
                 grey: 'rgb(201, 203, 207)',
-        
+
                 primaryShade1: 'rgb(68, 159, 238)',
                 primaryShade2: 'rgb(23, 139, 234)',
                 primaryShade3: 'rgb(14, 117, 202)',
@@ -471,7 +471,7 @@ export default class CampaignDashboard extends Component {
                     }
                 }
             };
-            
+
         if(this.state.loaderShow) {
             return <Loader type="puff" />;
         } else {
@@ -589,7 +589,7 @@ export default class CampaignDashboard extends Component {
                                                             {this.numberWithCommas(user.totalCost)}
                                                         </td>
                                                     </tr>
-                                                ) : null   
+                                                ) : null
                                             )
                                         ) : (
                                             <tr>
@@ -673,7 +673,7 @@ export default class CampaignDashboard extends Component {
                                                     src={user.url ? user.url : `/images/default_avatar.png`}
                                                 />
                                             </Col>
-                                            
+
                                             <Col
                                                 xl={7}
                                                 className="text-center text-xl-left p-1"
@@ -695,7 +695,7 @@ export default class CampaignDashboard extends Component {
                                             >
                                                 <label className="text-muted mb-0">Rating</label>
                                             </Col>
-                                            
+
                                             <Col
                                                 xl={8}
                                                 className="text-center text-xl-left pb-1"
@@ -724,7 +724,7 @@ export default class CampaignDashboard extends Component {
                                             >
                                                 <label className="text-muted mb-0 mt-1">Comment</label>
                                             </Col>
-                                            
+
                                             <Col
                                                 xl={7}
                                                 className="text-center text-xl-left pb-1"
@@ -793,7 +793,7 @@ export default class CampaignDashboard extends Component {
 
                                 <Col
                                     xl={6}
-                                >          
+                                >
                                     {/* vehicle information */}
                                     <strong className="cds-card-header cds-campaign-underline">VEHICLE INFORMATION</strong>
 
@@ -810,7 +810,7 @@ export default class CampaignDashboard extends Component {
                                                 </CardBody>
                                             </Card>
                                         </Col>
-                                        
+
                                         <Col
                                             xl={4}
                                         >
@@ -827,7 +827,7 @@ export default class CampaignDashboard extends Component {
                                                 </CardBody>
                                             </Card>
                                         </Col>
-                                        
+
                                         <Col
                                             xl={4}
                                         >
@@ -854,7 +854,7 @@ export default class CampaignDashboard extends Component {
                                                 <small className="text-muted">in {this.state.campaign.pay_basic_km + 'km'}</small>
                                             </div>
                                         </Col>
-                                        
+
                                         <Col xl={6}>
                                             <div className="cds-campaign-underline-blue">
                                                 <strong className="cds-card-header">ADDITIONAL PAY</strong>
@@ -889,7 +889,7 @@ export default class CampaignDashboard extends Component {
                                         </div>
                                     </div>
                                 </Col>
-                                
+
                                 <Col
                                     xl={4}
                                 >
@@ -902,7 +902,7 @@ export default class CampaignDashboard extends Component {
                                         </div>
                                     </div>
                                 </Col>
-                                
+
                                 <Col
                                     xl={4}
                                 >
@@ -918,7 +918,7 @@ export default class CampaignDashboard extends Component {
                             </Row>
                         </CardBody>
                     </Card>
-                    
+
                     {/* graph */}
                     <Row>
                         <Col md={8} sm={12}>

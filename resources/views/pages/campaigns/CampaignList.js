@@ -1,4 +1,4 @@
-   import React, { Component } from 'react';
+import React, { Component } from 'react';
 import {
 	Card,
 	CardHeader,
@@ -14,21 +14,22 @@ const vtype = [
 	require('../../../img/car_mid.icon.png'),
 	require('../../../img/car_large_icon.png'),
 	require('../../../img/motorcycle_icon.png')
-]; 
+];
+
 const sampleimg = require('../../../img/placeholder1.png');
 
 export default class CampaignList extends Component {
-	constructor(props){
+	constructor(props) {
 		super(props);
 		this.state = {
 			loader: true,
-			campaigns:[],
-			firstPage:'',
-			lastPage:'',
-			currentPage:''
+			campaigns: [],
+			firstPage: '',
+			lastPage: '',
+			currentPage: ''
 		}
 	}
-	componentWillMount(){
+	componentWillMount() {
 		this.LoadCampaign();
 	}
 
@@ -73,7 +74,7 @@ export default class CampaignList extends Component {
                     ((hour - 12) < 10 ? '0' + (hour - 12).toString() : (hour - 12)) + ':' + min + ' PM'
                 )
             );
-    
+
         if(timeInclude) {
             return months[month] + '. ' + date + ', ' + year + ' - ' +time ;
         } else {
@@ -82,73 +83,74 @@ export default class CampaignList extends Component {
     }
 	render() {
 		if(this.state.loader) {
-            return <Loader type="puff" />;
-		} else {
-			return (
-				<div>
-					<Card className="mycampaigns_card">
-					{/* <CardHeader>List</CardHeader> */}
-					<CardBody>
-						<Table hover id="mycampaigns">
-						<thead>
-							<tr>
-							<th>Campaign</th>
-							<th>Date</th>
-							<th>Vehicle</th>
-							<th>Location</th>
-							<th>Slots</th>
-							<th>Basic Pay</th>
-							<th>Additional Pay</th>
-							<th>Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{this.state.campaigns.map((campaign,id) =>
-								<tr key={id}>
-									<td>
-										<div className="d-flex flex-row justify-content-start align-items-center flex-wrap">
-											<div className="campaign-img"><img src={sampleimg}></img></div>
-											<p>{campaign.name}</p>
-										</div>
-									</td>
-									<td>{this.formatDate(campaign.created_at,true)}</td>
-									<td>
-										<div className="d-flex flex-row justify-content-start align-items-center flex-wrap">
-											<div className="vehicle-type"><img  src={vtype[campaign.vehicle_classification]}></img></div>
-											<p>{campaign.vehicle_type}</p>
-										{/* <p>{campaign.vehicle_stickerArea}</p> */}
-										</div>
-									</td>
-									<td>{campaign.location_id}</td>
-									<td>{campaign.slots}</td>
-									<td>
-										<div className="d-flex flex-column">
-											<p><strong>Cost:</strong> ‎₱ {campaign.pay_basic}</p>
-											<p><strong>Prerequisite:</strong> {campaign.pay_basic_km} km</p>
-										</div>
-									</td>
-									<td>
-										<div className="d-flex flex-column">
-											<p><strong>Cost:</strong> ‎₱ {campaign.pay_additional}</p>
-											<p><strong>Prerequisite:</strong> {campaign.pay_additional_km} km</p>
-										</div>
-									</td>
-									<td>
-										<div className="d-flex flex-column">
-											<button className="btn btn-success" onClick={e => this.props.history.push(`/campaign/dashboard/${campaign.id}`)}>View</button>
-											<button className="btn btn-primary">Update</button>
-											<button className="btn btn-danger">Remove</button>
-										</div>
-									</td>
-								</tr>
-							)}
-						</tbody>
-						</Table>
-					</CardBody>
-					</Card>
-
-				</div>
-			);
+      return <Loader type="puff" />;
 		}
+
+		return (
+			<div>
+				<Card className="mycampaigns_card">
+				{/* <CardHeader>List</CardHeader> */}
+				<CardBody>
+					<Table hover id="mycampaigns">
+					<thead>
+						<tr>
+						<th>Campaign</th>
+						<th>Date</th>
+						<th>Vehicle</th>
+						<th>Location</th>
+						<th>Slots</th>
+						<th>Basic Pay</th>
+						<th>Additional Pay</th>
+						<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						{this.state.campaigns.map((campaign, id) => (
+							<tr key={id}>
+								<td>
+									<div className="d-flex flex-row justify-content-start align-items-center flex-wrap">
+										<div className="campaign-img"><img src={sampleimg}></img></div>
+										<p>{campaign.name}</p>
+									</div>
+								</td>
+								<td>{this.formatDate(campaign.created_at,true)}</td>
+								<td>
+									<div className="d-flex flex-row justify-content-start align-items-center flex-wrap">
+										<div className="vehicle-type"><img  src={vtype[campaign.vehicle_classification]}></img></div>
+										<p>{campaign.vehicle_type}</p>
+									{/* <p>{campaign.vehicle_stickerArea}</p> */}
+									</div>
+								</td>
+								<td>{campaign.location_id}</td>
+								<td>{campaign.slots}</td>
+								<td>
+									<div className="d-flex flex-column">
+										<p><strong>Cost:</strong> ‎₱ {campaign.pay_basic}</p>
+										<p><strong>Prerequisite:</strong> {campaign.pay_basic_km} km</p>
+									</div>
+								</td>
+								<td>
+									<div className="d-flex flex-column">
+										<p><strong>Cost:</strong> ‎₱ {campaign.pay_additional}</p>
+										<p><strong>Prerequisite:</strong> {campaign.pay_additional_km} km</p>
+									</div>
+								</td>
+								<td>
+									<div className="d-flex flex-column">
+										<button className="btn btn-success" onClick={e => this.props.history.push(`/campaign/dashboard/${campaign.id}`)}>View</button>
+										<button className="btn btn-primary">Update</button>
+										<button className="btn btn-danger">Remove</button>
+									</div>
+								</td>
+							</tr>
+						)}
+					</tbody>
+					</Table>
+				</CardBody>
+				</Card>
+
+			</div>
+		);
 	}
+
 }

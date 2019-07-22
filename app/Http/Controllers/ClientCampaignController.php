@@ -18,7 +18,7 @@ class ClientCampaignController extends Controller
 		$this->middleware('auth:api');
 	}
 
-	public function campaigns(Request $request){
+	public function browse(Request $request){
 		if($request->rec){
 			$campaigns = ClientCampaign::inRandomOrder()->limit(5)->get();
 		} else {
@@ -72,7 +72,7 @@ class ClientCampaignController extends Controller
 		}
 
 	}
-	
+
 	public function campaign_show(Request $request, $id) {
 		$campaign = ClientCampaign::where('client_campaign.id', '=', $id)
 															->leftJoin('media as m', 'm.id', 'client_campaign.media_id')

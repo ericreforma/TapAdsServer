@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class UserTrip extends Model
 {
     protected $table = 'user_trip';
+    public $timestamps = false;
+
     public function client(){
       return $this->belongsTo('App\Client');
     }
@@ -26,6 +28,4 @@ class UserTrip extends Model
     public function tripMap(){
       return $this->hasMany('App\UserTripMap');
     }
-
-
 }
