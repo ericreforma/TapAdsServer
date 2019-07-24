@@ -7,6 +7,7 @@ import avatar1 from '../../img/avatar1.png';
 import nav from '../nav';
 import routes from '../route';
 import ContextProviders from '../components/utilities/ContextProviders';
+import ClientNotification from '../functions/notifications/ClientNotification.js';
 
 const MOBILE_SIZE = 992;
 
@@ -138,7 +139,8 @@ function HeaderNav() {
           </DropdownItem>
         </DropdownMenu>
       </UncontrolledDropdown>
-      <UncontrolledDropdown nav inNavbar>
+      <ClientNotification></ClientNotification>
+      {/* <UncontrolledDropdown nav inNavbar>
         <DropdownToggle nav>
           <Avatar size="small" color="blue" initials="JS" />
         </DropdownToggle>
@@ -148,7 +150,7 @@ function HeaderNav() {
           <DropdownItem divider />
           <DropdownItem>Reset</DropdownItem>
         </DropdownMenu>
-      </UncontrolledDropdown>
+      </UncontrolledDropdown> */}
     </React.Fragment>
   );
 }

@@ -3,106 +3,17 @@
 @import 'variables';
 
 // scss every section
-@import 'campaign-list';
+@import 'campaign/_campaign-list';
 @import 'campaign/_campaign';
 @import 'campaign/_campaign_dashboard';
+@import 'campaign/_campaign_requests';
+@import 'campaign/_campaign_notifications';
 @import 'user/viewprofile';
-
+@import 'auth/_client_login';
+@import 'auth/_client_signup';
 body{
     height:100vh;
 }
 #app{
     height:100%;
-    .login-container{
-        height:100%;
-        .login-form{
-            width: 100%;
-            padding: 30px;
-            -webkit-box-shadow: 1px 1px 30px 0px #ADADAD;
-            box-shadow: 1px 1px 30px 0px #ADADAD;
-            .app-logo{
-                width:80%;
-                height: auto;
-                margin-bottom: 20px;
-            }
-            label, input{
-                font-family: $avenir-light;
-                color: black;
-            }
-            input{
-                border: 1px solid $blue;
-                border-radius: 0px;
-            }
-            span{
-                &.input-group-text{
-                    border: 1px solid $blue;
-                    border-right: 0px;
-                    border-radius: 0px;
-                    //border-top-right-radius: 0px!important;
-                    //border-bottom-right-radius: 0px!important;
-                    i{
-                        color:$blue;
-                    }
-                }
-                &.error{
-                    color:#de1828;
-                    margin-bottom: 10px;
-                    display: block;
-                }
-            }
-            button{
-                display:block;
-                margin:auto;
-                margin-bottom:20px;
-                font-family: $avenir-roman;
-                background: none;
-                background-color: $blue;
-                color:white;
-                padding:5px 20px;
-                &:hover,&:active{
-                    background: none!important;
-                    background-color: $light-blue!important;
-                }
-            }
-        }
-    }
-    .signup-container{
-        height:100%;
-        margin-top: 20px;
-        margin-bottom: 20px;
-        .signup-form{
-            label, input{
-                font-family: $avenir-light;
-                color: black;
-            }
-            input{
-                border: 1px solid $blue;
-                border-radius: 0px;
-            }
-            span{
-                color:#de1828;
-                margin-bottom: 10px;
-                display: block;
-            }
-            .app-logo{
-                width:80%;
-                height: auto;
-                margin-bottom: 20px;
-            }
-            button{
-                display:block;
-                margin:auto;
-                margin-bottom:20px;
-                font-family: $avenir-roman;
-                background: none;
-                background-color: $blue;
-                color:white;
-                padding:5px 20px;
-                &:hover,&:active{
-                    background: none!important;
-                    background-color: $light-blue!important;
-                }
-            }
-        }
-    }
 }

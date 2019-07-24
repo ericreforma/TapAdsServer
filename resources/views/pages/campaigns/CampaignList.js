@@ -1,11 +1,5 @@
-   import React, { Component } from 'react';
-import {
-	Card,
-	CardHeader,
-	CardBody,
-	Table,
-	Button
-} from 'reactstrap';
+import React, { Component } from 'react';
+import { Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import { Loader } from '../../components';
 
@@ -16,6 +10,8 @@ const vtype = [
 	require('../../../img/motorcycle_icon.png')
 ]; 
 const sampleimg = require('../../../img/placeholder1.png');
+// configs for api url, apiKey, etc..
+import config from '../../config';
 
 export default class CampaignList extends Component {
 	constructor(props){
@@ -23,6 +19,7 @@ export default class CampaignList extends Component {
 		this.state = {
 			loader: true,
 			campaigns:[],
+			locations:[],
 			firstPage:'',
 			lastPage:'',
 			currentPage:''
@@ -41,20 +38,30 @@ export default class CampaignList extends Component {
 			}
 		}
 
-		axios.get('/api/client/campaigns',data).then( (res) => {
+		axios.get(config.api.campaignList,data).then( (res) => {
 			this.setState({
-				campaigns:res.data
+				campaigns:res.data.campaigns,
+				locations:res.data.locations
 			});
-			const script = document.createElement("script");
-			const scriptText = document.createTextNode("$('#mycampaigns').DataTable({responsive: true});");
-			script.appendChild(scriptText);
-			document.body.appendChild(script);
+			
 			this.setState({loader: false});
         }).catch(error => {
 			setTimeout(this.LoadCampaign, 1000);
         })
 	}
-
+	getLocation = (index) =>{
+		let Locations = this.state.locations;
+		let location_disp = "";
+		for(var i=0; i < index.length; i++){
+			Locations.filter(function(e) {
+				if( e.location_index == index[i]){
+					location_disp = location_disp + e.location_name.toString() + ', ';
+				}
+			});
+		}
+		location_disp = location_disp.slice(0, -2);
+		return location_disp;
+	}
 	formatDate = (dates, timeInclude) => {
         var d = dates.split(' ')[0],
             time = dates.split(' ')[1],
@@ -75,9 +82,9 @@ export default class CampaignList extends Component {
             );
     
         if(timeInclude) {
-            return months[month] + '. ' + date + ', ' + year + ' - ' +time ;
+            return months[month-1] + '. ' + date + ', ' + year + ' - ' +time ;
         } else {
-            return months[month] + '. ' + date + ', ' + year;
+            return months[month-1] + '. ' + date + ', ' + year;
         }
     }
 	render() {
@@ -85,30 +92,29 @@ export default class CampaignList extends Component {
             return <Loader type="puff" />;
 		} else {
 			return (
-				<div>
 					<Card className="mycampaigns_card">
 					{/* <CardHeader>List</CardHeader> */}
 					<CardBody>
 						<Table hover id="mycampaigns">
 						<thead>
 							<tr>
-							<th>Campaign</th>
-							<th>Date</th>
-							<th>Vehicle</th>
-							<th>Location</th>
-							<th>Slots</th>
-							<th>Basic Pay</th>
-							<th>Additional Pay</th>
-							<th>Actions</th>
+								<th>Campaign</th>
+								<th>Date</th>
+								<th>Vehicle</th>
+								<th>Location</th>
+								<th>Slots Used</th>
+								<th>Basic Pay</th>
+								<th>Additional Pay</th>
+								<th>Actions</th>
 							</tr>
 						</thead>
 						<tbody>
 							{this.state.campaigns.map((campaign,id) =>
 								<tr key={id}>
 									<td>
-										<div className="d-flex flex-row justify-content-start align-items-center flex-wrap">
+										<div className="d-flex flex-row justify-content-start align-items-center campaign-details">
 											<div className="campaign-img"><img src={sampleimg}></img></div>
-											<p>{campaign.name}</p>
+											<p>{campaign.campaign_name}</p>
 										</div>
 									</td>
 									<td>{this.formatDate(campaign.created_at,true)}</td>
@@ -119,8 +125,8 @@ export default class CampaignList extends Component {
 										{/* <p>{campaign.vehicle_stickerArea}</p> */}
 										</div>
 									</td>
-									<td>{campaign.location_id}</td>
-									<td>{campaign.slots}</td>
+									<td>{this.getLocation(campaign.location_id)}</td>
+									<td>{campaign.slots_used+" of "+campaign.slots_total} </td>
 									<td>
 										<div className="d-flex flex-column">
 											<p><strong>Cost:</strong> ‎₱ {campaign.pay_basic}</p>
@@ -146,8 +152,6 @@ export default class CampaignList extends Component {
 						</Table>
 					</CardBody>
 					</Card>
-
-				</div>
 			);
 		}
 	}

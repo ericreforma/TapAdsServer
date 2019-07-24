@@ -19,8 +19,10 @@ $teal: #4dc0b5;
 $cyan: #6cb2eb;
 
 //custom colors
-$blue:#0079ff;
-$light-blue:#00cfff;
+// $blue:#0079ff;
+$blue:#37abb4;
+// $light-blue:#00cfff;
+$light-blue:#7ed2bb;
 
 //palette colors
 $palette_blue: #37abb4;
@@ -51,3 +53,11 @@ $palette_yellow: #f0ae48;
 $avenir-heavy: 'Avenir LT Std 85 Heavy';
 $avenir-light: 'Avenir LT Std 35 Light';
 $avenir-roman: 'Avenir LT Std 55 Roman';
+
+@mixin clearfix {
+    &::after{
+        content: "";
+        clear: both;
+        display: table;
+    }
+}

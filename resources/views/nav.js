@@ -8,15 +8,22 @@ export default {
     {
       name: 'Campaigns',
       //url: '/campaigns',
-      icon: 'Star',
+      icon: 'Bookmark',
       children:[
         {
           name:'Campaign List',
           url: '/campaigns/list',
+          icon: 'List',
         },
         {
           name:'Create Campaign',
           url: '/campaigns/create',
+          icon: 'PlusCircle',
+        },
+        {
+          name:'User Requests',
+          url: '/campaign/requests/',
+          icon: 'Users',
         }
       ]
     },

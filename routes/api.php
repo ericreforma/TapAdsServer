@@ -47,7 +47,9 @@ Route::middleware('json.response')->group(function(){
       Route::middleware('auth:web_api')->group(function(){
         
         Route::get('/','ClientController@details');
-        Route::get('/campaigns','ClientController@getMyCampaigns');
+        Route::get('/campaigns','ClientCampaignController@getMyCampaigns'); // >>>> campaign list
+        Route::get('/campaigns/requests','ClientCampaignController@getMyCampaignRequests'); // >>>> campaign list
+        Route::post('/campaigns/requests','ClientCampaignController@UserStatusCampaignUpdate'); // >>>> campaign request update
         Route::get('logout', 'UserController@logout')->name('user_logout');
 
         Route::post('campaign/create', 'ClientCampaignController@campaign_store'); // >>>> create campaign
@@ -58,6 +60,8 @@ Route::middleware('json.response')->group(function(){
         Route::post('user/rating', 'UserController@submitUserRating');
         Route::get('user/{id}/profile', 'UserController@viewProfile');
 
+        //Notifications
+        Route::get('/notifications', 'ClientController@getMyNotifications'); // >>>> get unseen user campaign status
       });
   });
 });
