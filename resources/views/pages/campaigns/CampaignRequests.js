@@ -245,7 +245,15 @@ export default class CampaignRequests extends Component {
                 } 
             })
         }else{//timestamp
-
+            showRequests.sort((a,b) => {
+                a = Date.parse(a.timestamp);
+                b = Date.parse(b.timestamp);
+                if(order=='asc'){
+                    return a - b;
+                }else{
+                    return b - a;
+                } 
+            })
         }
         this.setState({
             showRequests
