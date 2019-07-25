@@ -7,6 +7,7 @@ import avatar1 from '../../img/avatar1.png';
 import nav from '../nav';
 import routes from '../route';
 import ContextProviders from '../components/utilities/ContextProviders';
+import '../../css/styles.css';
 
 const MOBILE_SIZE = 992;
 
@@ -69,7 +70,7 @@ export default class Dashboard extends Component {
               toggleSidebar={this.toggleSideCollapse}
               {...this.props}
             />
-            
+
             <Page>
               <Header
                 toggleSidebar={this.toggleSideCollapse}

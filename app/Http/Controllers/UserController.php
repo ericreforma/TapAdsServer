@@ -14,6 +14,7 @@ use App\UserRating;
 use App\ClientCampaign;
 use App\UserTrip;
 use App\UserTripMap;
+use App\UserCurrentLocation;
 
 use DB;
 use Carbon\Carbon;
@@ -221,17 +222,34 @@ class UserController extends Controller
   }
 
   public function trip_map_add(Request $request){
+    $tripmap = json_decode($request->trip_map, true);
+
+    return $tripmap['user_id'];
+    $userLocation = UserCurrentLocation::firstOrCreate(
+      ['user_trip_id' => $tripmap['user_trip_id']],
+      [
+        'campaign_id' => $tripmap['campaign_id'],
+        'user_id' => $tripmap['user_id'],
+        'campaign_id' => $tripmap['campaign_id'],
+        'user_campaign_id' => $tripmap['user_campaign_id'],
+        'latitude' => $tripmap['latitude'],
+        'longitude' => $tripmap['longitude'],
+        'speed' => $tripmap['speed'],
+        'timestamp' => Carbon::createFromTimestamp($tripmap['timestamp'])->format('Y-m-d H:i:s'),
+      ]
+    );
+
     $trip_map = new UserTripMap;
-    $trip_map->user_trip_id = $request->input('trip_map.user_trip_id');
-    $trip_map->campaign_id = $request->input('trip_map.campaign_id');
-    $trip_map->user_id = $request->input('trip_map.user_id');
-    $trip_map->user_campaign_id = $request->input('trip_map.user_campaign_id');
-    $trip_map->client_id = $request->input('trip_map.client_id');
-    $trip_map->counted = $request->input('trip_map.counted');
-    $trip_map->latitude = $request->input('trip_map.latitude');
-    $trip_map->longitude = $request->input('trip_map.longitude');
-    $trip_map->distance = $request->input('trip_map.distance');
-    $trip_map->speed = $request->input('trip_map.speed');
+    $trip_map->user_trip_id = $tripmap['user_trip_id'];
+    $trip_map->campaign_id = $tripmap['campaign_id'];
+    $trip_map->user_id = $tripmap['user_id'];
+    $trip_map->user_campaign_id = $tripmap['user_campaign_id'];
+    $trip_map->client_id = $tripmap['client_id'];
+    $trip_map->counted = $tripmap['counted'];
+    $trip_map->latitude = $tripmap['latitude'];
+    $trip_map->longitude = $tripmap['longitude'];
+    $trip_map->distance = $tripmap['distance'];
+    $trip_map->speed = $tripmap['speed'];
 
     $trip_map->save();
     return response()->json(1);

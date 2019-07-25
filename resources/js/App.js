@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Route, Switch, Link, Redirect } from 'react-router-dom';
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import DashboardLayout from '../views/layout/Dashboard';
 import LoginLayout from '../views/pages/auth/Login';
 import SignupLayout from '../views/pages/auth/Signup';
@@ -7,10 +7,11 @@ import SignupLayout from '../views/pages/auth/Signup';
 
 export default function App() {
 	return (
+		/* <BrowserRouter basename={"/tapads/public"}> */
 		<BrowserRouter>
 			<Switch>
-				<Route path="/login" component={LoginLayout} />
-				<Route path="/signup" component={SignupLayout} />
+				<Route path={`/login`} component={LoginLayout} />
+				<Route path={`/signup`} component={SignupLayout} />
 				{/* <Route component={DashboardLayout} /> */}
 				<PrivateRoute component={DashboardLayout} />
 			</Switch>

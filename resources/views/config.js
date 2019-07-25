@@ -1,16 +1,19 @@
+const homepage = '';
+
 export default {
-    api: {
-        createCampaign: '/api/client/campaign/create',
-        createGeoLocation: '/api/client/campaign/new/geolocation',
-        
-        campaignDashboard: '/api/client/campaign/dashboard/',
-        getGeoLocation: '/api/client/campaign/geolocation',
-        
-        submitRateUser: '/api/client/user/rating',
-        
-        userProfileView: '/api/client/user/:id/profile',
-    },
-    apiKey: {
-        googleApiKey: 'AIzaSyBwXTceRsEryqeySF0HtM66cVwwWa9rW0w'
-    }
+  api: {
+      campaignlist: `${homepage}/api/client/campaigns`,
+      createCampaign: `${homepage}/api/client/campaign/create`,
+      createGeoLocation: `${homepage}/api/client/campaign/new/geolocation`,
+      campaignDashboard: `${homepage}/api/client/campaign/dashboard/`,
+      getGeoLocation: `${homepage}/api/client/campaign/geolocation`,
+      submitRateUser: `${homepage}/api/client/user/rating`,
+      userProfileView: `${homepage}/api/client/user/:id/profile`,
+      login: `${homepage}/api/client/login`,
+      getLiveLocation: `${homepage}/api/client/campaign/getLiveLocation`,
+  },
+  apiKey: {
+      googleApiKey: 'AIzaSyBwXTceRsEryqeySF0HtM66cVwwWa9rW0w'
+  },
+  homepage
 };

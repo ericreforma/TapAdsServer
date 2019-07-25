@@ -17,6 +17,10 @@ export default {
         {
           name:'Create Campaign',
           url: '/campaigns/create',
+        },
+        {
+          name:'Live Map',
+          url: '/campaigns/livemap',
         }
       ]
     },

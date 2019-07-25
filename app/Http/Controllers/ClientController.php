@@ -9,6 +9,7 @@ use App\Client;
 use App\ClientCampaign;
 use App\ClientCampaignLocation;
 use App\UserCampaign;
+use App\UserTripMap;
 use Carbon\Carbon;
 use Hash;
 
@@ -40,7 +41,6 @@ class ClientController extends Controller
 		return response()->json($client);
 	}
 
-
 	public function logout (Request $request) {
 
 		$token = $request->user()->token();
@@ -56,7 +56,7 @@ class ClientController extends Controller
 		// DB::table('client_campaign')->where('client_campaign.client_id',$client_id)
 		// ->join('client_campaign_location', 'client_campaign.location_id', '=', 'friends.friend_id');
 
-		$mycampaigns = ClientCampaign::where('client_id',$client_id)
+		$mycampaigns = ClientCampaign::where('client_id',1)
 		// ->select('name','created_at','location','slots')
 		->get();
 
@@ -75,6 +75,7 @@ class ClientController extends Controller
 					$mc->vehicle_type = 'Mixed';
 				break;
 			}
+			
 			$location="";
 			$loc_arr = $mc->location_id;
 			foreach ($loc_arr as $locid) {
@@ -90,5 +91,16 @@ class ClientController extends Controller
 		$mycampaigns->toArray();
 		return response()->json($mycampaigns);
 	}
+
+	public function campaignGetLiveMap(Request $request){
+		$client = $request->user();
+		$campaign = ClientCampaign::find($request->campaign_id);
+
+		$userTrips = UserTripMap::select('latitude','longitude')
+											->get();
+		return $userTrips;
+	}
+
+
 
 }

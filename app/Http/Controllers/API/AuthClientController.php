@@ -20,7 +20,7 @@ class AuthClientController extends Controller
 		//return response()->json(['account_needed' => 'login'], 401);
 	}
 
-    public function login(Request $request){
+  public function login(Request $request){
 
 		$credentials = [
 			'email' => $request->email,
@@ -34,10 +34,10 @@ class AuthClientController extends Controller
 			//return response()->json(['error' => 'UnAuthorised'], 401);
 			return response()->json(['error' => 'UnAuthorised']);
 		}
-    }
+  }
 
-    
-    public function register (Request $request){
+
+  public function register (Request $request){
 		$validator = Validator::make($request->all(),[
 			'name' => 'required|string|max:255',
 			'business_name' => 'required|string|max:255',
@@ -65,5 +65,5 @@ class AuthClientController extends Controller
 		]);
 		$token = $user->createToken('tapads')->accessToken;
 		return response()->json(['token' => $token], 200);
-    }
+  }
 }

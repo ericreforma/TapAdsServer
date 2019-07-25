@@ -8,6 +8,7 @@ import {
 } from 'reactstrap';
 import axios from 'axios';
 import { Loader } from '../../components';
+import config from '../../config';
 
 const vtype = [
 	require('../../../img/car_small_icon.png'),
@@ -42,7 +43,7 @@ export default class CampaignList extends Component {
 			}
 		}
 
-		axios.get('/api/client/campaigns',data).then( (res) => {
+		axios.get(config.api.campaignlist,data).then( (res) => {
 			this.setState({
 				campaigns:res.data
 			});
@@ -105,7 +106,7 @@ export default class CampaignList extends Component {
 						</tr>
 					</thead>
 					<tbody>
-						{this.state.campaigns.map((campaign, id) => (
+						{this.state.campaigns.map((campaign, id) =>(
 							<tr key={id}>
 								<td>
 									<div className="d-flex flex-row justify-content-start align-items-center flex-wrap">
@@ -118,7 +119,6 @@ export default class CampaignList extends Component {
 									<div className="d-flex flex-row justify-content-start align-items-center flex-wrap">
 										<div className="vehicle-type"><img  src={vtype[campaign.vehicle_classification]}></img></div>
 										<p>{campaign.vehicle_type}</p>
-									{/* <p>{campaign.vehicle_stickerArea}</p> */}
 									</div>
 								</td>
 								<td>{campaign.location_id}</td>
@@ -142,8 +142,7 @@ export default class CampaignList extends Component {
 										<button className="btn btn-danger">Remove</button>
 									</div>
 								</td>
-							</tr>
-						)}
+							</tr>))}
 					</tbody>
 					</Table>
 				</CardBody>

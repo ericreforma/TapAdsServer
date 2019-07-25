@@ -14456,6 +14456,15 @@ img.img-circle {
   margin-bottom: 0px;
 }
 
+.car {
+  width: 20px;
+  height: 20px;
+  background-color: #2a7ddb;
+  border: 2px solid #fff;
+  border-radius: 100%;
+  box-shadow: 0px 1px 7px #1c1c1c;
+}
+
 body {
   height: 100vh;
 }

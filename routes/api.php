@@ -18,6 +18,7 @@ Route::middleware('json.response')->group(function(){
   // USER
   Route::prefix('user')->group(function(){
 
+
     Route::post('login', 'API\AuthUserController@login')->name('user_login');
     Route::post('register', 'API\AuthUserController@register')->name('user_register');
 
@@ -45,8 +46,8 @@ Route::middleware('json.response')->group(function(){
   Route::prefix('client')->group(function(){
 
       Route::get('home', 'API\AuthClientController@index');
-      Route::post('login', 'API\AuthClientController@login');
-      Route::post('register', 'API\AuthClientController@register');
+      Route::post('/login', 'API\AuthClientController@login');
+      Route::post('/register', 'API\AuthClientController@register');
 
       Route::middleware('auth:web_api')->group(function(){
 
@@ -61,6 +62,8 @@ Route::middleware('json.response')->group(function(){
         Route::get('campaign/geolocation', 'LocationController@geo_location_get');
         Route::post('user/rating', 'UserController@submitUserRating');
         Route::get('user/{id}/profile', 'UserController@viewProfile');
+
+        Route::get('campaign/getLiveLocation/{campaign_id}', 'ClientController@campaignGetLiveMap');
 
       });
   });

@@ -264,7 +264,7 @@ export default class CampaignDashboard extends Component {
         }
 
         this.setState({
-            currentPage: 0,[]
+            currentPage: 0,
             modalUserData: modalUserData,
             paginationLength: paginationLength
         });
