@@ -33,6 +33,12 @@ Route::middleware('json.response')->group(function(){
       // Campaigns
       Route::get('/campaign/browse','ClientCampaignController@campaigns');
 
+      
+      Route::prefix('websocket')->group(function() {
+        Route::get('getUserData', 'UserController@websocketUserData');
+        Route::post('message/sent', 'UserController@websocketMessageSent');
+      });
+
     });
 
   });
@@ -47,17 +53,28 @@ Route::middleware('json.response')->group(function(){
       Route::middleware('auth:web_api')->group(function(){
         
         Route::get('/','ClientController@details');
-        Route::get('/campaigns','ClientController@getMyCampaigns');
         Route::get('logout', 'UserController@logout')->name('user_logout');
+
+        Route::get('/campaigns','ClientController@getMyCampaigns');
 
         Route::post('campaign/create', 'ClientCampaignController@campaign_store'); // >>>> create campaign
         Route::get('campaign/dashboard/{id}', 'ClientCampaignController@campaign_show'); // >>>> campaign details for dashboard
-  
-        Route::post('campaign/new/geolocation', 'LocationController@geo_location_new');
-        Route::get('campaign/geolocation', 'LocationController@geo_location_get');
+        Route::post('campaign/new/geolocation', 'LocationController@geo_location_new'); // >>>> create custom geo location
+        Route::get('campaign/geolocation', 'LocationController@geo_location_get'); // >>>> get all geo location
+ 
+        Route::get('user/chats', 'ClientChatController@getUsersChat');
+        Route::get('user/convo/{id}', 'ClientChatController@getUsersConvo');
+        Route::get('chat/notif/update/{id}', 'ClientChatController@updateNotif');
+
         Route::post('user/rating', 'UserController@submitUserRating');
         Route::get('user/{id}/profile', 'UserController@viewProfile');
 
+        Route::prefix('websocket')->group(function() {
+          Route::get('getClientData', 'ClientController@websocketClientData');
+          Route::post('message/sent', 'ClientChatController@websocketMessageSent');
+        });
+
       });
+
   });
 });

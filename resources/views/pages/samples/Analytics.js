@@ -227,7 +227,7 @@ export default class AnalyticsPage extends Component {
                   }}
                 />
                 <span className="text-facebook pull-right">
-                  <i className="fa fa-facebook" /> Facebook
+                  <i className="fab fa-facebook-square" /> Facebook
                 </span>
                 <hr />
                 <Switch
@@ -237,7 +237,7 @@ export default class AnalyticsPage extends Component {
                   }}
                 />
                 <span className="text-twitter pull-right">
-                  <i className="fa fa-twitter" /> Twitter
+                  <i className="fab fa-twitter-square" /> Twitter
                 </span>
               </CardBody>
             </Card>

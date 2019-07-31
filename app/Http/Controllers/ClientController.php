@@ -90,5 +90,13 @@ class ClientController extends Controller
 		$mycampaigns->toArray();
 		return response()->json($mycampaigns);
 	}
+	
+    public function websocketClientData(Request $request) {
+        $returnData = (object)[
+            'id' => $request->user()->id
+        ];
+
+        return response()->json($returnData);
+    }
 
 }

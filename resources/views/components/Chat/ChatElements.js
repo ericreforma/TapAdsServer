@@ -27,10 +27,31 @@ function ChatDisplay({ currentUserImage, height }) {
   return (
     <div className="ChatDisplay" style={style}>
       <div className="p-a">
-        <span className="pull-left w-32 m-r-sm">
-          <img src={'.'+currentUserImage} alt="." className="w-full img-circle" />
+        <span className="float-left w-32 m-r-sm">
+          <img src={currentUserImage} alt="." className="w-full img-circle" />
         </span>
         <ChatMessage message={'Hello'} />
+      </div>
+
+      <div className="p-a text-right">
+        <span className="float-right w-32 m-l-sm">
+          <img src={currentUserImage} alt="." className="w-full img-circle" />
+        </span>
+        <ChatMessage message={'Helas fasdf asfasdas asfa d fa fasf lo'} />
+      </div>
+      
+      <div className="p-a">
+        <span className="float-left w-32 m-r-sm">
+          <img src={currentUserImage} alt="." className="w-full img-circle" />
+        </span>
+        <ChatMessage message={'Hello'} />
+      </div>
+
+      <div className="p-a text-right">
+        <span className="float-right w-32 m-l-sm">
+          <img src={currentUserImage} alt="." className="w-full img-circle" />
+        </span>
+        <ChatMessage message={'Helas fasdf asfasdas asfa d fa fasf lo'} />
       </div>
     </div>
   );
@@ -43,7 +64,7 @@ function ChatInput() {
         <input type="text" className="form-control" placeholder="Say something" />
         <span className="input-group-btn m-l-sm">
           <button className="btn bg-white b-a no-shadow" type="button">
-            <i className="fa fa-send" />
+            <i className="fa fa-paper-plane" />
             <span className="sr-only">Send Message</span>
           </button>
         </span>

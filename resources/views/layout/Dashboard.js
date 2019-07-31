@@ -18,7 +18,7 @@ export default class Dashboard extends Component {
       clientEmail:'',
       sidebarCollapsed: false,
       isMobile: window.innerWidth <= MOBILE_SIZE,
-      showChat1: true,
+      showChat1: true
     };
   }
 
@@ -98,16 +98,10 @@ export default class Dashboard extends Component {
             {/* <span className="ml-auto hidden-xs">
               Made with{' '}
               <span role="img" aria-label="taco">
-                🌮
+                🌮  
               </span>
             </span> */}
           </Footer>
-
-          {/* <Chat.Container>
-            {this.state.showChat1 && (
-              <Chat.ChatBox name="Messages" status="online" image={avatar1} close={this.closeChat} />
-            )}
-          </Chat.Container> */}
         </div>
       </ContextProviders>
     );
@@ -117,14 +111,14 @@ export default class Dashboard extends Component {
 function HeaderNav() {
   return (
     <React.Fragment>
-      <NavItem>
+      {/* <NavItem>
         <form className="form-inline">
           <input className="form-control mr-sm-1" type="search" placeholder="Search" aria-label="Search" />
           <Button type="submit" className="d-none d-sm-block">
             <i className="fa fa-search" />
           </Button>
         </form>
-      </NavItem>
+      </NavItem> */}
       <UncontrolledDropdown nav inNavbar>
         <DropdownToggle nav caret>
           New

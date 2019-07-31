@@ -22,9 +22,8 @@ import ProgressBars from './elements/ProgressBars';
 import PaginationPage from './elements/Pagination';
 import ErrorPage from './pages/samples/404';
 import { CreateCampaign, CampaignList, CampaignDashboard } from './pages/campaigns';
-import {
-  ViewProfile
-} from './pages/user';
+import { ViewProfile } from './pages/user';
+import Messages from './pages/messages/Messages';
 
 const pageList = [
   {
@@ -51,6 +50,11 @@ const pageList = [
     name: 'User Profile',
     path:'/user/profile/:id',
     component: ViewProfile
+  },
+  {
+    name: 'Messages',
+    path:'/messages',
+    component: Messages
   },
   {
     name: 'Buttons',

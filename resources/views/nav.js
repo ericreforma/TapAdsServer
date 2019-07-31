@@ -7,7 +7,6 @@ export default {
     },
     {
       name: 'Campaigns',
-      //url: '/campaigns',
       icon: 'Star',
       children:[
         {
@@ -19,6 +18,11 @@ export default {
           url: '/campaigns/create',
         }
       ]
+    },
+    {
+      name: 'Messages',
+      url: '/messages',
+      icon: 'MessageSquare'
     },
     {
       name: 'Gallery',

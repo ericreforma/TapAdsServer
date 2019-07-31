@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\User;
 use App\Client;
+use App\Chat;
 use App\Media;
 use App\UserVehiclePhoto;
 use App\Vehicle;
@@ -22,9 +23,9 @@ class UserController extends Controller
      * @return void
      */
 
-  // public function __construct()  {
-  //     $this->middleware('auth:api');
-  // }
+  public function __construct()  {
+      $this->middleware('auth:api');
+  }
 
   public function logout (Request $request) {
 
@@ -174,5 +175,32 @@ class UserController extends Controller
         'message' => 'Error occured! Try again later.'
       ]);
     }
+  }
+
+  
+	public function websocketUserData(Request $request) {
+		$returnData = (object)[
+			'id' => $request->user()->id
+		];
+
+		return response()->json($returnData);
+	}
+
+  public function websocketMessageSent(Request $request) {
+      $chat = new Chat;
+      $chat->user_id = $request->user()->id;
+      $chat->client_id = $request->uid;
+      $chat->message = $request->message;
+      $chat->type = $request->type;
+      $chat->sender = 0;
+      $chat->save();
+      $chat = Chat::find($chat->id);
+
+      return response()->json([
+          'status' => 'success',
+          'message' => [
+              'chat' => $chat
+          ]
+      ]);
   }
 }
