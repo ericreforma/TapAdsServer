@@ -13,13 +13,13 @@ import {
 	CardBody
 } from 'reactstrap';
 import GoogleMapReact from 'google-map-react';
-import axios from 'axios';
 
 //components
 import { Loader } from '../../components';
 
 // configs for api url, apiKey, etc..
 import config from '../../config';
+import { HttpRequest } from '../../services/http';
 
 export default class CreateCampainpage extends Component {
     state = {
@@ -167,25 +167,24 @@ export default class CreateCampainpage extends Component {
 	componentWillMount = () => {
 		var token =  localStorage.getItem('client_token');
 		this.setState({token});
+	}
+
+	componentDidMount = () => {
 		this.getGeoLocation();
 	}
 
 	getGeoLocation = () => {
-		axios.get(config.api.getGeoLocation, {
-			headers: {
-				Authorization: 'Bearer ' + this.state.token
-			}
-		}).then(response => {
+		HttpRequest.get(config.api.getGeoLocation).then(response => {
 			if(response.data.status == 'success') {
 				this.setState({
 					loaderShow: false,
 					defaultGeoLocations: response.data.message.geo_location
 				});
 			} else {
-				this.getGeoLocation();
+				setTimeout(() => this.getGeoLocation(), 1000);
 			}
 		}).catch(error => {
-			this.getGeoLocation();
+			setTimeout(() => this.getGeoLocation(), 1000);
 		});
 	}
 
@@ -339,12 +338,7 @@ export default class CreateCampainpage extends Component {
 							name: this.state.customLocationName
 						};
 					
-					axios.post(config.api.createGeoLocation, form, {
-						headers: {
-							Authorization: 'Bearer ' + this.state.token
-						}
-					}).then(response => {
-
+					HttpRequest.post(config.api.createGeoLocation, form).then(response => {
 						if(response.data.status == 'success') {
 							var { defaultGeoLocations } = this.state;
 
@@ -451,11 +445,7 @@ export default class CreateCampainpage extends Component {
 
 		if(proceed) {
 			this.setState({formData});
-			axios.post(config.api.createCampaign, sentForm, {
-				headers: {
-					Authorization: 'Bearer ' + this.state.token
-				}
-			}).then(response => {
+			HttpRequest.post(config.api.createCampaign, sentForm).then(response => {
 				if(response.data.status == 'success') {
 					document.getElementById('createCampaignForm').reset();
 					this.removeCurrentMarkers();

@@ -3,6 +3,8 @@ import * as Feather from 'react-feather';
 import NavBadge from './NavBadge';
 import NavSingleItem from './NavSingleItem';
 
+import HttpRequest from '../../../services/http';
+
 export default class NavDropdownItem extends Component {
   constructor(props) {
     super(props);

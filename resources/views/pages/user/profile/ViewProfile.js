@@ -36,6 +36,9 @@ export default class ViewProfile extends Component {
     componentWillMount = () => {
 		var token =  localStorage.getItem('client_token');
         this.setState({token});
+    }
+
+    componentDidMount = () => {
         this.getUserProfile();
     }
 

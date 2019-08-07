@@ -11,6 +11,7 @@ use App\ClientCampaignLocation;
 use App\UserCampaign;
 use Carbon\Carbon;
 use Hash;
+use DB;
 
 class ClientController extends Controller
 {
@@ -50,45 +51,39 @@ class ClientController extends Controller
 		return response($response, 200);
 	}
 
-	public function getMyCampaigns (Request $request){
+	public function getMyNotifications (Request $request){
 		$client_id = $request->user()->id;
 
-		// DB::table('client_campaign')->where('client_campaign.client_id',$client_id)
-		// ->join('client_campaign_location', 'client_campaign.location_id', '=', 'friends.friend_id');
-
-		$mycampaigns = ClientCampaign::where('client_id',$client_id)
-		// ->select('name','created_at','location','slots')
-		->get();
-
-		foreach($mycampaigns as $mc){
-			switch($mc->vehicle_type){
-				case 0:
-					$mc->vehicle_type = 'Private';
-				break;
-				case 1:
-					$mc->vehicle_type = 'Public';
-				break;
-				case 2:
-					$mc->vehicle_type = 'Mixed';
-				break;
-				default:
-					$mc->vehicle_type = 'Mixed';
-				break;
-			}
-			$location="";
-			$loc_arr = $mc->location_id;
-			foreach ($loc_arr as $locid) {
-				$mc->location_id=$locid;
-				$loc = ClientCampaignLocation::where('id',$locid)->select('name')->first();
-				$location .= $loc->name." , ";
-			}
-			$location = rtrim(trim($location), ',');
-			$mc->location_id=$location;
-			$slots_avail = UserCampaign::where('campaign_id',$mc->id)->count();
-			$mc->slots = $slots_avail." of ".$mc->slots;
-		}
-		$mycampaigns->toArray();
-		return response()->json($mycampaigns);
+		$notifs = DB::table('client_campaign')
+			->join('user_campaign', function($join) use ($client_id){
+				$join->on('user_campaign.campaign_id','=','client_campaign.id')
+				->where('client_campaign.client_id','=',$client_id)
+				->where('user_campaign.status','=',0)
+				->where('user_campaign.seen','=',0);
+			})->join('users as user','user.id','=','user_campaign.user_id')
+			->select('user.name as user_name','user_campaign.status as status','client_campaign.name as campaign_name','client_campaign.id as campaign_id','user_campaign.created_at as timestamp')
+			->orderBy('timestamp','DESC')
+			->get();
+		// foreach($notifs as $nt){
+		// 	switch($nt->status){
+		// 		case 0:
+		// 			$nt->status = "pending";
+		// 		break;
+		// 		case 1:
+		// 			$nt->status = "approved";
+		// 		break;
+		// 		case 2:
+		// 			$nt->status = "rejected";
+		// 		break;
+		// 		default:
+		// 			$nt->status = "invalid";
+		// 		break;
+		// 	}
+		// }
+		// dd($interested_notifs);
+		//media ids
+		$notifs->toArray();
+		return response()->json($notifs);
 	}
 	
     public function websocketClientData(Request $request) {
@@ -98,5 +93,4 @@ class ClientController extends Controller
 
         return response()->json($returnData);
     }
-
 }

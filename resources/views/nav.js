@@ -7,33 +7,43 @@ export default {
     },
     {
       name: 'Campaigns',
-      icon: 'Star',
+      //url: '/campaigns',
+      icon: 'Bookmark',
       children:[
         {
           name:'Campaign List',
           url: '/campaigns/list',
+          icon: 'List',
         },
         {
           name:'Create Campaign',
           url: '/campaigns/create',
+          icon: 'PlusCircle',
+        },
+        {
+          name:'User Requests',
+          url: '/campaign/requests/',
+          icon: 'Users',
         }
       ]
     },
     {
       name: 'Messages',
       url: '/messages',
+      hasNotif: true,
+      notifCount: '0',
       icon: 'MessageSquare'
     },
-    {
-      name: 'Gallery',
-      url: '/gallery',
-      icon: 'Image'
-    },
-    {
-      name: 'Settings',
-      url: '/settings',
-      icon: 'Settings'
-    },
+    // {
+    //   name: 'Gallery',
+    //   url: '/gallery',
+    //   icon: 'Image'
+    // },
+    // {
+    //   name: 'Settings',
+    //   url: '/settings',
+    //   icon: 'Settings'
+    // },
     {
       divider: true,
     }

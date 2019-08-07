@@ -53,9 +53,10 @@ Route::middleware('json.response')->group(function(){
       Route::middleware('auth:web_api')->group(function(){
         
         Route::get('/','ClientController@details');
+        Route::get('/campaigns','ClientCampaignController@getMyCampaigns'); // >>>> campaign list
+        Route::get('/campaigns/requests','ClientCampaignController@getMyCampaignRequests'); // >>>> campaign list
+        Route::post('/campaigns/requests','ClientCampaignController@UserStatusCampaignUpdate'); // >>>> campaign request update
         Route::get('logout', 'UserController@logout')->name('user_logout');
-
-        Route::get('/campaigns','ClientController@getMyCampaigns');
 
         Route::post('campaign/create', 'ClientCampaignController@campaign_store'); // >>>> create campaign
         Route::get('campaign/dashboard/{id}', 'ClientCampaignController@campaign_show'); // >>>> campaign details for dashboard
@@ -65,6 +66,7 @@ Route::middleware('json.response')->group(function(){
         Route::get('user/chats', 'ClientChatController@getUsersChat');
         Route::get('user/convo/{id}', 'ClientChatController@getUsersConvo');
         Route::get('chat/notif/update/{id}', 'ClientChatController@updateNotif');
+        Route::get('chat/usersList', 'ClientChatController@getUserList');
 
         Route::post('user/rating', 'UserController@submitUserRating');
         Route::get('user/{id}/profile', 'UserController@viewProfile');
@@ -74,6 +76,8 @@ Route::middleware('json.response')->group(function(){
           Route::post('message/sent', 'ClientChatController@websocketMessageSent');
         });
 
+        //Notifications
+        Route::get('/notifications', 'ClientController@getMyNotifications'); // >>>> get unseen user campaign status
       });
 
   });

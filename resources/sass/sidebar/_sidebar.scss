@@ -1,0 +1,20 @@
+#main-menu .menu-expand-icon {
+    top: auto;
+}
+
+#main-menu .nav-item > a {
+    align-items: center;
+}
+
+#main-menu .nav-item a .notif {
+    background-color: #e74c4b;
+    position: absolute;
+    right: 20px;
+    font-size: 10px;
+    width: 25px;
+    height: 25px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

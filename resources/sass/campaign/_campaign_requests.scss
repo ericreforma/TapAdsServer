@@ -1,0 +1,62 @@
+.campaign-requests_card{
+    label,a{
+        color: #000!important;
+    }
+    .card-body{ 
+        .table{
+            color:black!important;
+            th{
+                background-color: $blue;
+                color: #fff;
+                border-bottom: 1px solid #fff!important;
+                text-transform: capitalize;
+                i{
+                    float: right;
+                    margin-top: 5px;
+                }
+                &:not(:last-child):hover{
+                    cursor: pointer;
+                    background-color: $light-blue;
+                    -webkit-transition: background .5s ease-out;
+                    -moz-transition: background .5s ease-out;
+                    -ms-transition: background .5s ease-out;
+                    -o-transition: background .5s ease-out;
+                    transition: background .5s ease-out;
+                }
+            }
+            tbody{
+                td{
+                    padding: 10px;
+                    // border: 1px solid $blue!important;
+                    button{
+                        margin-bottom: 10px;
+                    }
+                    img{
+                        &.img-round{
+                            height:70px;
+                            width:70px;
+                            border-radius: 50%;
+                            background-color: $light-blue;
+                            margin-right: 10px;
+                        }  
+                    }
+                    .request-btns{
+                        >button{
+                            background: #f0ad4e;;
+                        }
+                    }
+                    a{
+                        height: 100%;
+                        width:100%;
+                        display: block;
+                    }
+                }
+            }
+        }
+        .page-item.active{
+            a{
+                color:white!important;
+            }
+        }
+    }
+}

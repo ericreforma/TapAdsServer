@@ -1,0 +1,65 @@
+.mycampaigns_card{
+    label,a{
+        color: #000!important;
+    }
+    .card-body{ 
+        .table{
+            color:black!important;
+            th{
+            background-color: $blue;
+            color: #fff;
+            border-bottom: 1px solid #fff!important;
+            text-transform: capitalize;
+            }
+            tbody{
+                td{
+                    padding: 10px;
+                    // border: 1px solid $blue!important;
+                    button{
+                        margin-bottom: 10px;
+                    }
+                    p{
+                        
+                    }
+                }
+            }
+        }
+        .flex-wrap{
+            margin-bottom: -20px;
+            .vehicle-type,.campaign-img,p{
+                margin-bottom: 20px;
+            }
+        }
+        .vehicle-type{
+            display: inline-block;
+            img{
+            height:50px;
+            width:50px;
+            object-fit: cover;
+            }
+            // border:1px solid black;
+            // border-radius: 200px;
+            // box-sizing: border-box;
+            // padding: 5px;
+            margin-right: 20px;
+        }
+        .campaign-img{
+            display: inline-block;
+            height:70px;
+            width:70px;
+            img{
+            border-radius: 50%;
+            box-sizing: border-box;
+            height: 100%;
+            width: 100%;;
+            object-fit: cover;
+            }
+            margin-right: 20px;
+        }
+        .campaign-details{
+            p{
+                margin-bottom: 0px;
+            }
+        }
+    }
+}

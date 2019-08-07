@@ -60,10 +60,13 @@ class ClientChatController extends Controller
                     ->orderBy('c.created_at', 'desc')
                     ->get();
         
+        $nonConvoUsers = $this->getUserList($request->user()->id);
+        
         return response()->json([
             'status'  => 'success',
             'message' => [
-                'users' => $users
+                'users' => $users,
+                'nonConvoUsers' => $nonConvoUsers
             ]
         ]);
     }
@@ -87,6 +90,23 @@ class ClientChatController extends Controller
 				'message' => 'User id does not exist'
 			]);
         }
+    }
+
+    private function getUserList($id) {
+        $users = DB::table('user_campaign as uc')
+                ->leftJoin('client_campaign as cc', 'cc.id', 'uc.campaign_id')
+                ->leftJoin('users as u', 'u.id', 'uc.user_id')
+                ->leftJoin('media as m', 'm.id', 'u.media_id')
+                ->where('cc.client_id', '=', $id)
+                ->distinct('uc.user_id')
+                ->select(
+                    'u.id',
+                    'u.name',
+                    'm.url'
+                )
+                ->get();
+
+        return $users;
     }
 
     public function updateNotif(Request $request, $id) {

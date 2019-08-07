@@ -119,4 +119,94 @@ class ClientCampaignController extends Controller
 			]);
 		}
 	}
+
+	public function getMyCampaigns (Request $request){
+		$client_id = $request->user()->id;
+		$mycampaigns = ClientCampaign::where('client_id','=',$client_id)
+									->leftJoin('media as m','m.id','client_campaign.media_id')
+									// ->leftJoin('user_campaign as uc','uc.campaign_id','client_campaign.id')
+									->select(
+										'm.url as campaign_image',
+										'client_campaign.vehicle_classification',
+										DB::raw('(CASE client_campaign.vehicle_type 
+										WHEN 0 THEN "Private" 
+										WHEN 1 THEN "Public"
+										ELSE "Mixed"
+										END) AS vehicle_type
+										'),
+										'client_campaign.pay_basic',
+										'client_campaign.pay_basic_km',
+										'client_campaign.pay_additional',
+										'client_campaign.pay_additional_km',
+										'client_campaign.id',
+										'client_campaign.location_id',
+										//  DB::raw('(SELECT JSON_ARRAY(client_campaign.location_id)) AS location_ids'),
+										'client_campaign.name as campaign_name',
+										'client_campaign.created_at as created_at',
+										'client_campaign.slots as slots_total',
+										DB::raw("(SELECT COUNT(*) FROM user_campaign WHERE client_campaign.id = user_campaign.campaign_id) as slots_used")
+									)
+									->get();
+		$location_ids = array();
+		foreach($mycampaigns as $mc){
+			$location_ids = array_unique(array_merge($location_ids , $mc->location_id));
+		}								
+		$locations = ClientCampaignLocation::whereIn('id',$location_ids)->select('name as location_name','id as location_index')->get()->toArray();
+		$mycampaigns = $mycampaigns->toArray();
+		$arr_response = array('campaigns'=> $mycampaigns ,'locations'=>$locations);
+		return response()->json($arr_response);
+	}
+
+	public function getMyCampaignRequests(Request $request){
+		$client_id = $request->user()->id;
+		$requests = DB::table('client_campaign as cc')
+			->join(
+			'user_campaign as uc', function($join) use ($client_id){
+				$join->on('uc.campaign_id','=','cc.id')
+				->where('cc.client_id','=',$client_id);
+			})
+			->leftJoin('users as user','user.id','=','uc.user_id')
+			->select(
+				'user.name as user_name',
+				DB::raw('
+					(
+						CASE uc.status 
+						WHEN 0 THEN "Pending"
+						WHEN 1 THEN "Approved"
+						WHEN 2 THEN "Rejected"
+						ELSE "Invalid"
+						END
+					) as status'
+				),
+				'uc.user_id as user_id',
+				'cc.name as campaign_name',
+				'cc.id as campaign_id',
+				'uc.updated_at as timestamp',
+				DB::raw("(SELECT url FROM media WHERE cc.media_id = media.id) as campaign_image"),
+				DB::raw("(SELECT url FROM media WHERE user.media_id = media.id) as user_image")
+			)
+			->orderBy('timestamp','DESC')
+			->get();
+
+		return response()->json($requests);
+	}
+	public function UserStatusCampaignUpdate(Request $request){
+		$uid = $request->user_id;
+		$cid = $request->campaign_id;
+		$status = $request->status;
+		try {
+		$UserCampaignUpdate = UserCampaign::where('user_id',$uid)
+		->where('campaign_id',$cid)
+		->update(['status'=>$status]);
+		}catch (\Illuminate\Database\QueryException $e) {
+			return response()->json([
+				'status' => 'error',
+				'message' => 'There is an error updating request status, Please try again.'
+			]);
+		}
+		return response()->json([
+			'status' => 'success',
+			'message' => 'Request Status Updated'
+		]);
+	}
 }

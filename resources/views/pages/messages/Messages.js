@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
 import {
-    Input
+    Input,
+    Button
 } from 'reactstrap';
-import axios from 'axios';
 import io from 'socket.io-client';
-import { Send } from 'react-feather';
+import { Send, MessageCircle } from 'react-feather';
+import FA from 'react-fontawesome';
 
+import { HttpRequest } from '../../services/http';
 import { Loader } from '../../components';
 import config from '../../config';
-import { dateFormat } from '../../utils/dateForChat';
+import { dateFormat, conversationBreak } from '../../utils/dateForChat';
 
 export default class Messages extends Component {
     constructor(props) {
@@ -18,7 +20,13 @@ export default class Messages extends Component {
             loader: true,
             token: '',
 
+            styleLeftPart: {},
+            leftPartToggle: false,
+            userNotFound: false,
+            totalNotifCount: 0,
+            totalUsers: [],
             users: [],
+            nonConvoUsers: [],
             conversation: [],
             activeUserId: null,
             activeChatIndex: null,
@@ -41,16 +49,40 @@ export default class Messages extends Component {
     }
 
     getUserChat = () => {
-        axios.get(config.api.getChat, {
-            headers: {
-                Authorization: `Bearer ${this.state.token}`
-            }
-        }).then(response => {
+        HttpRequest.get(config.api.getChat).then(response => {
             if(response.data.status == 'success') {
+                var { users,
+                    nonConvoUsers } = response.data.message,
+                    loaderConversation = false,
+                    totalUsers = [],
+                    totalNotifCount = users.filter(u => u.notif).map(u => u.notif).reduce((a, b) => a + b, 0);
+
+                users.map(u => {
+                    totalUsers.push({
+                        id: u.id,
+                        name: u.name,
+                        url: u.url
+                    });
+                });
+
+                nonConvoUsers.map(nu => {
+                    var arrayIDs = users.map(u => u.id);
+
+                    if(arrayIDs.indexOf(nu.id) === -1) {
+                        totalUsers.push({
+                            id: nu.id,
+                            name: nu.name,
+                            url: nu.url
+                        });
+                    }
+                });
+
                 this.setState({
-                    users: response.data.message.users,
-                    loaderConversation: false,
-                    userApiDone: true,
+                    users,
+                    loaderConversation,
+                    totalNotifCount,
+                    nonConvoUsers,
+                    totalUsers,
                 });
                 this.chatWebSocket(this.state.token);
             } else {
@@ -120,7 +152,8 @@ export default class Messages extends Component {
                 created_at } = chat,
                 { users,
                 conversation,
-                activeUserId } = this.state,
+                activeUserId,
+                totalNotifCount } = this.state,
                 index = users.map(u => u.id).indexOf(user_id),
                 newMessages = users.splice(index, 1);
 
@@ -130,6 +163,7 @@ export default class Messages extends Component {
             
             if(activeUserId !== user_id) {
                 newMessages[0].notif = newMessages[0].notif ? newMessages[0].notif + 1 : 1;
+                totalNotifCount += 1;
             } else {
                 var lastConvo = conversation[conversation.length - 1];
                 
@@ -145,8 +179,13 @@ export default class Messages extends Component {
             }
             users.unshift(newMessages[0]);
 
-            this.setState({users, conversation});
+            this.setState({
+                users,
+                conversation,
+                totalNotifCount
+            });
             this.scrollToBottom();
+            this.props.changeMessageNotifCount(totalNotifCount);
         });
 
         this.setState({socket});
@@ -154,23 +193,39 @@ export default class Messages extends Component {
     
     chatOnClick = (activeUserId, activeChatIndex) => (e) => {
         if(activeUserId !== this.state.activeUserId) {
-            var loaderConversation = true;
+            var loaderConversation = true,
+                { totalNotifCount,
+                users } = this.state,
+                searchValue = '';
+
+            totalNotifCount -= users.filter(u => u.id == activeUserId)[0].notif ? users.filter(u => u.id == activeUserId)[0].notif : 0;
+            this.props.changeMessageNotifCount(totalNotifCount);
+
             this.setState({
                 activeChatIndex,
                 loaderConversation,
-                activeUserId
+                activeUserId,
+                totalNotifCount,
+                searchValue
             });
 
             this.conversationAlignment(activeUserId);
         }
     }
 
+    newMessageOnClick = (activeUserId) => (e) => {
+        var conversation = [],
+            searchValue = '';
+
+        this.setState({
+            activeUserId,
+            conversation,
+            searchValue
+        })
+    }
+
     conversationAlignment = (uid) => {
-        axios.get(config.api.getConvo + uid, {
-            headers: {
-                Authorization: `Bearer ${this.state.token}`
-            }
-        }).then(response => {
+        HttpRequest.get(config.api.getConvo + uid).then(response => {
             if(response.data.status == 'success') {
                 var conversation = [],
                     uData = [],
@@ -180,29 +235,43 @@ export default class Messages extends Component {
                     messageToSend = '',
                     convo = response.data.message.convo,
                     activeUserId = uid,
+                    previousDate = null,
+                    pushDate = null,
+                    pushCBreak = null,
                     currSender;
                     
                 convo.map((c, cIdx) => {
-                    if(currSender !== c.sender) {
-                        if(uData.length !== 0) {
+                    var cBreak = conversationBreak(c.created_at, previousDate);
+                    if(currSender !== c.sender || cBreak) {
+                        if(cIdx !== 0) {
                             conversation.push({
+                                date: dateFormat(pushDate),
+                                break: pushCBreak,
+                                sender: currSender,
+                                messages: (cIdx + 1) == convo.length ? uData.concat([c]) : uData
+                            });
+                        }
+
+                        currSender = c.sender;
+                        pushDate = c.created_at;
+                        pushCBreak = cBreak;
+                        uData = [];
+                    }
+
+                    uData.push(c);
+
+                    if((cIdx + 1) == convo.length) {
+                        if(currSender === c.sender) {
+                            conversation.push({
+                                date: dateFormat(pushDate),
+                                break: pushCBreak,
                                 sender: currSender,
                                 messages: uData
                             });
                         }
-        
-                        currSender = c.sender;
-                        uData = [];
                     }
-        
-                    uData.push(c);
-        
-                    if((cIdx + 1) == convo.length) {
-                        conversation.push({
-                            sender: currSender,
-                            messages: uData
-                        });
-                    }
+
+                    previousDate = c.created_at;
                 });
 
                 users[this.state.activeChatIndex].notif = null;
@@ -219,16 +288,13 @@ export default class Messages extends Component {
                 this.scrollToBottom();
             }
         }).catch(error => {
+            this.conversationAlignment(uid);
             console.log(error);
         });
     }
 
     updateNotif = (uid) => {
-        axios.get(`${config.api.updateNotif}/${uid}`, {
-            headers: {
-                Authorization: `Bearer ${this.state.token}`
-            }
-        }).catch(error => {
+        HttpRequest.get(`${config.api.updateNotif}/${uid}`).catch(error => {
             console.log(error);
             setTimeout(() => this.updateNotif(uid), 2000);
         });
@@ -307,71 +373,160 @@ export default class Messages extends Component {
         this.messagesEnd.scrollIntoView({ behavior: "auto" });
     }
 
+    onSearchValueOnChange = (e) => {
+        var {users} = this.state,
+            searchValue = e.target.value,
+            userNotFound = searchValue === '' ? false : (
+                users.filter(u =>
+                    u.name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1
+                ).length !== 0 ? false : true
+            );
+
+        this.setState({
+            searchValue,
+            userNotFound
+        });
+    }
+
+    toggleUserList = () => {
+        this.setState({
+            leftPartToggle: !this.state.leftPartToggle
+        });
+    }
+
+    getRightPanelData = {
+        name: () => {
+            var { totalUsers,
+                activeUserId } = this.state,
+                user = totalUsers.filter(u => u.id == activeUserId);
+    
+            return activeUserId ? user[0].name : 'bins';
+        },
+        url: () => {
+            var { totalUsers,
+                activeUserId } = this.state,
+                user = totalUsers.filter(u => u.id == activeUserId)[0];
+    
+            return user.url ? user.url : '/images/default_avatar.png';
+        }
+    }
+
     render() {
         if(this.state.loader) {
             return <Loader type="puff" />
         } else {
             return (
                 <div className="chat-section">
-                    <div className="cs-left-part">
+                    <div
+                        className="cs-left-part"
+                        style={
+                            this.state.leftPartToggle ? {
+                                width: '0px',
+                                minWidth: '0px',
+                                paddingLeft: '0px',
+                                paddingRight: '0px',
+                                overflowY: 'hidden'
+                            } : {}
+                        }
+                    >
                         <div className="cs-lp-nav">
                             <div className="cs-lp-n-searchbox">
                                 <Input
                                     type="text"
                                     placeholder="Search User.."
-                                    onChange={e => this.setState({searchValue: e.target.value})}
+                                    onChange={this.onSearchValueOnChange}
+                                    value={this.state.searchValue}
                                 />
                             </div>
                         </div>
                         
-                        {this.state.users.map((u, uIdx) =>
-                            u.name.toLowerCase().indexOf(this.state.searchValue.toLowerCase()) !== -1 ? (
-                                <div
-                                    key={u.id}
-                                    className={"cs-lp-chatbox " + (this.state.activeUserId == u.id? 'cs-lp-chatbox-dark' : 'cs-lp-chatbox-white')}
-                                    onClick={this.chatOnClick(u.id, uIdx)}
-                                >
-                                    <div className="cs-lp-cb-image-container">
-                                        <div className="cs-lp-cb-image-wrapper">
-                                            <img
-                                                src={u.url ? u.url : '/images/default_avatar.png'}
-                                            />
-                                        </div>
+                        <div className="cs-lp-users">
+                            {this.state.users.length === 0 || this.state.userNotFound ? (
+                                <div className="text-center pt-3 pb-2">
+                                    <span className="text-muted">No {this.state.users.length === 0 ? 'user' : 'conversation'}/s found ..</span>
+                                </div>
+                            ) : this.state.users.map((u, uIdx) =>
+                                    u.name.toLowerCase().indexOf(this.state.searchValue.toLowerCase()) !== -1 ? (
+                                        <div
+                                            key={u.id}
+                                            className={"cs-lp-chatbox " + (this.state.activeUserId == u.id? 'cs-lp-chatbox-dark' : 'cs-lp-chatbox-white')}
+                                            onClick={this.chatOnClick(u.id, uIdx)}
+                                        >
+                                            <div className="cs-lp-cb-image-container">
+                                                <div className="cs-lp-cb-image-wrapper">
+                                                    <img
+                                                        src={u.url ? u.url : '/images/default_avatar.png'}
+                                                    />
+                                                </div>
 
-                                        {u.online ? (
-                                            <div className="cs-lp-cb-online"></div>
-                                        ) : null}
-                                    </div>
-
-                                    <div className="cs-lp-cb-chat-info">
-                                        <div className="cs-lp-cb-row">
-                                            <h5 className="mb-0">{u.name}</h5>
-                                            <small className="text-muted">{dateFormat(u.created_at)}</small>
-                                        </div>
-
-                                        <div className="cs-lp-cb-row">
-                                            <div className="text-muted cp-lp-cb-message">
-                                                {(u.sender == 1 ? 'You: ' : '') + u.message}
-                                            </div>
-                                            <div className="cs-lp-cb-notification-wrapper">
-                                                {u.notif != 0 && u.notif ? (
-                                                    <div className="cs-lp-cb-notification">
-                                                        <small>{u.notif > 9 ? '9+' : u.notif}</small>
-                                                    </div>
+                                                {u.online ? (
+                                                    <div className="cs-lp-cb-online"></div>
                                                 ) : null}
                                             </div>
+
+                                            <div className="cs-lp-cb-chat-info">
+                                                <div className="cs-lp-cb-row">
+                                                    <h5 className="mb-0">{u.name}</h5>
+                                                    <small className="text-muted">{dateFormat(u.created_at)}</small>
+                                                </div>
+
+                                                <div className="cs-lp-cb-row">
+                                                    <div className="text-muted cp-lp-cb-message">
+                                                        {(u.sender == 1 ? 'You: ' : '') + u.message}
+                                                    </div>
+                                                    <div className="cs-lp-cb-notification-wrapper">
+                                                        {u.notif != 0 && u.notif ? (
+                                                            <div className="cs-lp-cb-notification">
+                                                                <small>{u.notif > 9 ? '9+' : u.notif}</small>
+                                                            </div>
+                                                        ) : null}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    ) : null
+                                )
+                            }
+
+                            {this.state.searchValue !== '' ? (
+                                <div className="cs-lp-nonconvouser-container">
+                                    <hr />
+
+                                    {this.state.nonConvoUsers.map(nu =>
+                                        this.state.users.map(u => u.id).indexOf(nu.id) === -1 &&
+                                        nu.name.toLowerCase().indexOf(this.state.searchValue.toLowerCase()) !== -1  ? (
+                                            <div
+                                                className="cs-lp-nc-wrapper"
+                                                key={nu.id}
+                                                onClick={this.newMessageOnClick(nu.id)}
+                                            >
+                                                <div className="cs-lp-nc-w-img-wrapper">
+                                                    <img
+                                                        src={nu.url ? nu.url : '/images/default_avatar.png'}
+                                                    />
+                                                </div>
+
+                                                <h5 className="mb-0">{nu.name}</h5>
+
+                                                <div className="pr-2"><MessageCircle /></div>
+                                            </div>
+                                        ) : null
+                                    )}
                                 </div>
-                            ) : null
-                        )}
+                            ) : null}
+                        </div>
                     </div>
 
                     <div className="cs-right-part">
                         <div className="cs-rp-header-container">
-                            <div className="text-center">
-                                <h4 className="mb-0">{this.state.activeUserId ? this.state.users[this.state.activeChatIndex].name : (<span>&nbsp;</span>)}</h4>
-                            </div>
+                            <Button className="float-left" onClick={this.toggleUserList}>
+                                {this.state.leftPartToggle ? (
+                                    <FA name={'chevron-right'} />
+                                ) : (
+                                    <FA name={'chevron-left'} />
+                                )}
+                            </Button>
+                            <h4 className="mb-0">{this.getRightPanelData.name()}</h4>
                         </div>
                         
                         <div className="cs-rp-convo-container">
@@ -382,24 +537,30 @@ export default class Messages extends Component {
                                     </div>
                                 ) : (
                                     this.state.conversation.map((c, cIdx) =>
-                                        <div className={c.sender == 0 ? "cs-rp-c-user" : "cs-rp-c-client"} key={cIdx}>
-                                            {c.sender == 0 ? (
-                                                <div className="cs-rp-cu-image-wrapper">
-                                                    <img
-                                                        src={this.state.users[this.state.activeChatIndex].url ? this.state.users[this.state.activeChatIndex].url : '/images/default_avatar.png'}
-                                                    />
+                                        <div key={cIdx}>
+                                            {c.break ? (
+                                                <div className="text-center mb-2">
+                                                    <small style={{fontSize: '0.7rem'}} className="text-muted">{c.date}</small>
                                                 </div>
                                             ) : null}
 
-                                            <div className={c.sender == 0 ? "cs-rp-cu-message-container" : "cs-rp-cc-message-container"}>
-                                                {c.messages.map(m =>
-                                                    <div 
-                                                        className={c.sender == 0 ? "cs-rp-cu-message" : "cs-rp-cc-message"}
-                                                        key={m.id}
-                                                    >
-                                                        <p>{m.message}</p>
+                                            <div className={c.sender == 0 ? "cs-rp-c-user" : "cs-rp-c-client"}>
+                                                {c.sender == 0 ? (
+                                                    <div className="cs-rp-cu-image-wrapper">
+                                                        <img src={this.getRightPanelData.url()} />
                                                     </div>
-                                                )}
+                                                ) : null}
+
+                                                <div className={c.sender == 0 ? "cs-rp-cu-message-container" : "cs-rp-cc-message-container"}>
+                                                    {c.messages.map((m, mIdx) =>
+                                                        <div 
+                                                            className={c.sender == 0 ? "cs-rp-cu-message" : "cs-rp-cc-message"}
+                                                            key={m.id}
+                                                        >
+                                                            <p>{m.message}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     )

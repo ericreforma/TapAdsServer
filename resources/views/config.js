@@ -1,14 +1,24 @@
 export default {
     api: {
-        createCampaign: '/api/client/campaign/create',
-        createGeoLocation: '/api/client/campaign/new/geolocation',
-        campaignDashboard: '/api/client/campaign/dashboard/',
-        getGeoLocation: '/api/client/campaign/geolocation',
-        submitRateUser: '/api/client/user/rating',
-        userProfileView: '/api/client/user/:id/profile',
-        getChat: '/api/client/user/chats',
-        getConvo: '/api/client/user/convo/',
-        updateNotif: '/api/client/chat/notif/update'
+        createCampaign: `/client/campaign/create`,
+        createGeoLocation: '/client/campaign/new/geolocation',
+        campaignDashboard: '/client/campaign/dashboard/',
+        getGeoLocation: '/client/campaign/geolocation',
+
+        submitRateUser: '/client/user/rating',
+        userProfileView: '/client/user/:id/profile',
+        getChat: '/client/user/chats',
+        getConvo: '/client/user/convo/',
+        submitRateUser: '/client/user/rating',
+
+        updateNotif: '/client/chat/notif/update',
+
+        campaignList:  '/client/campaigns',
+        userRequests: '/client/campaigns/requests',
+
+        clientNotification: '/client/notifications',
+
+        getListOfUsers: '/client/chat/usersList',
     },
     apiKey: {
         googleApiKey: 'AIzaSyBwXTceRsEryqeySF0HtM66cVwwWa9rW0w'

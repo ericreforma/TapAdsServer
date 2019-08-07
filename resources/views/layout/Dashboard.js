@@ -7,6 +7,10 @@ import avatar1 from '../../img/avatar1.png';
 import nav from '../nav';
 import routes from '../route';
 import ContextProviders from '../components/utilities/ContextProviders';
+import ClientNotification from '../functions/notifications/ClientNotification.js';
+
+import {HttpRequest} from '../services/http';
+import config from '../config';
 
 const MOBILE_SIZE = 992;
 
@@ -18,7 +22,9 @@ export default class Dashboard extends Component {
       clientEmail:'',
       sidebarCollapsed: false,
       isMobile: window.innerWidth <= MOBILE_SIZE,
-      showChat1: true
+      showChat1: true,
+      nav: nav,
+      messageNotif: 0
     };
   }
 
@@ -37,7 +43,8 @@ export default class Dashboard extends Component {
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this.handleResize);
+	window.addEventListener('resize', this.handleResize);
+	this.getMessageNotificationCount();
   }
 
   componentWillUnmount() {
@@ -52,9 +59,36 @@ export default class Dashboard extends Component {
     this.setState({ showChat1: false });
   };
 
+  changeMessageNotifCount = (messageNotif) => {
+    var {nav} = this.state;
+    nav.top = nav.top.map(n => {
+      if(n.hasNotif) {
+        n.notifCount = messageNotif;
+      }
+
+      return n;
+    });
+    this.setState({messageNotif, nav});
+  }
+
+  getMessageNotificationCount = () => {
+    HttpRequest.get(config.api.getChat).then(response => {
+      	if(response.data.status == 'success') {
+			var {users} = response.data.message,
+				totalNotifCount = users.filter(u => u.notif).map(u => u.notif).reduce((a, b) => a + b, 0);
+
+			this.changeMessageNotifCount(totalNotifCount);
+      	}
+    }).catch(error => {
+		setTimeout(() => this.getMessageNotificationCount(), 1000);
+      	console.log(error);
+    });
+  }
+
   render() {
     const { sidebarCollapsed } = this.state;
     const sidebarCollapsedClass = sidebarCollapsed ? 'side-menu-collapsed' : '';
+    
     return (
       <ContextProviders>
         <div className={`app ${sidebarCollapsedClass}`}>
@@ -62,7 +96,7 @@ export default class Dashboard extends Component {
 
           <div className="app-body">
             <SidebarNav
-              nav={nav}
+              nav={this.state.nav}
               logo={Logo}
               logoText="TAP ADS"
               isSidebarCollapsed={sidebarCollapsed}
@@ -83,7 +117,15 @@ export default class Dashboard extends Component {
               <PageContent>
                 <Switch>
                   {routes.map((page, key) => (
-                    <Route path={page.path} component={page.component} key={key} />
+                    <Route
+                      path={page.path}
+                      render={props =>
+                        <page.component
+                          {...props}
+                          changeMessageNotifCount={this.changeMessageNotifCount}
+                        />}
+                      key={key}
+                  />
                   ))}
                   <Redirect from="/" to="/dashboard" />
                 </Switch>
@@ -120,7 +162,7 @@ function HeaderNav() {
         </form>
       </NavItem> */}
       <UncontrolledDropdown nav inNavbar>
-        <DropdownToggle nav caret>
+        {/* <DropdownToggle nav caret>
           New
         </DropdownToggle>
         <DropdownMenu right>
@@ -130,9 +172,10 @@ function HeaderNav() {
           <DropdownItem>
             Message <Badge color="primary">10</Badge>
           </DropdownItem>
-        </DropdownMenu>
+        </DropdownMenu> */}
       </UncontrolledDropdown>
-      <UncontrolledDropdown nav inNavbar>
+      <ClientNotification></ClientNotification>
+      {/* <UncontrolledDropdown nav inNavbar>
         <DropdownToggle nav>
           <Avatar size="small" color="blue" initials="JS" />
         </DropdownToggle>
@@ -142,7 +185,7 @@ function HeaderNav() {
           <DropdownItem divider />
           <DropdownItem>Reset</DropdownItem>
         </DropdownMenu>
-      </UncontrolledDropdown>
+      </UncontrolledDropdown> */}
     </React.Fragment>
   );
 }

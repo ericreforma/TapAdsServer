@@ -11,6 +11,9 @@ const NavSingleItem = ({ item }) => {
         <a href={item.url}>
           {item.icon && Icon && <Icon className="side-nav-icon" />}
           <span className="nav-item-label">{item.name}</span>
+					{item.hasNotif ? (
+						<span>test</span>
+					) : null}
           {item.badge && <NavBadge color={item.badge.variant} text={item.badge.text} />}
         </a>
       </li>
@@ -21,6 +24,9 @@ const NavSingleItem = ({ item }) => {
         <NavLink to={item.url} activeClassName="active">
           {item.icon && Icon && <Icon className="side-nav-icon" />}
           <span className="nav-item-label">{item.name}</span>
+					{item.hasNotif && item.notifCount > 0? (
+						<div className="notif">{parseInt(item.notifCount) > 99 ? `${item.notifCount}+` : item.notifCount }</div>
+					) : null}
           {item.badge && <NavBadge color={item.badge.variant} text={item.badge.text} />}
         </NavLink>
       </li>
