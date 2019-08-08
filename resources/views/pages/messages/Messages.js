@@ -3,7 +3,6 @@ import {
     Input,
     Button
 } from 'reactstrap';
-import io from 'socket.io-client';
 import { Send, MessageCircle } from 'react-feather';
 import FA from 'react-fontawesome';
 
@@ -11,6 +10,7 @@ import { HttpRequest } from '../../services/http';
 import { Loader } from '../../components';
 import config from '../../config';
 import { dateFormat, conversationBreak } from '../../utils/dateForChat';
+import { TOKEN } from '../../config/variable';
 
 export default class Messages extends Component {
     constructor(props) {
@@ -18,7 +18,6 @@ export default class Messages extends Component {
 
         this.state = {
             loader: true,
-            token: '',
 
             styleLeftPart: {},
             leftPartToggle: false,
@@ -34,14 +33,8 @@ export default class Messages extends Component {
             messageToSend: '',
             messageType: 0,
             shiftButton: false,
-            searchValue: '',
-            socket: []
+            searchValue: ''
         };
-    }
-
-    componentWillMount = () => {
-        var token = localStorage.getItem('client_token');
-        this.setState({token});
     }
 
     componentDidMount = () => {
@@ -84,7 +77,7 @@ export default class Messages extends Component {
                     nonConvoUsers,
                     totalUsers,
                 });
-                this.chatWebSocket(this.state.token);
+                this.chatWebSocket();
             } else {
                 setTimeout(() => this.getUserChat(), 1000);
             }
@@ -94,58 +87,36 @@ export default class Messages extends Component {
         });
     }
 
-    chatWebSocket = (token) => {
-        var socket = io(`http://192.168.0.100:3000/chat/authentication?token=${token}&userType=1`);
+    chatWebSocket = () => {
+        var { users } = this.props.websocket.messages;
+        this.webSocket.onlineUsers(users);
+    }
 
-        socket.on('connect', () => {
-            // websocket connected
-        });
+    componentWillReceiveProps  = () => {
+        var { socketFunctions,
+            messages } = this.props.websocket,
+            { newMessage,
+            updatedFunction } = socketFunctions,
+            { users } = messages;
 
-        socket.on('online users', data => {
-            var {users} = this.state,
-                onlineIDs = data.map(d => d.id),
-                loader = false;
+        if(!this.state.loader && updatedFunction !== '') {
+            if(updatedFunction == 'online user' || updatedFunction == 'disconnected user') {
+                this.webSocket.setUser(users);
+            } else if(updatedFunction == 'new message') {
+                this.webSocket.newMessage(newMessage);
+            }
+        }
+    }
 
-            users = users.map(u => {
-                u.online = onlineIDs.indexOf(u.id) !== -1 ? true : false;
-                return u;
-            });
-
-            this.setState({
-                loader,
-                users
-            });
-        });
-
-        socket.on('online user', data => {
-            var {users} = this.state,
-                {id} = data;
-
-            users = users.map(u => {
-                if(u.id == id) {
-                    u.online = true;
-                }
-                return u;
-            });
-
+    webSocket = {
+        onlineUsers: (users) => {
+            var loader = false;
+            this.setState({loader, users});
+        },
+        setUser: (users) => {
             this.setState({users});
-        });
-
-        socket.on('disconnected user', data => {
-            var {users} = this.state,
-                {id} = data;
-
-            users = users.map(u => {
-                if(u.id == id) {
-                    u.online = false;
-                }
-                return u;
-            });
-
-            this.setState({users});
-        });
-
-        socket.on('new message', data => {
+        },
+        newMessage: (data) => {
             var { chat } = data,
                 { user_id,
                 message,
@@ -165,12 +136,23 @@ export default class Messages extends Component {
                 newMessages[0].notif = newMessages[0].notif ? newMessages[0].notif + 1 : 1;
                 totalNotifCount += 1;
             } else {
-                var lastConvo = conversation[conversation.length - 1];
-                
+                var lastConvo = conversation[conversation.length - 1],
+                    cBreak = conversationBreak(created_at, lastConvo.messages[lastConvo.messages.length - 1].created_at);
                 if(lastConvo.sender == 0) { //user
-                    conversation[conversation.length - 1].messages.push(chat);
+                    if(cBreak) {
+                        conversation.push({
+                            date: dateFormat(created_at),
+                            break: cBreak,
+                            sender: 0,
+                            messages: [chat]
+                        });
+                    } else {
+                        conversation[conversation.length - 1].messages.push(chat);
+                    }
                 } else { //client
                     conversation.push({
+                        date: dateFormat(created_at),
+                        break: cBreak,
                         sender: 0,
                         messages: [chat]
                     });
@@ -186,9 +168,7 @@ export default class Messages extends Component {
             });
             this.scrollToBottom();
             this.props.changeMessageNotifCount(totalNotifCount);
-        });
-
-        this.setState({socket});
+        }
     }
     
     chatOnClick = (activeUserId, activeChatIndex) => (e) => {
@@ -301,20 +281,17 @@ export default class Messages extends Component {
     }
 
     messageSent = () => {
-        var {
-            socket,
-            activeUserId,
+        var { activeUserId,
             messageType,
-            messageToSend,
-            token
-        } = this.state;
+            messageToSend } = this.state,
+            { socket } = this.props.websocket.socketFunctions;
 
         if(messageToSend !== '' && activeUserId) {
             socket.emit('message', {
                 to_id: activeUserId,
                 message: messageToSend,
                 messageType: messageType,
-                token: token
+                token: TOKEN
             }, chat => {
                 var { conversation,
                     users,
@@ -324,7 +301,8 @@ export default class Messages extends Component {
                     created_at } = chat,
                     lastConvo = conversation[conversation.length - 1],
                     index = users.map(u => u.id).indexOf(user_id),
-                    newMessages = users.splice(index, 1);
+                    newMessages = users.splice(index, 1),
+                    cBreak = conversationBreak(created_at, lastConvo.messages[lastConvo.messages.length - 1].created_at);;
     
                 newMessages[0].message = message;
                 newMessages[0].sender = 1;
@@ -337,11 +315,22 @@ export default class Messages extends Component {
                     
                 if(lastConvo.sender == 0) { //user
                     conversation.push({
+                        date: dateFormat(created_at),
+                        break: cBreak,
                         sender: 1,
                         messages: [chat]
                     });
                 } else { //client
-                    conversation[conversation.length - 1].messages.push(chat);
+                    if(cBreak) {
+                        conversation.push({
+                            date: dateFormat(created_at),
+                            break: cBreak,
+                            sender: 1,
+                            messages: [chat]
+                        });
+                    } else {
+                        conversation[conversation.length - 1].messages.push(chat);
+                    }
                 }
     
                 this.setState({conversation, users});
@@ -370,7 +359,9 @@ export default class Messages extends Component {
     }
 
     scrollToBottom = () => {
-        this.messagesEnd.scrollIntoView({ behavior: "auto" });
+        if(this.state.activeUserId) {
+            this._messagesEnd.scrollIntoView({ behavior: "auto" });
+        }
     }
 
     onSearchValueOnChange = (e) => {
@@ -400,7 +391,7 @@ export default class Messages extends Component {
                 activeUserId } = this.state,
                 user = totalUsers.filter(u => u.id == activeUserId);
     
-            return activeUserId ? user[0].name : 'bins';
+            return activeUserId ? user[0].name : <span>&nbsp;</span>;
         },
         url: () => {
             var { totalUsers,
@@ -568,7 +559,7 @@ export default class Messages extends Component {
                             </div>
                             
                             <div style={{ float:"left", clear: "both" }}
-                                ref={(el) => { this.messagesEnd = el; }}>
+                                ref={(el) => { this._messagesEnd = el; }}>
                             </div>
                         </div>
                     

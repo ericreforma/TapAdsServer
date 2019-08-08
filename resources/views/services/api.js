@@ -1,3 +1,5 @@
+import {TOKEN} from '../config/variable';
+
 var baseURL = '/api',
     timeout = 30000,
     headers = {
@@ -12,10 +14,9 @@ const API = {
 };
 
 const TOKENIZED_API = () => {
-    const api = API,
-        token = localStorage.getItem('client_token');
+    const api = API;
     
-    api.headers.Authorization = `Bearer ${token}`;
+    api.headers.Authorization = `Bearer ${TOKEN}`;
     return api;
 };
 

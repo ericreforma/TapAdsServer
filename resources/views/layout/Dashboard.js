@@ -1,191 +1,291 @@
 import React, { Component } from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
-import { Button, Badge, NavItem, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
-import { Header, SidebarNav, Footer, PageContent, Avatar, Chat, PageAlert, Page } from '../components';
+import { UncontrolledDropdown } from 'reactstrap';
+import { Header, SidebarNav, Footer, PageContent, PageAlert, Page } from '../components';
 import Logo from '../../img/vibe-logo.svg';
-import avatar1 from '../../img/avatar1.png';
 import nav from '../nav';
 import routes from '../route';
 import ContextProviders from '../components/utilities/ContextProviders';
 import ClientNotification from '../functions/notifications/ClientNotification.js';
+import { Loader } from '../components';
 
-import {HttpRequest} from '../services/http';
+import { Socket } from '../services/websocket';
+import { HttpRequest } from '../services/http';
 import config from '../config';
 
 const MOBILE_SIZE = 992;
 
 export default class Dashboard extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isLoggedIn:false,
-      clientEmail:'',
-      sidebarCollapsed: false,
-      isMobile: window.innerWidth <= MOBILE_SIZE,
-      showChat1: true,
-      nav: nav,
-      messageNotif: 0
-    };
-  }
+	constructor(props) {
+		super(props);
+		this.state = {
+			websocketDone: false,
+			isLoggedIn:false,
+			clientEmail:'',
+			sidebarCollapsed: false,
+			isMobile: window.innerWidth <= MOBILE_SIZE,
+			nav: nav,
+			messageNotif: 0,
 
-  handleResize = () => {
-    if (window.innerWidth <= MOBILE_SIZE) {
-      this.setState({ sidebarCollapsed: false, isMobile: true });
-    } else {
-      this.setState({ isMobile: false });
-    }
-  };
+			//chat state values
+			socketFunctions: {
+				socket: [],
+				newMessage: {},
+				updatedFunction: ''
+			},
+			messages: {
+				users: []
+			}
+			//end chat state values
+		};
+	}
 
-  componentDidUpdate(prev) {
-    if (this.state.isMobile && prev.location.pathname !== this.props.location.pathname) {
-      this.toggleSideCollapse();
-    }
-  }
+	componentWillMount = () => {
+		var { socketFunctions } = this.state,
+			socket = Socket.connect();
+		
+		socketFunctions.socket = socket;
+		this.socketConnection(socket);
+		this.setState({socketFunctions});
+	}
 
-  componentDidMount() {
-	window.addEventListener('resize', this.handleResize);
-	this.getMessageNotificationCount();
-  }
+	websocketFunctions = {
+		onlineUsers: (data) => {
+			var { socketFunctions,
+				messages } = this.state,
+				{ users } = messages,
+				onlineIDs = data.map(d => d.id);
+	
+			messages.users = users.map(u => {
+				u.online = onlineIDs.indexOf(u.id) !== -1 ? true : false;
+				return u;
+			});
 
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.handleResize);
-  }
+			socketFunctions.updatedFunction = 'online users';
+			this.setState({messages, socketFunctions});
+		},
+		onlineUser: (data) => {
+			var { messages,
+				socketFunctions } = this.state,
+				{ users } = messages,
+				{ id } = data;
+	
+			messages.users = users.map(u => {
+				if(u.id == id) {
+					u.online = true;
+				}
+				return u;
+			});
 
-  toggleSideCollapse = () => {
-    this.setState(prevState => ({ sidebarCollapsed: !prevState.sidebarCollapsed }));
-  };
+			socketFunctions.updatedFunction = 'online user';
+			this.setState({messages, socketFunctions});
+		},
+		disconnectedUser: (data) => {
+			var { socketFunctions,
+				messages } = this.state,
+				{ users } = messages,
+				{ id } = data;
+	
+			messages.users = users.map(u => {
+				if(u.id == id) {
+					u.online = false;
+				}
+				return u;
+			});
+			socketFunctions.updatedFunction = 'disconnected user';
+			this.setState({messages, socketFunctions});
+		},
+		newMessage: (data) => {
+			var { socketFunctions } = this.state,
+				{ pathname } = window.location;
 
-  closeChat = () => {
-    this.setState({ showChat1: false });
-  };
+			if(pathname.indexOf('messages') === -1) {
+				var { nav,
+					messages,
+					messageNotif } = this.state,
+					{ users } = messages,
+					messageNotif = parseInt(messageNotif) + 1,
+					{ chat } = data,
+					{ user_id,
+					message,
+					created_at } = chat,
+					index = users.map(u => u.id).indexOf(user_id),
+					newMessages = users.splice(index, 1);
+	
+				newMessages[0].message = message;
+				newMessages[0].sender = 0;
+				newMessages[0].created_at = created_at;
+                newMessages[0].notif = newMessages[0].notif ? newMessages[0].notif + 1 : 1;
+				users.unshift(newMessages[0]);
+				messages.users = users;
 
-  changeMessageNotifCount = (messageNotif) => {
-    var {nav} = this.state;
-    nav.top = nav.top.map(n => {
-      if(n.hasNotif) {
-        n.notifCount = messageNotif;
-      }
+				nav.top = nav.top.map(n => {
+					if(n.hasNotif) {
+						n.notifCount = messageNotif;
+					}
 
-      return n;
-    });
-    this.setState({messageNotif, nav});
-  }
+					return n;
+				});
 
-  getMessageNotificationCount = () => {
-    HttpRequest.get(config.api.getChat).then(response => {
-      	if(response.data.status == 'success') {
-			var {users} = response.data.message,
-				totalNotifCount = users.filter(u => u.notif).map(u => u.notif).reduce((a, b) => a + b, 0);
+				this.setState({
+					messageNotif,
+					nav,
+					users
+				});
+			} else {
+				socketFunctions.newMessage = data;
+				socketFunctions.updatedFunction = 'new message';
+				this.setState({socketFunctions});
+			}
+		},
+	}
 
-			this.changeMessageNotifCount(totalNotifCount);
-      	}
-    }).catch(error => {
-		setTimeout(() => this.getMessageNotificationCount(), 1000);
-      	console.log(error);
-    });
-  }
+	socketConnection = (socket) => {
+		Socket.onConnect(socket, () => this.setState({websocketDone: true}));
+		Socket.getOnlineUsers(socket, data => this.websocketFunctions.onlineUsers(data));
+		Socket.newOnlineUser(socket, data => this.websocketFunctions.onlineUser(data));
+		Socket.disconnectedUser(socket, data => this.websocketFunctions.disconnectedUser(data));
+		Socket.newMessage(socket, data => this.websocketFunctions.newMessage(data));
+	}
 
-  render() {
-    const { sidebarCollapsed } = this.state;
-    const sidebarCollapsedClass = sidebarCollapsed ? 'side-menu-collapsed' : '';
-    
-    return (
-      <ContextProviders>
-        <div className={`app ${sidebarCollapsedClass}`}>
-          <PageAlert />
+	handleResize = () => {
+		if (window.innerWidth <= MOBILE_SIZE) {
+			this.setState({ sidebarCollapsed: false, isMobile: true });
+		} else {
+			this.setState({ isMobile: false });
+		}
+	};
 
-          <div className="app-body">
-            <SidebarNav
-              nav={this.state.nav}
-              logo={Logo}
-              logoText="TAP ADS"
-              isSidebarCollapsed={sidebarCollapsed}
-              toggleSidebar={this.toggleSideCollapse}
-              {...this.props}
-            />
-            
-            <Page>
-              <Header
-                toggleSidebar={this.toggleSideCollapse}
-                isSidebarCollapsed={sidebarCollapsed}
-                routes={routes}
-                {...this.props}
-              >
-                <HeaderNav />
-              </Header>
+	componentDidUpdate(prev) {
+		if (this.state.isMobile && prev.location.pathname !== this.props.location.pathname) {
+			this.toggleSideCollapse();
+		}
+	}
 
-              <PageContent>
-                <Switch>
-                  {routes.map((page, key) => (
-                    <Route
-                      path={page.path}
-                      render={props =>
-                        <page.component
-                          {...props}
-                          changeMessageNotifCount={this.changeMessageNotifCount}
-                        />}
-                      key={key}
-                  />
-                  ))}
-                  <Redirect from="/" to="/dashboard" />
-                </Switch>
-              </PageContent>
-            </Page>
-          </div>
+	componentDidMount() {
+		window.addEventListener('resize', this.handleResize);
+		this.getMessageNotificationCount();
+	}
 
-          <Footer>
-            <span>
-              <a href="#!">Terms</a> | <a href="#!">Privacy Policy</a>
-            </span>
-            {/* <span className="ml-auto hidden-xs">
-              Made with{' '}
-              <span role="img" aria-label="taco">
-                🌮  
-              </span>
-            </span> */}
-          </Footer>
-        </div>
-      </ContextProviders>
-    );
-  }
+	componentWillUnmount() {
+		window.removeEventListener('resize', this.handleResize);
+	}
+
+	toggleSideCollapse = () => {
+		this.setState(prevState => ({ sidebarCollapsed: !prevState.sidebarCollapsed }));
+	};
+
+	changeMessageNotifCount = (messageNotif) => {
+		var { nav, socketFunctions } = this.state;
+		nav.top = nav.top.map(n => {
+			if(n.hasNotif) {
+				n.notifCount = messageNotif;
+			}
+
+			return n;
+		});
+		socketFunctions.updatedFunction = '';
+		this.setState({
+			messageNotif,
+			socketFunctions,
+			nav
+		});
+	}
+
+	getMessageNotificationCount = () => {
+		HttpRequest.get(config.api.getChat).then(response => {
+			if(response.data.status == 'success') {
+				var {users} = response.data.message,
+					{messages} = this.state,
+					totalNotifCount = users.filter(u => u.notif).map(u => u.notif).reduce((a, b) => a + b, 0);
+				messages.users = users;
+				this.changeMessageNotifCount(totalNotifCount);
+				this.setState({messages});
+			}
+		}).catch(error => {
+			setTimeout(() => this.getMessageNotificationCount(), 1000);
+			console.log(error);
+		});
+	}
+
+	render() {
+		const { sidebarCollapsed } = this.state;
+		const sidebarCollapsedClass = sidebarCollapsed ? 'side-menu-collapsed' : '';
+		
+		if(!this.state.websocketDone) {
+            return (
+				<div className="mt-5">
+					<Loader type="puff" />
+				</div>
+			)
+		} else {
+			return (
+				<ContextProviders>
+					<div className={`app ${sidebarCollapsedClass}`}>
+						<PageAlert />
+
+						<div className="app-body">
+							<SidebarNav
+								nav={this.state.nav}
+								logo={Logo}
+								logoText="TAP ADS"
+								isSidebarCollapsed={sidebarCollapsed}
+								toggleSidebar={this.toggleSideCollapse}
+								{...this.props}
+							/>
+							
+							<Page>
+								<Header
+									toggleSidebar={this.toggleSideCollapse}
+									isSidebarCollapsed={sidebarCollapsed}
+									routes={routes}
+									{...this.props}
+								>
+									<HeaderNav />
+								</Header>
+
+								<PageContent>
+									<Switch>
+										{routes.map((page, key) => (
+											<Route
+												exact
+												path={page.path}
+												render={props =>
+													<page.component
+														{...props}
+														changeMessageNotifCount={this.changeMessageNotifCount}
+														websocket={{
+															socketFunctions: this.state.socketFunctions,
+															messages: this.state.messages
+														}}
+													/>
+												}
+												key={key}
+											/>
+										))}
+										<Redirect from="/" to="/dashboard" />
+									</Switch>
+								</PageContent>
+							</Page>
+						</div>
+
+						<Footer>
+							<span>
+								<a href="#!">Terms</a> | <a href="#!">Privacy Policy</a>
+							</span>
+						</Footer>
+					</div>
+				</ContextProviders>
+			);	
+		}
+	}
 }
 
 function HeaderNav() {
-  return (
-    <React.Fragment>
-      {/* <NavItem>
-        <form className="form-inline">
-          <input className="form-control mr-sm-1" type="search" placeholder="Search" aria-label="Search" />
-          <Button type="submit" className="d-none d-sm-block">
-            <i className="fa fa-search" />
-          </Button>
-        </form>
-      </NavItem> */}
-      <UncontrolledDropdown nav inNavbar>
-        {/* <DropdownToggle nav caret>
-          New
-        </DropdownToggle>
-        <DropdownMenu right>
-          <DropdownItem>Project</DropdownItem>
-          <DropdownItem>User</DropdownItem>
-          <DropdownItem divider />
-          <DropdownItem>
-            Message <Badge color="primary">10</Badge>
-          </DropdownItem>
-        </DropdownMenu> */}
-      </UncontrolledDropdown>
-      <ClientNotification></ClientNotification>
-      {/* <UncontrolledDropdown nav inNavbar>
-        <DropdownToggle nav>
-          <Avatar size="small" color="blue" initials="JS" />
-        </DropdownToggle>
-        <DropdownMenu right>
-          <DropdownItem>Option 1</DropdownItem>
-          <DropdownItem>Option 2</DropdownItem>
-          <DropdownItem divider />
-          <DropdownItem>Reset</DropdownItem>
-        </DropdownMenu>
-      </UncontrolledDropdown> */}
-    </React.Fragment>
-  );
+	return (
+		<React.Fragment>
+			<UncontrolledDropdown nav inNavbar></UncontrolledDropdown>
+			<ClientNotification></ClientNotification>
+		</React.Fragment>
+	);
 }
