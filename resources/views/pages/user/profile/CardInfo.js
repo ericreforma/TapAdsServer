@@ -74,7 +74,11 @@ export default class CardInfo extends Component {
                                     <h6 className="text-muted mb-0">{userData.location}</h6>
                                     <h6 className="text-muted">{userData.email}</h6>
 
-                                    <Button color="primary" size="sm">
+                                    <Button
+                                        color="primary"
+                                        size="sm"
+                                        onClick={e => this.props.history.push('/messages', {id: userData.id})}
+                                    >
                                         Message
                                     </Button>
                                 </Col>

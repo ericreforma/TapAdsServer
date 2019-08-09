@@ -2,11 +2,15 @@ export default {
     api: {
         createCampaign: `/client/campaign/create`,
         createGeoLocation: '/client/campaign/new/geolocation',
-        campaignDashboard: '/client/campaign/dashboard/',
+        campaignDashboard: (id) => {
+            return `/client/campaign/dashboard/${id}`
+        },
         getGeoLocation: '/client/campaign/geolocation',
 
         submitRateUser: '/client/user/rating',
-        userProfileView: '/client/user/:id/profile',
+        userProfileView: (id) => {
+            return `/client/user/${id}/profile`
+        },
         getChat: '/client/user/chats',
         getConvo: '/client/user/convo/',
         submitRateUser: '/client/user/rating',

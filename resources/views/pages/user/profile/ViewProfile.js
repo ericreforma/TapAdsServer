@@ -7,13 +7,13 @@ import {
     CardBody,
     Button
 } from 'reactstrap';
-import axios from 'axios';
 
 import CardInfo from './CardInfo';
 import CardCampaigns from './CardCampaigns';
 import CardRatings from './CardRatings';
 import { Loader } from '../../../components';
 import config from '../../../config';
+import { HttpRequest } from '../../../services/http';
 
 export default class ViewProfile extends Component {
     constructor(props) {
@@ -21,7 +21,6 @@ export default class ViewProfile extends Component {
 
         this.state = {
             loader: true,
-            token: '',
 
             userData: {},
             userCampaigns: [],
@@ -33,35 +32,19 @@ export default class ViewProfile extends Component {
         }
     }
 
-    componentWillMount = () => {
-		var token =  localStorage.getItem('client_token');
-        this.setState({token});
-    }
-
     componentDidMount = () => {
         this.getUserProfile();
     }
 
     getUserProfile = () => {
-        var { id } = this.props.match.params,
-            apiRoute = config.api.userProfileView.split(':id'),
-            url;
+        var { id } = this.props.match.params;
         
-        apiRoute.splice(1, 0, id);
-        url = apiRoute.join('');
-        
-        axios.get(url, {
-            headers: {
-				Authorization: 'Bearer ' + this.state.token
-            }
-        }).then(response => {
+        HttpRequest.get(config.api.userProfileView(id)).then(response => {
             if(response.data.status == 'success') {
-                var {
-                        userData,
-                        userCampaigns,
-                        userRating,
-                        userVehicles,
-                    } = response.data.message,
+                var { userData,
+                    userCampaigns,
+                    userRating,
+                    userVehicles } = response.data.message,
                     rate = userRating.length !== 0 ? (
                         userRating.map(r => {return r.rate;}).reduce((a,b) => a + b) / userRating.length
                     ) : 0,
@@ -80,7 +63,7 @@ export default class ViewProfile extends Component {
                     userVehicles: userVehicles
                 });
             } else {
-                alert(response.data.message);
+                this.props.history.push('/pages/404');
             }
         }).catch(error => {
             setTimeout(this.getUserProfile, 1000);
@@ -108,7 +91,10 @@ export default class ViewProfile extends Component {
             return (
                 <div className="user-profile-section">
                     <div className="ups-personal-info">
-                        <CardInfo userData={userData} />
+                        <CardInfo
+                            {...this.props}
+                            userData={userData}
+                        />
                     </div>
 
                     <Row>

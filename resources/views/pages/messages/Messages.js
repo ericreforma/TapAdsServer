@@ -28,7 +28,6 @@ export default class Messages extends Component {
             nonConvoUsers: [],
             conversation: [],
             activeUserId: null,
-            activeChatIndex: null,
             loaderConversation: true,
             messageToSend: '',
             messageType: 0,
@@ -78,6 +77,7 @@ export default class Messages extends Component {
                     totalUsers,
                 });
                 this.chatWebSocket();
+                this.checkIDParams();
             } else {
                 setTimeout(() => this.getUserChat(), 1000);
             }
@@ -85,6 +85,17 @@ export default class Messages extends Component {
             console.log(error);
             setTimeout(() => this.getUserChat(), 1000);
         });
+    }
+
+    checkIDParams = () => {
+        const {state} = this.props.location;
+        if(state) {
+            var activeUserId = state.id,
+                loaderConversation = true;
+
+            this.setState({activeUserId, loaderConversation});
+            this.conversationAlignment(activeUserId);
+        }
     }
 
     chatWebSocket = () => {
@@ -171,7 +182,7 @@ export default class Messages extends Component {
         }
     }
     
-    chatOnClick = (activeUserId, activeChatIndex) => (e) => {
+    chatOnClick = (activeUserId) => (e) => {
         if(activeUserId !== this.state.activeUserId) {
             var loaderConversation = true,
                 { totalNotifCount,
@@ -182,7 +193,6 @@ export default class Messages extends Component {
             this.props.changeMessageNotifCount(totalNotifCount);
 
             this.setState({
-                activeChatIndex,
                 loaderConversation,
                 activeUserId,
                 totalNotifCount,
@@ -209,11 +219,11 @@ export default class Messages extends Component {
             if(response.data.status == 'success') {
                 var conversation = [],
                     uData = [],
-                    users = this.state.users,
+                    { users } = this.state,
                     loaderConversation = false,
                     loader = false,
                     messageToSend = '',
-                    convo = response.data.message.convo,
+                    { convo } = response.data.message,
                     activeUserId = uid,
                     previousDate = null,
                     pushDate = null,
@@ -254,7 +264,10 @@ export default class Messages extends Component {
                     previousDate = c.created_at;
                 });
 
-                users[this.state.activeChatIndex].notif = null;
+                var userIndex = users.map(u => u.id).indexOf(activeUserId);
+                if(userIndex !== -1) {
+                    users[userIndex].notif = null;
+                }
         
                 this.setState({
                     conversation,
@@ -268,7 +281,7 @@ export default class Messages extends Component {
                 this.scrollToBottom();
             }
         }).catch(error => {
-            this.conversationAlignment(uid);
+            setTimeout(() => this.conversationAlignment(uid), 1000);
             console.log(error);
         });
     }
@@ -295,42 +308,72 @@ export default class Messages extends Component {
             }, chat => {
                 var { conversation,
                     users,
+                    totalUsers,
                     activeUserId } = this.state,
                     { user_id,
                     message,
-                    created_at } = chat,
+                    created_at,
+                    client_id } = chat,
                     lastConvo = conversation[conversation.length - 1],
                     index = users.map(u => u.id).indexOf(user_id),
-                    newMessages = users.splice(index, 1),
-                    cBreak = conversationBreak(created_at, lastConvo.messages[lastConvo.messages.length - 1].created_at);;
-    
-                newMessages[0].message = message;
-                newMessages[0].sender = 1;
-                newMessages[0].created_at = created_at;
+                    cBreak, newMessages;
                 
-                if(activeUserId !== user_id) {
-                    newMessages[0].notif = newMessages[0].notif ? newMessages[0].notif + 1 : 1;
-                }
-                users.unshift(newMessages[0]);
+                if(index !== -1) {
+                    cBreak = conversationBreak(created_at, lastConvo.messages[lastConvo.messages.length - 1].created_at);
+                    newMessages = users.splice(index, 1);
+                    newMessages[0].message = message;
+                    newMessages[0].sender = 1;
+                    newMessages[0].created_at = created_at;
                     
-                if(lastConvo.sender == 0) { //user
-                    conversation.push({
-                        date: dateFormat(created_at),
-                        break: cBreak,
-                        sender: 1,
-                        messages: [chat]
-                    });
-                } else { //client
-                    if(cBreak) {
+                    if(activeUserId !== user_id) {
+                        newMessages[0].notif = newMessages[0].notif ? newMessages[0].notif + 1 : 1;
+                    }
+                    users.unshift(newMessages[0]);
+                    
+                    if(lastConvo.sender == 0) { //user
                         conversation.push({
                             date: dateFormat(created_at),
                             break: cBreak,
                             sender: 1,
                             messages: [chat]
                         });
-                    } else {
-                        conversation[conversation.length - 1].messages.push(chat);
+                    } else { //client
+                        if(cBreak) {
+                            conversation.push({
+                                date: dateFormat(created_at),
+                                break: cBreak,
+                                sender: 1,
+                                messages: [chat]
+                            });
+                        } else {
+                            conversation[conversation.length - 1].messages.push(chat);
+                        }
                     }
+                } else {
+                    var tuIndex = totalUsers.map(tu => tu.id).indexOf(user_id),
+                        url = totalUsers[tuIndex].url,
+                        name = totalUsers[tuIndex].name,
+                        id = user_id,
+                        notif = null,
+                        sender = 1;
+
+                    users.unshift({
+                        id,
+                        message,
+                        client_id,
+                        url,
+                        created_at,
+                        name,
+                        notif,
+                        sender
+                    });
+
+                    conversation.push({
+                        date: dateFormat(created_at),
+                        break: false,
+                        sender: 1,
+                        messages: [chat]
+                    });
                 }
     
                 this.setState({conversation, users});
@@ -390,7 +433,7 @@ export default class Messages extends Component {
             var { totalUsers,
                 activeUserId } = this.state,
                 user = totalUsers.filter(u => u.id == activeUserId);
-    
+
             return activeUserId ? user[0].name : <span>&nbsp;</span>;
         },
         url: () => {
@@ -441,7 +484,7 @@ export default class Messages extends Component {
                                         <div
                                             key={u.id}
                                             className={"cs-lp-chatbox " + (this.state.activeUserId == u.id? 'cs-lp-chatbox-dark' : 'cs-lp-chatbox-white')}
-                                            onClick={this.chatOnClick(u.id, uIdx)}
+                                            onClick={this.chatOnClick(u.id)}
                                         >
                                             <div className="cs-lp-cb-image-container">
                                                 <div className="cs-lp-cb-image-wrapper">
@@ -527,33 +570,41 @@ export default class Messages extends Component {
                                         <Loader type="puff" />
                                     </div>
                                 ) : (
-                                    this.state.conversation.map((c, cIdx) =>
-                                        <div key={cIdx}>
-                                            {c.break ? (
-                                                <div className="text-center mb-2">
-                                                    <small style={{fontSize: '0.7rem'}} className="text-muted">{c.date}</small>
-                                                </div>
-                                            ) : null}
-
-                                            <div className={c.sender == 0 ? "cs-rp-c-user" : "cs-rp-c-client"}>
-                                                {c.sender == 0 ? (
-                                                    <div className="cs-rp-cu-image-wrapper">
-                                                        <img src={this.getRightPanelData.url()} />
+                                    this.state.conversation.length === 0 ? (
+                                        <div className="text-center">
+                                            <small className="text-muted">
+                                                <i>-- No messages --</i>
+                                            </small>
+                                        </div>
+                                    ) : (
+                                        this.state.conversation.map((c, cIdx) =>
+                                            <div key={cIdx}>
+                                                {c.break ? (
+                                                    <div className="text-center mb-2">
+                                                        <small style={{fontSize: '0.7rem'}} className="text-muted">{c.date}</small>
                                                     </div>
                                                 ) : null}
 
-                                                <div className={c.sender == 0 ? "cs-rp-cu-message-container" : "cs-rp-cc-message-container"}>
-                                                    {c.messages.map((m, mIdx) =>
-                                                        <div 
-                                                            className={c.sender == 0 ? "cs-rp-cu-message" : "cs-rp-cc-message"}
-                                                            key={m.id}
-                                                        >
-                                                            <p>{m.message}</p>
+                                                <div className={c.sender == 0 ? "cs-rp-c-user" : "cs-rp-c-client"}>
+                                                    {c.sender == 0 ? (
+                                                        <div className="cs-rp-cu-image-wrapper">
+                                                            <img src={this.getRightPanelData.url()} />
                                                         </div>
-                                                    )}
+                                                    ) : null}
+
+                                                    <div className={c.sender == 0 ? "cs-rp-cu-message-container" : "cs-rp-cc-message-container"}>
+                                                        {c.messages.map((m, mIdx) =>
+                                                            <div 
+                                                                className={c.sender == 0 ? "cs-rp-cu-message" : "cs-rp-cc-message"}
+                                                                key={m.id}
+                                                            >
+                                                                <p>{m.message}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        )
                                     )
                                 )}
                             </div>

@@ -329,7 +329,7 @@ export default class CampaignRequests extends Component {
                                                     <td title="View User"><Link to={"/user/profile/"+request.user_id}><img className="img-round" src={request.user_image}></img>{request.user_name}</Link></td>
                                                     <td title="View Campaign"><Link to={"/campaign/dashboard/"+request.campaign_id}><img className="img-round" src={request.campaign_image}></img>{request.campaign_name}</Link></td>
                                                     <td>{request.status}</td>
-                                                    <td>{this.formatDate(request.timestamp, true)}</td>
+                                                    <td>{this.formatDate(request.timestamp, false)}</td>
                                                     <td>
                                                         <div className="d-flex flex-column">
                                                             {/* <button className="btn btn-success" onClick={e => this.props.history.push(`/campaign/dashboard/${request.campaign_id}`)}>View Campaign</button>

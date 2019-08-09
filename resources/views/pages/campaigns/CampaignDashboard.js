@@ -17,9 +17,9 @@ import {
     PaginationLink
 } from 'reactstrap';
 import { Doughnut, Line } from 'react-chartjs-2';
-import axios from 'axios';
 import { Loader } from '../../components';
 
+import { HttpRequest } from '../../services/http';
 import config from '../../config';
 
 export default class CampaignDashboard extends Component {
@@ -76,11 +76,7 @@ export default class CampaignDashboard extends Component {
     }
 
     getCampaignData = (id) => {
-        axios.get(config.api.campaignDashboard + id, {
-			headers: {
-				Authorization: 'Bearer ' + this.state.token
-            }
-        }).then(response => {
+        HttpRequest.get(config.api.campaignDashboard(id)).then(response => {
             if(response.data.status == 'success') {
                 var userData = [],
                     campaign = response.data.message.campaign,
@@ -304,11 +300,7 @@ export default class CampaignDashboard extends Component {
         }
 
         if(proceed) {
-            axios.post(config.api.submitRateUser, form, {
-                headers: {
-                    Authorization: 'Bearer ' + this.state.token
-                }
-            }).then(response => {
+            HttpRequest.post(config.api.submitRateUser, form).then(response => {
                 if(response.data.status == 'success') {
                     var userData = this.state.userData;
 
