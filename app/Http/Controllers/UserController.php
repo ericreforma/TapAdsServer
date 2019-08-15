@@ -12,6 +12,8 @@ use App\Vehicle;
 use App\UserCampaign;
 use App\UserVehicle;
 use App\UserRating;
+use App\UserTrip;
+use App\UserTripMap;
 use App\ClientCampaign;
 use DB;
 
@@ -202,5 +204,20 @@ class UserController extends Controller
               'chat' => $chat
           ]
       ]);
+  }
+
+  public function getUserTrip(Request $request, $cid, $uid) {
+    $user_trip = UserTrip::where('campaign_id', '=', $cid)
+                        ->where('user_id', '=', $uid)
+                        ->get();
+    $user_trip_map = UserTripMap::whereIn('user_trip_id', $user_trip->pluck('id')->all())->get();
+
+    return response()->json([
+      'status'  => 'success',
+      'message' => [
+        'userTrip'    => $user_trip,
+        'userTripMap' => $user_trip_map
+      ]
+    ]);
   }
 }

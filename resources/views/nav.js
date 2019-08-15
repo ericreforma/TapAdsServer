@@ -34,6 +34,11 @@ export default {
       notifCount: '0',
       icon: 'MessageSquare'
     },
+    {
+      name: 'User Location',
+      url: '/user/location',
+      icon: 'MapPin'
+    },
     // {
     //   name: 'Gallery',
     //   url: '/gallery',

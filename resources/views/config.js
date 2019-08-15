@@ -6,6 +6,7 @@ export default {
             return `/client/campaign/dashboard/${id}`
         },
         getGeoLocation: '/client/campaign/geolocation',
+        getCampaignData: '/client/campaign/location/data',
 
         submitRateUser: '/client/user/rating',
         userProfileView: (id) => {
@@ -13,6 +14,9 @@ export default {
         },
         getChat: '/client/user/chats',
         getConvo: '/client/user/convo/',
+        getTrips: (uid, cid) => {
+            return `/client/user/trip/${cid}/${uid}`;
+        },
         submitRateUser: '/client/user/rating',
 
         updateNotif: '/client/chat/notif/update',

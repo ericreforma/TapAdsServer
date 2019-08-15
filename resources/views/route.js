@@ -21,7 +21,7 @@ import Modals from './elements/Modals';
 import ProgressBars from './elements/ProgressBars';
 import PaginationPage from './elements/Pagination';
 import ErrorPage from './pages/samples/404';
-import { ViewProfile } from './pages/user';
+import { ViewProfile, UserLocation } from './pages/user';
 import { CreateCampaign, CampaignList, CampaignDashboard, CampaignRequests } from './pages/campaigns';
 import Messages from './pages/messages/Messages';
 
@@ -60,6 +60,11 @@ const pageList = [
     name: 'Messages',
     path:'/messages',
     component: Messages
+  },
+  {
+    name: 'User Location',
+    path:'/user/location',
+    component: UserLocation
   },
   {
     name: 'Buttons',

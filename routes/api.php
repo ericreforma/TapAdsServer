@@ -58,18 +58,22 @@ Route::middleware('json.response')->group(function(){
         Route::post('/campaigns/requests','ClientCampaignController@UserStatusCampaignUpdate'); // >>>> campaign request update
         Route::get('logout', 'UserController@logout')->name('user_logout');
 
-        Route::post('campaign/create', 'ClientCampaignController@campaign_store'); // >>>> create campaign
-        Route::get('campaign/dashboard/{id}', 'ClientCampaignController@campaign_show'); // >>>> campaign details for dashboard
-        Route::post('campaign/new/geolocation', 'LocationController@geo_location_new'); // >>>> create custom geo location
-        Route::get('campaign/geolocation', 'LocationController@geo_location_get'); // >>>> get all geo location
- 
+        Route::prefix('campaign')->group(function() {
+          Route::post('create', 'ClientCampaignController@campaign_store'); // >>>> create campaign
+          Route::get('dashboard/{id}', 'ClientCampaignController@campaign_show'); // >>>> campaign details for dashboard
+          Route::post('new/geolocation', 'LocationController@geo_location_new'); // >>>> create custom geo location
+          Route::get('geolocation', 'LocationController@geo_location_get'); // >>>> get all geo location
+          Route::get('location/data', 'LocationController@for_location_data'); // >>>> get all geo location
+        });
+        
         Route::get('user/chats', 'ClientChatController@getUsersChat');
         Route::get('user/convo/{id}', 'ClientChatController@getUsersConvo');
-        Route::get('chat/notif/update/{id}', 'ClientChatController@updateNotif');
-        Route::get('chat/usersList', 'ClientChatController@getUserList');
-
         Route::post('user/rating', 'UserController@submitUserRating');
         Route::get('user/{id}/profile', 'UserController@viewProfile');
+        Route::get('user/trip/{cid}/{uid}', 'UserController@getUserTrip');
+
+        Route::get('chat/notif/update/{id}', 'ClientChatController@updateNotif');
+        Route::get('chat/usersList', 'ClientChatController@getUserList');
 
         Route::prefix('websocket')->group(function() {
           Route::get('getClientData', 'ClientController@websocketClientData');
