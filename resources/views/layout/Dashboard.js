@@ -19,9 +19,9 @@ export default class Dashboard extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			websocketDone: false,
 			isLoggedIn:false,
 			clientEmail:'',
+			initialData: false,
 			sidebarCollapsed: false,
 			isMobile: window.innerWidth <= MOBILE_SIZE,
 			nav: nav,
@@ -34,7 +34,9 @@ export default class Dashboard extends Component {
 				updatedFunction: ''
 			},
 			messages: {
-				users: []
+				users: [],
+				nonConvoUsers: [],
+				totalNotifCount: 0,
 			}
 			//end chat state values
 		};
@@ -141,7 +143,9 @@ export default class Dashboard extends Component {
 	}
 
 	socketConnection = (socket) => {
-		Socket.onConnect(socket, () => this.setState({websocketDone: true}));
+		Socket.onConnect(socket, () => {
+			console.log('connected');
+		});
 		Socket.getOnlineUsers(socket, data => this.websocketFunctions.onlineUsers(data));
 		Socket.newOnlineUser(socket, data => this.websocketFunctions.onlineUser(data));
 		Socket.disconnectedUser(socket, data => this.websocketFunctions.disconnectedUser(data));
@@ -176,7 +180,8 @@ export default class Dashboard extends Component {
 	};
 
 	changeMessageNotifCount = (messageNotif) => {
-		var { nav, socketFunctions } = this.state;
+		var { nav, socketFunctions } = this.state,
+			initialData = false;
 		nav.top = nav.top.map(n => {
 			if(n.hasNotif) {
 				n.notifCount = messageNotif;
@@ -188,19 +193,24 @@ export default class Dashboard extends Component {
 		this.setState({
 			messageNotif,
 			socketFunctions,
-			nav
+			nav,
+			initialData
 		});
 	}
 
 	getMessageNotificationCount = () => {
 		HttpRequest.get(config.api.getChat).then(response => {
 			if(response.data.status == 'success') {
-				var {users} = response.data.message,
+				var {users,
+					nonConvoUsers } = response.data.message,
 					{messages} = this.state,
+					initialData = true,
 					totalNotifCount = users.filter(u => u.notif).map(u => u.notif).reduce((a, b) => a + b, 0);
 				messages.users = users;
+				messages.nonConvoUsers = nonConvoUsers;
+				messages.totalNotifCount = totalNotifCount;
+				this.setState({messages, initialData});
 				this.changeMessageNotifCount(totalNotifCount);
-				this.setState({messages});
 			}
 		}).catch(error => {
 			setTimeout(() => this.getMessageNotificationCount(), 1000);
@@ -212,72 +222,66 @@ export default class Dashboard extends Component {
 		const { sidebarCollapsed } = this.state;
 		const sidebarCollapsedClass = sidebarCollapsed ? 'side-menu-collapsed' : '';
 		
-		if(!this.state.websocketDone) {
-            return (
-				<div className="mt-5">
-					<Loader type="puff" />
-				</div>
-			)
-		} else {
-			return (
-				<ContextProviders>
-					<div className={`app ${sidebarCollapsedClass}`}>
-						<PageAlert />
+		return (
+			<ContextProviders>
+				<div className={`app ${sidebarCollapsedClass}`}>
+					<PageAlert />
 
-						<div className="app-body">
-							<SidebarNav
-								nav={this.state.nav}
-								logo={Logo}
-								logoText="TAP ADS"
-								isSidebarCollapsed={sidebarCollapsed}
+					<div className="app-body">
+						<SidebarNav
+							nav={this.state.nav}
+							logo={Logo}
+							logoText="TAP ADS"
+							isSidebarCollapsed={sidebarCollapsed}
+							toggleSidebar={this.toggleSideCollapse}
+							{...this.props}
+						/>
+						
+						<Page>
+							<Header
 								toggleSidebar={this.toggleSideCollapse}
+								isSidebarCollapsed={sidebarCollapsed}
+								routes={routes}
 								{...this.props}
-							/>
-							
-							<Page>
-								<Header
-									toggleSidebar={this.toggleSideCollapse}
-									isSidebarCollapsed={sidebarCollapsed}
-									routes={routes}
-									{...this.props}
-								>
-									<HeaderNav />
-								</Header>
+							>
+								<HeaderNav />
+							</Header>
 
-								<PageContent>
-									<Switch>
-										{routes.map((page, key) => (
-											<Route
-												exact
-												path={page.path}
-												render={props =>
-													<page.component
-														{...props}
-														changeMessageNotifCount={this.changeMessageNotifCount}
-														websocket={{
-															socketFunctions: this.state.socketFunctions,
-															messages: this.state.messages
-														}}
-													/>
-												}
-												key={key}
-											/>
-										))}
-										<Redirect from="/" to="/dashboard" />
-									</Switch>
-								</PageContent>
-							</Page>
-						</div>
-
-						<Footer>
-							<span>
-								<a href="#!">Terms</a> | <a href="#!">Privacy Policy</a>
-							</span>
-						</Footer>
+							<PageContent>
+								<Switch>
+									{routes.map((page, key) => (
+										<Route
+											exact
+											path={page.path}
+											render={props =>
+												<page.component
+													{...props}
+													changeMessageNotifCount={this.changeMessageNotifCount}
+													websocket={{
+														socketFunctions: this.state.socketFunctions,
+														messages: this.state.messages,
+														messageNotif: this.state.messageNotif,
+														initialData: this.state.initialData
+													}}
+												/>
+											}
+											key={key}
+										/>
+									))}
+									<Redirect from="/" to="/dashboard" />
+								</Switch>
+							</PageContent>
+						</Page>
 					</div>
-				</ContextProviders>
-			);	
-		}
+
+					<Footer>
+						<span>
+							<a href="#!">Terms</a> | <a href="#!">Privacy Policy</a>
+						</span>
+					</Footer>
+				</div>
+			</ContextProviders>
+		);
 	}
 }
 

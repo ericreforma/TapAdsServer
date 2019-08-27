@@ -36,55 +36,44 @@ export default class Messages extends Component {
         };
     }
 
-    componentDidMount = () => {
-        this.getUserChat();
-    }
-
     getUserChat = () => {
-        HttpRequest.get(config.api.getChat).then(response => {
-            if(response.data.status == 'success') {
-                var { users,
-                    nonConvoUsers } = response.data.message,
-                    loaderConversation = false,
-                    totalUsers = [],
-                    totalNotifCount = users.filter(u => u.notif).map(u => u.notif).reduce((a, b) => a + b, 0);
+        var { users,
+            nonConvoUsers,
+            messageNotif } = this.props.websocket.messages,
+            loaderConversation = false,
+            totalUsers = [],
+            totalNotifCount = messageNotif;
 
-                users.map(u => {
-                    totalUsers.push({
-                        id: u.id,
-                        name: u.name,
-                        url: u.url
-                    });
-                });
-
-                nonConvoUsers.map(nu => {
-                    var arrayIDs = users.map(u => u.id);
-
-                    if(arrayIDs.indexOf(nu.id) === -1) {
-                        totalUsers.push({
-                            id: nu.id,
-                            name: nu.name,
-                            url: nu.url
-                        });
-                    }
-                });
-
-                this.setState({
-                    users,
-                    loaderConversation,
-                    totalNotifCount,
-                    nonConvoUsers,
-                    totalUsers,
-                });
-                this.chatWebSocket();
-                this.checkIDParams();
-            } else {
-                setTimeout(() => this.getUserChat(), 1000);
-            }
-        }).catch(error => {
-            console.log(error);
-            setTimeout(() => this.getUserChat(), 1000);
+        users.map(u => {
+            totalUsers.push({
+                id: u.id,
+                name: u.name,
+                url: u.url
+            });
         });
+
+        nonConvoUsers.map(nu => {
+            var arrayIDs = users.map(u => u.id);
+
+            if(arrayIDs.indexOf(nu.id) === -1) {
+                totalUsers.push({
+                    id: nu.id,
+                    name: nu.name,
+                    url: nu.url
+                });
+            }
+        });
+
+        this.setState({
+            users,
+            loaderConversation,
+            totalNotifCount,
+            nonConvoUsers,
+            totalUsers,
+        });
+        
+        this.chatWebSocket();
+        this.checkIDParams();
     }
 
     checkIDParams = () => {
@@ -103,19 +92,24 @@ export default class Messages extends Component {
         this.webSocket.onlineUsers(users);
     }
 
-    componentWillReceiveProps  = () => {
+    UNSAFE_componentWillReceiveProps = (nextProps) => {
         var { socketFunctions,
-            messages } = this.props.websocket,
+            messages,
+            initialData } = nextProps.websocket,
             { newMessage,
             updatedFunction } = socketFunctions,
             { users } = messages;
-
+            
         if(!this.state.loader && updatedFunction !== '') {
             if(updatedFunction == 'online user' || updatedFunction == 'disconnected user') {
                 this.webSocket.setUser(users);
             } else if(updatedFunction == 'new message') {
                 this.webSocket.newMessage(newMessage);
             }
+        }
+
+        if(initialData) {
+            this.getUserChat();
         }
     }
 
@@ -190,7 +184,6 @@ export default class Messages extends Component {
                 searchValue = '';
 
             totalNotifCount -= users.filter(u => u.id == activeUserId)[0].notif ? users.filter(u => u.id == activeUserId)[0].notif : 0;
-            this.props.changeMessageNotifCount(totalNotifCount);
 
             this.setState({
                 loaderConversation,
@@ -219,7 +212,8 @@ export default class Messages extends Component {
             if(response.data.status == 'success') {
                 var conversation = [],
                     uData = [],
-                    { users } = this.state,
+                    { users,
+                    totalNotifCount } = this.state,
                     loaderConversation = false,
                     loader = false,
                     messageToSend = '',
@@ -238,7 +232,7 @@ export default class Messages extends Component {
                                 date: dateFormat(pushDate),
                                 break: pushCBreak,
                                 sender: currSender,
-                                messages: (cIdx + 1) == convo.length ? uData.concat([c]) : uData
+                                messages: ((cIdx + 1) == convo.length && !cBreak) ? uData.concat([c]) : uData
                             });
                         }
 
@@ -279,6 +273,7 @@ export default class Messages extends Component {
                 });
                 this.updateNotif(uid);
                 this.scrollToBottom();
+                this.props.changeMessageNotifCount(totalNotifCount);
             }
         }).catch(error => {
             setTimeout(() => this.conversationAlignment(uid), 1000);

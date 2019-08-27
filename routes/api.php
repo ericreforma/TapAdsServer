@@ -33,6 +33,11 @@ Route::middleware('json.response')->group(function(){
       // Campaigns
       Route::get('/campaign/browse','ClientCampaignController@campaigns');
 
+      // chat
+      Route::prefix('chat')->group(function(){
+        Route::get('list', 'UserChatController@getChatList');
+        Route::get('{cid}', 'UserChatController@getMessages');
+      });
       
       Route::prefix('websocket')->group(function() {
         Route::get('getUserData', 'UserController@websocketUserData');

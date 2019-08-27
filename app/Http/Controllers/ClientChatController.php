@@ -42,6 +42,7 @@ class ClientChatController extends Controller
                                 FROM chat
                                 WHERE seen = 0
                                 AND sender = 0
+                                AND client_id = '.$request->user()->id.'
                                 GROUP BY user_id
                             ) as n
                         '), 'n.user_id', 'users.id'

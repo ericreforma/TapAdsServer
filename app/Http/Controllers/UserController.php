@@ -54,6 +54,9 @@ class UserController extends Controller
       $v->photo = Media::whereIn('id',$vehicle_photo_id)->get();
     };
 
+    $user_media = Media::where('id', $request->user()->media_id)->first();
+    $user->profilePicture = $user_media ? $user_media->url : null;
+
     return response()->json($user);
   }
 
@@ -179,7 +182,6 @@ class UserController extends Controller
     }
   }
 
-  
 	public function websocketUserData(Request $request) {
 		$returnData = (object)[
 			'id' => $request->user()->id
