@@ -8,7 +8,7 @@ class ClientCampaign extends Model
 {
     protected $table = 'client_campaign';
     public $timestamps = false;
-    
+
     protected $casts = [
       'location_id' => 'array'
     ];
@@ -20,5 +20,9 @@ class ClientCampaign extends Model
     public function userCampaign(){
       return $this->hasMany('App\UserCampaign');
     }
-    
+
+    public function userTripMap() {
+      return $this->hasMany('App\UserTripMap','client_id','id');
+    }
+
 }

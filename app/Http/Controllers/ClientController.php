@@ -9,6 +9,7 @@ use App\Client;
 use App\ClientCampaign;
 use App\ClientCampaignLocation;
 use App\UserCampaign;
+use App\UserTripMap;
 use Carbon\Carbon;
 use Hash;
 use DB;
@@ -41,7 +42,6 @@ class ClientController extends Controller
 		return response()->json($client);
 	}
 
-	
 	public function logout (Request $request) {
 
 		$token = $request->user()->token();
@@ -85,12 +85,21 @@ class ClientController extends Controller
 		$notifs->toArray();
 		return response()->json($notifs);
 	}
-	
+
     public function websocketClientData(Request $request) {
         $returnData = (object)[
             'id' => $request->user()->id
         ];
 
-        return response()->json($returnData);
-    }
+	public function campaignGetLiveMap(Request $request){
+		$client = $request->user();
+		$campaign = ClientCampaign::find($request->campaign_id);
+
+		$userTrips = UserTripMap::select('latitude','longitude')
+											->get();
+		return $userTrips;
+	}
+
+
+
 }

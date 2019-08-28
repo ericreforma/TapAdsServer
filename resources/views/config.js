@@ -1,3 +1,5 @@
+const homepage = '/TapAdsServer/public';
+
 export default {
     api: {
         createCampaign: `/client/campaign/create`,
@@ -27,7 +29,7 @@ export default {
         clientNotification: '/client/notifications',
 
         getListOfUsers: '/client/chat/usersList',
-        
+
         auth: {
             login: '/client/login',
             register: '/client/register',

@@ -44,7 +44,7 @@ export default class Dashboard extends Component {
 	componentWillMount = () => {
 		var { socketFunctions } = this.state,
 			socket = Socket.connect();
-		
+
 		socketFunctions.socket = socket;
 		this.socketConnection(socket);
 		this.setState({socketFunctions});
@@ -56,7 +56,7 @@ export default class Dashboard extends Component {
 				messages } = this.state,
 				{ users } = messages,
 				onlineIDs = data.map(d => d.id);
-	
+
 			messages.users = users.map(u => {
 				u.online = onlineIDs.indexOf(u.id) !== -1 ? true : false;
 				return u;
@@ -70,7 +70,7 @@ export default class Dashboard extends Component {
 				socketFunctions } = this.state,
 				{ users } = messages,
 				{ id } = data;
-	
+
 			messages.users = users.map(u => {
 				if(u.id == id) {
 					u.online = true;
@@ -86,7 +86,7 @@ export default class Dashboard extends Component {
 				messages } = this.state,
 				{ users } = messages,
 				{ id } = data;
-	
+
 			messages.users = users.map(u => {
 				if(u.id == id) {
 					u.online = false;
@@ -112,7 +112,7 @@ export default class Dashboard extends Component {
 					created_at } = chat,
 					index = users.map(u => u.id).indexOf(user_id),
 					newMessages = users.splice(index, 1);
-	
+
 				newMessages[0].message = message;
 				newMessages[0].sender = 0;
 				newMessages[0].created_at = created_at;
@@ -218,7 +218,7 @@ export default class Dashboard extends Component {
 	render() {
 		const { sidebarCollapsed } = this.state;
 		const sidebarCollapsedClass = sidebarCollapsed ? 'side-menu-collapsed' : '';
-		
+
 		return (
 			<ContextProviders>
 				<div className={`app ${sidebarCollapsedClass}`}>
@@ -233,7 +233,7 @@ export default class Dashboard extends Component {
 							toggleSidebar={this.toggleSideCollapse}
 							{...this.props}
 						/>
-						
+
 						<Page>
 							<Header
 								toggleSidebar={this.toggleSideCollapse}

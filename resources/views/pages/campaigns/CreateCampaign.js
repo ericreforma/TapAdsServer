@@ -25,7 +25,7 @@ export default class CreateCampainpage extends Component {
     state = {
 		loaderShow: true,
 		token: '',
-		
+
 		// forms
 		formData: [
 			{
@@ -142,7 +142,7 @@ export default class CreateCampainpage extends Component {
 				]
 			}
 		],
-		
+
 		// google map data
 		polygons: [],
 		google: {},
@@ -223,7 +223,7 @@ export default class CreateCampainpage extends Component {
 				geoLocations.push(defaultGeoLocations.filter(dg => dg.id == parseInt(options[x].value))[0]);
 			}
 		}
-		
+
 		var google = this.state.google,
 			bounds = new google.maps.LatLngBounds(),
 			newPolygons = [];
@@ -236,7 +236,7 @@ export default class CreateCampainpage extends Component {
 					var lat = c.lat,
 						lng = c.lng,
 						loc = new google.maps.LatLng(lat, lng);
-						
+
 					bounds.extend(loc);
 				});
 
@@ -290,7 +290,7 @@ export default class CreateCampainpage extends Component {
 					position: {lat: lat, lng: lng},
 					title: 'Lat: ' + lat + '\nLng: ' + lng,
 					draggable: true,
-				});	
+				});
 			markers.push(marker);
 			marker.addListener('drag', this.markerDrag);
 			this.setState({markers});
@@ -337,7 +337,7 @@ export default class CreateCampainpage extends Component {
 							coordinates: JSON.stringify([paths]),
 							name: this.state.customLocationName
 						};
-					
+
 					HttpRequest.post(config.api.createGeoLocation, form).then(response => {
 						if(response.data.status == 'success') {
 							var { defaultGeoLocations } = this.state;
@@ -363,7 +363,7 @@ export default class CreateCampainpage extends Component {
 					});
 				}
 			}
-				
+
 			this.setState({
 				customLocationError: customLocationName !== '' ? false : true
 			});
@@ -431,7 +431,7 @@ export default class CreateCampainpage extends Component {
 					form.invalid = true;
 				}
 			}
-			
+
 			return form;
 		});
 
@@ -451,7 +451,7 @@ export default class CreateCampainpage extends Component {
 					this.removeCurrentMarkers();
 					this.removeCurrentPaths();
 				}
-				
+
 				alert(response.data.message);
 			}).catch(error => {
 				console.log(error);
@@ -509,7 +509,7 @@ export default class CreateCampainpage extends Component {
 																	<option
 																		key={optionIdx}
 																		value={optionIdx}
-																	>{option}</option>	
+																	>{option}</option>
 																)}
 															</Input>
 														) : (
@@ -553,7 +553,7 @@ export default class CreateCampainpage extends Component {
 																					<option
 																						key={optionIdx}
 																						value={optionIdx}
-																					>{option}</option>	
+																					>{option}</option>
 																				)}
 																			</Input>
 																		) : (
@@ -576,7 +576,7 @@ export default class CreateCampainpage extends Component {
 													</Row>
 												)
 											)}
-	
+
 											<Label for="googleMap">Location (Metro Manila)</Label>
 											<Card color="light">
 												<CardBody>
@@ -627,7 +627,7 @@ export default class CreateCampainpage extends Component {
 															onInput={this.defaultGeoLocationOnInput}
 															multiple
 														>
-															{this.state.defaultGeoLocations.map(geo => 
+															{this.state.defaultGeoLocations.map(geo =>
 																<option
 																	key={geo.id}
 																	value={geo.id}
@@ -684,7 +684,7 @@ export default class CreateCampainpage extends Component {
 													)}
 												</CardBody>
 											</Card>
-	
+
 											<div
 												className="mt-3"
 											>

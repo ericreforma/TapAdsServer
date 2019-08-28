@@ -42,6 +42,11 @@ const pageList = [
     component: CampaignList
   },
   {
+    name: 'Live Map',
+    path:'/campaigns/livemap/:id',
+    component: LiveMap
+  },
+  {
     name: 'Campaign Dashboard',
     path:'/campaign/dashboard/:id',
     component: CampaignDashboard

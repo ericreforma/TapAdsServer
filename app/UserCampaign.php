@@ -7,6 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class UserCampaign extends Model
 {
     protected $table = 'user_campaign';
+    public $timestamps = false;
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->created_at = $model->freshTimestamp();
+        });
+    }
     public function user(){
       return $this->belongsTo('App\User');
     }

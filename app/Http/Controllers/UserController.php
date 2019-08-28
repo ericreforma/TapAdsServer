@@ -15,7 +15,12 @@ use App\UserRating;
 use App\UserTrip;
 use App\UserTripMap;
 use App\ClientCampaign;
+use App\UserTrip;
+use App\UserTripMap;
+use App\UserCurrentLocation;
+
 use DB;
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
@@ -60,19 +65,20 @@ class UserController extends Controller
     return response()->json($user);
   }
 
-  public function getMyCampaigns(Request $request){
+  public function campaign_list(Request $request){
     $user = $request->user();
 
     $mycampaign = $user->campaigns;
     foreach ($mycampaign as $c) {
       $c->campaignDetails = ClientCampaign::find($c->campaign_id);
       $c->client = Client::find($c->campaignDetails->client_id);
+      $c->trips = UserTrip::where('user_campaign_id',$c->id)->get();
     }
 
     return response()->json($mycampaign);
   }
 
-  public function addMyCampaigns(Request $request){
+  public function campaign_add(Request $request){
 
     $mycampaign = UserCampaign::where('campaign_id', $request->campaign_id)->count();
 
@@ -83,9 +89,6 @@ class UserController extends Controller
       $userCampaign->campaign_id = $request->campaign_id;
       $userCampaign->user_id = $user->id;
       $userCampaign->user_vehicle_id = $request->user_vehicle_id;
-      $userCampaign->distance_traveled = 0;
-      $userCampaign->completed = 0;
-      $userCampaign->favorite = 0;
       $userCampaign->save();
 
       return response()->json(['status' => 'success', 'message' => 'added on list']);
@@ -93,6 +96,14 @@ class UserController extends Controller
 
       return response()->json(['status' => 'error', 'message' => 'Already on list']);
     }
+  }
+
+  public function campaign_trip_update(Request $request){
+    $myCampaign = UserCampaign::find($request->input('trip.user_campaign_id'));
+
+    $myCampaign->campaign_traveled = $myCampaign->campaign_traveled + $request->input('trip.campaign_traveled');
+    $myCampaign->trip_traveled = $myCampaign->trip_traveled + $request->input('trip.trip_traveled');
+    $myCampaign->save();
   }
 
   public function addToFavorites(Request $request){
@@ -182,44 +193,73 @@ class UserController extends Controller
     }
   }
 
-	public function websocketUserData(Request $request) {
-		$returnData = (object)[
-			'id' => $request->user()->id
-		];
+  public function trip_create(Request $request){
+    $user = $request->user();
+    $userTrip = new UserTrip;
+    $userTrip->campaign_id = $request->campaign_id;
+    $userTrip->user_id = $user->id;
+    $userTrip->user_campaign_id = $request->user_campaign_id;
+    $userTrip->started = Carbon::now()->format('Y-m-d H:i:s');
 
-		return response()->json($returnData);
-	}
+    $userTrip->save();
 
-  public function websocketMessageSent(Request $request) {
-      $chat = new Chat;
-      $chat->user_id = $request->user()->id;
-      $chat->client_id = $request->uid;
-      $chat->message = $request->message;
-      $chat->type = $request->type;
-      $chat->sender = 0;
-      $chat->save();
-      $chat = Chat::find($chat->id);
+    return response()->json(['status' => 'saved', 'trip' => $userTrip ]);
+  }
+  public function trip_end(Request $request){
+    $trip_id = $request->input('trip.trip_id');
 
-      return response()->json([
-          'status' => 'success',
-          'message' => [
-              'chat' => $chat
-          ]
-      ]);
+    $trip = UserTrip::find($trip_id);
+
+    $trip->ended = Carbon::now()->format('Y-m-d H:i:s');
+    $trip->campaign_traveled = $request->input('trip.campaign_traveled');
+    $trip->trip_traveled = $request->input('trip.trip_traveled');
+    $trip->location_start_address =$request->input('trip.location_start_address');
+    $trip->location_start_long = $request->input('trip.location_start_longitude');
+    $trip->location_start_lat = $request->input('trip.location_start_latitude');
+    $trip->location_end_address =$request->input('trip.location_end_address');
+    $trip->location_end_long = $request->input('trip.location_end_longitude');
+    $trip->location_end_lat = $request->input('trip.location_end_latitude');
+    $trip->save();
+
+    $userCampaign = UserCampaign::find($request->input('trip.user_campaign_id'));
+    $userCampaign->campaign_traveled = $userCampaign->campaign_traveled + $request->input('trip.campaign_traveled');
+    $userCampaign->trip_traveled = $userCampaign->trip_traveled + $request->input('trip.trip_traveled');
+    $userCampaign->save();
   }
 
-  public function getUserTrip(Request $request, $cid, $uid) {
-    $user_trip = UserTrip::where('campaign_id', '=', $cid)
-                        ->where('user_id', '=', $uid)
-                        ->get();
-    $user_trip_map = UserTripMap::whereIn('user_trip_id', $user_trip->pluck('id')->all())->get();
+  public function trip_map_add(Request $request){
+    $tripmap = json_decode($request->trip_map, true);
 
-    return response()->json([
-      'status'  => 'success',
-      'message' => [
-        'userTrip'    => $user_trip,
-        'userTripMap' => $user_trip_map
+    return $tripmap['user_id'];
+    $userLocation = UserCurrentLocation::firstOrCreate(
+      ['user_trip_id' => $tripmap['user_trip_id']],
+      [
+        'campaign_id' => $tripmap['campaign_id'],
+        'user_id' => $tripmap['user_id'],
+        'campaign_id' => $tripmap['campaign_id'],
+        'user_campaign_id' => $tripmap['user_campaign_id'],
+        'latitude' => $tripmap['latitude'],
+        'longitude' => $tripmap['longitude'],
+        'speed' => $tripmap['speed'],
+        'timestamp' => Carbon::createFromTimestamp($tripmap['timestamp'])->format('Y-m-d H:i:s'),
       ]
-    ]);
+    );
+
+    $trip_map = new UserTripMap;
+    $trip_map->user_trip_id = $tripmap['user_trip_id'];
+    $trip_map->campaign_id = $tripmap['campaign_id'];
+    $trip_map->user_id = $tripmap['user_id'];
+    $trip_map->user_campaign_id = $tripmap['user_campaign_id'];
+    $trip_map->client_id = $tripmap['client_id'];
+    $trip_map->counted = $tripmap['counted'];
+    $trip_map->latitude = $tripmap['latitude'];
+    $trip_map->longitude = $tripmap['longitude'];
+    $trip_map->distance = $tripmap['distance'];
+    $trip_map->speed = $tripmap['speed'];
+
+    $trip_map->save();
+    return response()->json(1);
   }
+
+
 }
