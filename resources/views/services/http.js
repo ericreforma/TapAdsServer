@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API, TOKENIZED_API } from './api';
+import { API, TOKENIZED_API, API_RAW } from './api';
 
 let httpRequest;
 
@@ -20,7 +20,7 @@ export const RawHttpRequest = {
         return httpRequest.get(url);
     },
     post: (url, form = {}) => {
-        httpRequest = axios.create(API);
+        httpRequest = axios.create(API_RAW());
         return httpRequest.post(url, form);
     }
-}
+};

@@ -92,6 +92,12 @@ export default class Messages extends Component {
         this.webSocket.onlineUsers(users);
     }
 
+    componentDidMount = () => {
+        if(this.props.websocket.initialData) {
+            this.getUserChat();
+        }
+    }
+
     UNSAFE_componentWillReceiveProps = (nextProps) => {
         var { socketFunctions,
             messages,

@@ -14041,21 +14041,21 @@ img.img-circle {
   font-family: "Avenir LT Std 85 Heavy";
   font-style: normal;
   font-weight: normal;
-  src: local("Avenir LT Std 85 Heavy"), url(/fonts/AvenirLTStd-Heavy.woff?b997fee54ed6b4a9d397dcaee5b08bbb) format("woff");
+  src: local("Avenir LT Std 85 Heavy"), url("/tapads/public/assets/fonts/AvenirLTStd-Heavy.woff") format("woff");
 }
 
 @font-face {
   font-family: "Avenir LT Std 35 Light";
   font-style: normal;
   font-weight: normal;
-  src: local("Avenir LT Std 35 Light"), url(/fonts/AvenirLTStd-Light.woff?4a3e0c4011dfa60d118374f6322d4c33) format("woff");
+  src: local("Avenir LT Std 35 Light"), url("/tapads/public/assets/fonts/AvenirLTStd-Light.woff") format("woff");
 }
 
 @font-face {
   font-family: "Avenir LT Std 55 Roman";
   font-style: normal;
   font-weight: normal;
-  src: local("Avenir LT Std 55 Roman"), url(/fonts/AvenirLTStd-Roman.woff?43666b5e46a5d44b8c9457955a403041) format("woff");
+  src: local("Avenir LT Std 55 Roman"), url("/tapads/public/assets/fonts/AvenirLTStd-Roman.woff") format("woff");
 }
 
 .mycampaigns_card label,

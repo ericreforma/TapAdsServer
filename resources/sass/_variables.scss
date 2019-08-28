@@ -35,19 +35,19 @@ $palette_yellow: #f0ae48;
     font-family: 'Avenir LT Std 85 Heavy';
     font-style: normal;
     font-weight: normal;
-    src: local('Avenir LT Std 85 Heavy'), url('../../public/assets/fonts/AvenirLTStd-Heavy.woff') format('woff');
+    src: local('Avenir LT Std 85 Heavy'), url('/tapads/public/assets/fonts/AvenirLTStd-Heavy.woff') format('woff');
 }
 @font-face {
     font-family: 'Avenir LT Std 35 Light';
     font-style: normal;
     font-weight: normal;
-    src: local('Avenir LT Std 35 Light'), url('../../public/assets/fonts/AvenirLTStd-Light.woff') format('woff');
+    src: local('Avenir LT Std 35 Light'), url('/tapads/public/assets/fonts/AvenirLTStd-Light.woff') format('woff');
 }
 @font-face {
     font-family: 'Avenir LT Std 55 Roman';
     font-style: normal;
     font-weight: normal;
-    src: local('Avenir LT Std 55 Roman'), url('../../public/assets/fonts/AvenirLTStd-Roman.woff') format('woff');
+    src: local('Avenir LT Std 55 Roman'), url('/tapads/public/assets/fonts/AvenirLTStd-Roman.woff') format('woff');
 }
 //fonts
 $avenir-heavy: 'Avenir LT Std 85 Heavy';

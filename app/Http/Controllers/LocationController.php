@@ -73,7 +73,7 @@ class LocationController extends Controller
                 ->orderBy('u.id', 'ASC')
                 ->get();
         $locationIDs = $campaigns->pluck('location_id')->all();
-        $mergedLIDs = array_unique(array_merge(...$locationIDs));
+        $mergedLIDs = count($locationIDs) !== 0 ? array_unique(array_merge(...$locationIDs)) : [];
         $campaignLocations = ClientCampaignLocation::whereIn('id', $mergedLIDs)->get();
 
         return response()->json([

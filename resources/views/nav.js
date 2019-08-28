@@ -152,13 +152,9 @@ export default {
       ],
     },
     {
-      name: 'Account',
-      url: '/dashboard',
-      icon: 'User',
-      badge: {
-        variant: 'success',
-        text: '3',
-      },
+      name: 'Logout',
+      url: '/logout',
+      icon: 'Power'
     },
   ],
 };

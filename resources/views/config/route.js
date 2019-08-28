@@ -1,5 +1,7 @@
 import {USER_TYPE, TOKEN} from '../config/variable';
 
+const basePath = '/tapads/public';
+
 export const websocketURI = {
     chat: {
         client: {
@@ -18,4 +20,12 @@ export const websocketEvents = {
         NEW_MESSAGE: 'new message',
         DC_USER: 'disconnected user'
     }
+};
+
+export const URL_ROUTES = {
+    basePath,
+    dashboard: `/dashboard`,
+    login: `/login`,
+    signup: `/signup`,
+    logout: `/logout`
 };

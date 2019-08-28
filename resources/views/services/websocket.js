@@ -1,7 +1,7 @@
 import io from 'socket.io-client';
 import { websocketURI, websocketEvents } from '../config/route';
 
-const baseURL = 'http://dev.bcdpinpoint.com:3000';
+const baseURL = 'http://127.0.0.1:3000';
 
 let { chat } = websocketEvents,
     socket;

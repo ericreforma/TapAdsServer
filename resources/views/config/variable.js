@@ -1,3 +1,6 @@
+import {getToken} from '../storage';
+import { URL_ROUTES } from '../config/route';
+
 export const chat = {
     maxHourBreak: 2
 };
@@ -34,4 +37,8 @@ export const GOOGLE_API = {
     defaultZoom: 10,
 };
 
-export const TOKEN = localStorage.getItem('client_token');
+export const TOKEN = getToken();
+
+export const IMAGES = {
+    logo: `${URL_ROUTES.basePath}/images/app-logo.png`
+};

@@ -7,7 +7,6 @@ import nav from '../nav';
 import routes from '../route';
 import ContextProviders from '../components/utilities/ContextProviders';
 import ClientNotification from '../functions/notifications/ClientNotification.js';
-import { Loader } from '../components';
 
 import { Socket } from '../services/websocket';
 import { HttpRequest } from '../services/http';
@@ -21,13 +20,13 @@ export default class Dashboard extends Component {
 		this.state = {
 			isLoggedIn:false,
 			clientEmail:'',
-			initialData: false,
 			sidebarCollapsed: false,
 			isMobile: window.innerWidth <= MOBILE_SIZE,
 			nav: nav,
 			messageNotif: 0,
 
 			//chat state values
+			initialData: false,
 			socketFunctions: {
 				socket: [],
 				newMessage: {},
@@ -180,8 +179,7 @@ export default class Dashboard extends Component {
 	};
 
 	changeMessageNotifCount = (messageNotif) => {
-		var { nav, socketFunctions } = this.state,
-			initialData = false;
+		var { nav, socketFunctions } = this.state;
 		nav.top = nav.top.map(n => {
 			if(n.hasNotif) {
 				n.notifCount = messageNotif;
@@ -193,8 +191,7 @@ export default class Dashboard extends Component {
 		this.setState({
 			messageNotif,
 			socketFunctions,
-			nav,
-			initialData
+			nav
 		});
 	}
 
@@ -210,7 +207,7 @@ export default class Dashboard extends Component {
 				messages.nonConvoUsers = nonConvoUsers;
 				messages.totalNotifCount = totalNotifCount;
 				this.setState({messages, initialData});
-				this.changeMessageNotifCount(totalNotifCount);
+				this.changeMessageNotifCount(totalNotifCount, true);
 			}
 		}).catch(error => {
 			setTimeout(() => this.getMessageNotificationCount(), 1000);

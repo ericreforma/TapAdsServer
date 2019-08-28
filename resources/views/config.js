@@ -27,8 +27,17 @@ export default {
         clientNotification: '/client/notifications',
 
         getListOfUsers: '/client/chat/usersList',
+        
+        auth: {
+            login: '/client/login',
+            register: '/client/register',
+            logout: '/client/logout'
+        }
     },
     apiKey: {
         googleApiKey: 'AIzaSyBwXTceRsEryqeySF0HtM66cVwwWa9rW0w'
+    },
+    keys: {
+        storageKey: '6CdP1np01nT D!r3cT m@rk3t!nG 1nC'
     }
 };

@@ -33,7 +33,7 @@ export default class ClientNotification extends Component {
 			this.setState({loader: false});
         }).catch(error => {
             // console.log(error);
-			setTimeout(this.getNotifications, 5000);
+			setTimeout(() => this.getNotifications(), 5000);
         });
     }
     formatDate = (dates, timeInclude) => {

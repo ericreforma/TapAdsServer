@@ -3,15 +3,19 @@ import { BrowserRouter, Route, Switch, Link, Redirect } from 'react-router-dom';
 import DashboardLayout from '../views/layout/Dashboard';
 import LoginLayout from '../views/pages/auth/Login';
 import SignupLayout from '../views/pages/auth/Signup';
+import LogoutLayout from '../views/pages/auth/Logout';
+import { URL_ROUTES } from '../views/config/route';
+import { getToken } from '../views/storage';
 //import Auth from '../views/functions/Authenticate';
 
 export default function App() {
 	return (
-		<BrowserRouter>
+		<BrowserRouter basename={URL_ROUTES.basePath}>
+		{/* <BrowserRouter> */}
 			<Switch>
-				<Route path="/login" component={LoginLayout} />
-				<Route path="/signup" component={SignupLayout} />
-				{/* <Route component={DashboardLayout} /> */}
+				<AuthRoutes path={URL_ROUTES.login} component={LoginLayout} />
+				<AuthRoutes path={URL_ROUTES.signup} component={SignupLayout} />
+				<Route path={URL_ROUTES.logout} component={LogoutLayout} />
 				<PrivateRoute component={DashboardLayout} />
 			</Switch>
 		</BrowserRouter>
@@ -19,10 +23,21 @@ export default function App() {
 }
 const PrivateRoute = ({ component: Component, ...rest }) => (
 	<Route {...rest} render={(props) => (
-	  	localStorage.getItem('client_token') !== null
+	  	getToken() !== null
 		? <Component {...props} />
 		: <Redirect to={{
-			pathname: '/login'
+			pathname: URL_ROUTES.login
 		  }} />
 	)} />
-)
+);
+
+const AuthRoutes = ({ component: Component, ...rest }) => (
+	<Route
+		{...rest}
+		render={(props) => (
+			getToken() !== null
+			? <Redirect to={{pathname: URL_ROUTES.dashboard}} />
+			: <Component {...props} />
+		)}
+	/>
+);

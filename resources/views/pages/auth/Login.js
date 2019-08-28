@@ -1,43 +1,37 @@
 import React, { Component } from 'react';
 import { Container, Row, Col, Button, Form, FormGroup, Label, Input, InputGroup } from 'reactstrap';
 import {Link} from 'react-router-dom';
-import axios from 'axios';
+import config from '../../config';
+import { IMAGES } from '../../config/variable';
+import { RawHttpRequest } from '../../services/http';
+import { URL_ROUTES } from '../../config/route';
+import { storeToken } from '../../storage';
+import { API } from '../../services/api';
+
+console.log(API);
 
 export default class Login extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-		email:'',
-		password:'',
-		error:''
-    }
-    this.login = this.login.bind(this);
-  }
+	constructor(props) {
+		super(props);
+		this.state = {
+			email:'',
+			password:'',
+			error:''
+		}
+		this.login = this.login.bind(this);
+	}
+	
 	login = (e) =>{
 		e.preventDefault();
-		var token = document.head.querySelector('meta[name="csrf-token"]');
-		var data = {
+		RawHttpRequest.post(config.api.auth.login, {
 			email:this.state.email,
 			password:this.state.password
-		}
-		var headers = {
-			'Content-Type': 'application/json',
-			'X-CSRF-TOKEN': token.content,
-			'X-Requested-With': 'XMLHttpRequest',
-			"Access-Control-Allow-Origin": "*",
-		}
-		axios.post('/api/client/login',data,headers
-		).then( (res) => {
+		}).then(res => {
 			if(res.data.error){
 				this.setState({error:'Invalid Email or Password'});
 			}else{
-				localStorage.setItem('client_token',res.data.token);
-				/*this.props.authenticate( () => {
-					this.setState(() => ({
-						redirectToReferrer: true
-					}))
-				});*/
-				this.props.history.push("/dashboard");
+				storeToken(res.data.token);
+				this.props.history.push(URL_ROUTES.dashboard);
 			}
 		}).catch((err) => {
 			console.log(err);
@@ -47,18 +41,12 @@ export default class Login extends Component {
 	}
 
 	render(){
-		{/*const { from } = this.props.location.state || { from: { pathname: '/' } }
-		const { redirectToReferrer } = this.state
-	
-		if (redirectToReferrer === true) {
-		  return <Redirect to={from} />
-		}*/}
 		return(
 			<Container className="login-container d-flex align-items-center justify-content-center">
 				<Row>
 					<Col className="login-form text-center">
 					{/* <h1>Tap Ads Server</h1> */}
-					<img src="/images/app-logo.png" className='app-logo'/>
+					<img src={IMAGES.logo} className='app-logo'/>
 					<Form onSubmit={this.login}>
 						<FormGroup>
 							<Label style={{padding:0}} for="email">Email Address</Label>
@@ -90,7 +78,7 @@ export default class Login extends Component {
 						</FormGroup>
 						<span className="error">{this.state.error}</span>
 						<Button>Log In</Button>
-						<Link to="/signup">Sign Up</Link>
+						<Link to={URL_ROUTES.signup}>Sign Up</Link>
 						</Form>
 					</Col>
 				</Row>
