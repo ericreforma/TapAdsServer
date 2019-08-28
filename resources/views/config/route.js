@@ -1,6 +1,6 @@
 import {USER_TYPE, TOKEN} from '../config/variable';
 
-const basePath = '/tapads/public';
+const basePath = '/TapAdsServer/public';
 
 export const websocketURI = {
     chat: {
