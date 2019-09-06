@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import { IMAGES } from '../../../config/variable';
 
 export default class CardRatings extends Component {
     render() {
@@ -9,7 +10,7 @@ export default class CardRatings extends Component {
                 <div className="ups-cr-client-info">
                     <div className="ups-cr-ci-image">
                         <img
-                            src={rating.url ? rating.url : '/images/gallery-icon.png'}
+                            src={rating.url ? IMAGES.imgPath(rating.url) : IMAGES.galleryIcon}
                             alt={rating.business_name}
                         />
                     </div>
@@ -18,11 +19,11 @@ export default class CardRatings extends Component {
                         <h4 className="mb-0"><strong>{rating.business_name}</strong></h4>
                         <h5 className="text-muted mb-0">{rating.business_nature}</h5>
                         <div>
-                            {Array(5).fill('/images/icons/').map((star, starIndex) =>
+                            {Array(5).fill(null).map((star, starIndex) =>
                                 <img
                                     key={starIndex}
                                     className="ups-cr-star-icon"
-                                    src={star + (starIndex < parseInt(rating.rate) ? 'star_active.png' : 'star_inactive.png')}
+                                    src={starIndex < parseInt(rating.rate) ? IMAGES.icons.starActive : IMAGES.icons.starInactive}
                                 />
                             )}
                         </div>

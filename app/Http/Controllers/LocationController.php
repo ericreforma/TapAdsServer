@@ -47,7 +47,7 @@ class LocationController extends Controller
         }
     }
 
-    public function geo_location_get(Request $request) {
+    public function geo_location_get() {
         $geo_location = ClientCampaignLocation::all();
         return response()->json([
             'status' => 'success',
@@ -68,7 +68,7 @@ class LocationController extends Controller
                     'u.*',
                     'm.url',
                     'uc.campaign_id',
-                    'uc.distance_traveled'
+                    'uc.campaign_traveled as distance_traveled'
                 )
                 ->orderBy('u.id', 'ASC')
                 ->get();

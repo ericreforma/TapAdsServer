@@ -21,6 +21,7 @@ import { Loader } from '../../components';
 
 import { HttpRequest } from '../../services/http';
 import config from '../../config';
+import { IMAGES } from '../../config/variable';
 
 export default class CampaignDashboard extends Component {
     constructor(props) {
@@ -29,16 +30,6 @@ export default class CampaignDashboard extends Component {
         this.state = {
             loaderShow: true,
             token: '',
-
-            //icons
-            vehicleClass: [
-                '/images/icons/car_small_icon.png',
-                '/images/icons/car_mid_icon.png',
-                '/images/icons/car_large_icon.png',
-                '/images/icons/motorcycle_icon.png'
-            ],
-            sortIcon: '/images/icons/sort_icon.png',
-            chatIcon: '/images/icons/chat_icon.png',
 
             campaign: {},
             modalUserData: [],
@@ -90,7 +81,7 @@ export default class CampaignDashboard extends Component {
                     var returnUser = user,
                         distance = parseFloat(user.distance_traveled),
                         totalCost = 0;
-            
+
                     if(distance >= basicPayKm) {
                         var perKm = Math.floor(distance / addPayKm),
                             totalCost = (perKm * addPay) + basicPayKm;
@@ -98,7 +89,7 @@ export default class CampaignDashboard extends Component {
 
                     var filteredRating = userRating.filter(rate => rate.user_id == user.user_id),
                         arrayRates = userRating.filter(rate => rate.user_id == user.user_id).map(r => {return r.rate;});
-                        
+
                     returnUser.rate = filteredRating.length !== 0 ? arrayRates.reduce((a,b) => a + b) / arrayRates.length : null;
                     returnUser.totalCost = totalCost.toFixed(2);
                     return returnUser;
@@ -140,7 +131,7 @@ export default class CampaignDashboard extends Component {
         userData.map(data => {
             var distance = parseFloat(data.distance_traveled);
             totalKm += distance;
-            
+
             if(distance >= basicPayKm) {
                 var perKm = Math.floor((distance - basicPayKm) / addPayKm);
                 basicCost += basicPay;
@@ -161,7 +152,7 @@ export default class CampaignDashboard extends Component {
     // modal functions >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     userModalToggle = () => {
         var {userData} = this.state;
-        
+
         userData.sort((a, b) => { // ascending
             return parseFloat(a.id) - parseFloat(b.id);
         });
@@ -258,7 +249,7 @@ export default class CampaignDashboard extends Component {
             modalUserData = userData.filter(m => m.name.toLowerCase().indexOf(searchValue.toLowerCase()) !== -1);
             var paginationLength = Math.ceil(modalUserData.length / this.state.tableRowLength);
         }
-        
+
         this.setState({
             currentPage: 0,
             modalUserData: modalUserData,
@@ -348,7 +339,7 @@ export default class CampaignDashboard extends Component {
                     ((hour - 12) < 10 ? '0' + (hour - 12).toString() : (hour - 12)) + ':' + min + ' PM'
                 )
             );
-    
+
         if(timeInclude) {
             return time + ' - ' + months[month] + '. ' + date + ', ' + year;
         } else {
@@ -402,7 +393,7 @@ export default class CampaignDashboard extends Component {
                 primaryTransparent: 'rgba(68, 159, 238, .8)',
                 purple: 'rgb(153, 102, 255)',
                 grey: 'rgb(201, 203, 207)',
-        
+
                 primaryShade1: 'rgb(68, 159, 238)',
                 primaryShade2: 'rgb(23, 139, 234)',
                 primaryShade3: 'rgb(14, 117, 202)',
@@ -463,7 +454,7 @@ export default class CampaignDashboard extends Component {
                     }
                 }
             };
-            
+
         if(this.state.loaderShow) {
             return <Loader type="puff" />;
         } else {
@@ -499,7 +490,7 @@ export default class CampaignDashboard extends Component {
                                                     <h5 className="mb-0">User Info</h5>
                                                     <img
                                                         className="cds-ct-sort-icons ml-2"
-                                                        src={this.state.sortIcon}
+                                                        src={IMAGES.icons.sort}
                                                     />
                                                 </div>
                                             </td>
@@ -509,7 +500,7 @@ export default class CampaignDashboard extends Component {
                                                     <h5 className="mb-0">Distance <small>(Km)</small></h5>
                                                     <img
                                                         className="cds-ct-sort-icons ml-2"
-                                                        src={this.state.sortIcon}
+                                                        src={IMAGES.icons.sort}
                                                     />
                                                 </div>
                                             </td>
@@ -533,7 +524,7 @@ export default class CampaignDashboard extends Component {
                                                         <td align="center">
                                                             <img
                                                                 className="cds-ct-user-image cds-ct-user-hover"
-                                                                src={user.url ? user.url : `/images/default_avatar.png`}
+                                                                src={user.url ? IMAGES.imgPath(user.url) : IMAGES.defaultAvatar}
                                                                 onClick={e => this.props.history.push(`/user/profile/${user.user_id}`)}
                                                             />
                                                         </td>
@@ -545,11 +536,11 @@ export default class CampaignDashboard extends Component {
                                                             >{user.name}</span>
                                                             {user.rate ? (
                                                                 <div>
-                                                                    {Array(5).fill('/images/icons/').map((star, starIndex) =>
+                                                                    {Array(5).fill(null).map((star, starIndex) =>
                                                                         <img
                                                                             key={starIndex}
                                                                             className="cds-ct-user-rate"
-                                                                            src={star + (starIndex < parseInt(user.rate) ? 'star_active.png' : 'star_inactive.png')}
+                                                                            src={starIndex < parseInt(user.rate) ? IMAGES.icons.starActive : IMAGES.icons.starInactive}
                                                                         />
                                                                     )}
                                                                 </div>
@@ -581,7 +572,7 @@ export default class CampaignDashboard extends Component {
                                                             {this.numberWithCommas(user.totalCost)}
                                                         </td>
                                                     </tr>
-                                                ) : null   
+                                                ) : null
                                             )
                                         ) : (
                                             <tr>
@@ -662,10 +653,10 @@ export default class CampaignDashboard extends Component {
                                             >
                                                 <img
                                                     className="cds-ct-user-image"
-                                                    src={user.url ? user.url : `/images/default_avatar.png`}
+                                                    src={user.url ? IMAGES.imgPath(user.url) : IMAGES.defaultAvatar}
                                                 />
                                             </Col>
-                                            
+
                                             <Col
                                                 xl={7}
                                                 className="text-center text-xl-left p-1"
@@ -687,13 +678,13 @@ export default class CampaignDashboard extends Component {
                                             >
                                                 <label className="text-muted mb-0">Rating</label>
                                             </Col>
-                                            
+
                                             <Col
                                                 xl={8}
                                                 className="text-center text-xl-left pb-1"
                                             >
                                                 <div>
-                                                    {Array(5).fill('/images/icons/star.png').map((star, starIndex) =>
+                                                    {Array(5).fill(IMAGES.icons.star).map((star, starIndex) =>
                                                         <img
                                                             key={starIndex}
                                                             className={"cds-ct-ur-star " + (this.state.starRating > starIndex ? 'bg-warning' : (this.state.ratingOnMouseOver > starIndex ? 'bg-warning' : 'bg-secondary'))}
@@ -716,7 +707,7 @@ export default class CampaignDashboard extends Component {
                                             >
                                                 <label className="text-muted mb-0 mt-1">Comment</label>
                                             </Col>
-                                            
+
                                             <Col
                                                 xl={7}
                                                 className="text-center text-xl-left pb-1"
@@ -762,7 +753,7 @@ export default class CampaignDashboard extends Component {
                                     <div className="d-flex align-items-center">
                                         <img
                                             className="cds-campaign-image mr-3"
-                                            src={this.state.campaign.url ? this.state.campaign.url : '/images/sample_campaign_img.png'}
+                                            src={this.state.campaign.url ? IMAGES.imgPath(this.state.campaign.url) : IMAGES.galleryIcon}
                                         />
                                         <div>
                                             <h2 className="cds-campaign-underline">
@@ -785,7 +776,7 @@ export default class CampaignDashboard extends Component {
 
                                 <Col
                                     xl={6}
-                                >          
+                                >
                                     {/* vehicle information */}
                                     <strong className="cds-card-header cds-campaign-underline">VEHICLE INFORMATION</strong>
 
@@ -802,7 +793,7 @@ export default class CampaignDashboard extends Component {
                                                 </CardBody>
                                             </Card>
                                         </Col>
-                                        
+
                                         <Col
                                             xl={4}
                                         >
@@ -814,12 +805,12 @@ export default class CampaignDashboard extends Component {
                                                             height: 60,
                                                             width: 60
                                                         }}
-                                                        src={this.state.vehicleClass[this.state.campaign.vehicle_classification]}
+                                                        src={IMAGES.vtype[this.state.campaign.vehicle_classification]}
                                                     />
                                                 </CardBody>
                                             </Card>
                                         </Col>
-                                        
+
                                         <Col
                                             xl={4}
                                         >
@@ -846,7 +837,7 @@ export default class CampaignDashboard extends Component {
                                                 <small className="text-muted">in {this.state.campaign.pay_basic_km + 'km'}</small>
                                             </div>
                                         </Col>
-                                        
+
                                         <Col xl={6}>
                                             <div className="cds-campaign-underline-blue">
                                                 <strong className="cds-card-header">ADDITIONAL PAY</strong>
@@ -881,7 +872,7 @@ export default class CampaignDashboard extends Component {
                                         </div>
                                     </div>
                                 </Col>
-                                
+
                                 <Col
                                     xl={4}
                                 >
@@ -894,7 +885,7 @@ export default class CampaignDashboard extends Component {
                                         </div>
                                     </div>
                                 </Col>
-                                
+
                                 <Col
                                     xl={4}
                                 >
@@ -910,7 +901,7 @@ export default class CampaignDashboard extends Component {
                             </Row>
                         </CardBody>
                     </Card>
-                    
+
                     {/* graph */}
                     <Row>
                         <Col md={8} sm={12}>

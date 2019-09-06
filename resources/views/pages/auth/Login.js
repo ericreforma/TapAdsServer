@@ -6,9 +6,6 @@ import { IMAGES } from '../../config/variable';
 import { RawHttpRequest } from '../../services/http';
 import { URL_ROUTES } from '../../config/route';
 import { storeToken } from '../../storage';
-import { API } from '../../services/api';
-
-console.log(API);
 
 export default class Login extends Component {
 	constructor(props) {
@@ -20,7 +17,7 @@ export default class Login extends Component {
 		}
 		this.login = this.login.bind(this);
 	}
-	
+
 	login = (e) =>{
 		e.preventDefault();
 		RawHttpRequest.post(config.api.auth.login, {
@@ -31,7 +28,7 @@ export default class Login extends Component {
 				this.setState({error:'Invalid Email or Password'});
 			}else{
 				storeToken(res.data.token);
-				this.props.history.push(URL_ROUTES.dashboard);
+				window.location.reload();
 			}
 		}).catch((err) => {
 			console.log(err);
@@ -52,10 +49,10 @@ export default class Login extends Component {
 							<Label style={{padding:0}} for="email">Email Address</Label>
 							<InputGroup>
 								<span className="input-group-text"><i className="far fa-envelope"></i></span>
-								<Input 
-								type="email" 
-								name="email" 
-								id="email" 
+								<Input
+								type="email"
+								name="email"
+								id="email"
 								onChange = {(text) => this.setState({email:text.target.value})}
 								value={this.state.email}
 								required
@@ -66,10 +63,10 @@ export default class Login extends Component {
 							<Label style={{padding:0}} for="password">Password</Label>
 							<InputGroup>
 								<span className="input-group-text"><i className="fas fa-lock"></i></span>
-								<Input 
-								type="password" 
-								name="password" 
-								id="password" 
+								<Input
+								type="password"
+								name="password"
+								id="password"
 								onChange = {(text) => this.setState({password:text.target.value})}
 								value={this.state.password}
 								required
@@ -86,4 +83,3 @@ export default class Login extends Component {
 		);
 	}
 }
-

@@ -22,7 +22,7 @@ import ProgressBars from './elements/ProgressBars';
 import PaginationPage from './elements/Pagination';
 import ErrorPage from './pages/samples/404';
 import { ViewProfile, UserLocation } from './pages/user';
-import { CreateCampaign, CampaignList, CampaignDashboard, CampaignRequests } from './pages/campaigns';
+import { CreateCampaign, CampaignList, CampaignDashboard, CampaignRequests, LiveMap } from './pages/campaigns';
 import Messages from './pages/messages/Messages';
 
 const pageList = [
@@ -40,6 +40,11 @@ const pageList = [
     name: 'Campaign List',
     path:'/campaigns/list',
     component: CampaignList
+  },
+  {
+    name: 'Live Map',
+    path:'/campaigns/livemap/:id',
+    component: LiveMap
   },
   {
     name: 'Campaign Dashboard',

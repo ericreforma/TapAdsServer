@@ -3,6 +3,7 @@ import {UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem, Badge 
 import { Loader } from '../../components';
 import { Link } from 'react-router-dom';
 import config from '../../config';
+import { IMAGES } from '../../config/variable';
 
 import { HttpRequest } from '../../services/http';
 const sampleimg = require('../../../img/placeholder1.png');
@@ -93,25 +94,38 @@ export default class ClientNotification extends Component {
                 </DropdownToggle>
                 <DropdownMenu right>
                     <div className="notif-board">
-                    {this.state.notifications.slice(0, this.state.total).map((notif,id) =>
-                        <div key={id}  ref={(el) => this.notifindex[parseInt(id)] = el }>  
-                            <DropdownItem  tag={Link} to={{ pathname: '/campaign/requests/',
-                                state:{ r_status: 'Pending', c_name: notif.campaign_name}
-                            }}>
-                            <div className="notif-wrapper">
-                                <img src={sampleimg}></img>
-                                <div className="notif-desc"><p><b>{notif.user_name}</b> is interested in your campaign: <b>{notif.campaign_name}</b><br/>{this.formatDate(notif.timestamp,true)}</p></div>
-                            </div>
-                            </DropdownItem>
-                            <DropdownItem divider></DropdownItem>
-                        </div> 
+                    {this.state.notifications.length == 0 ? (
+                        <div className="text-center">
+                            <i><small className="text-muted">Hello! No notification for you :)</small></i>
+                        </div>    
+                    ) : (
+                        <div>
+                            {this.state.notifications.slice(0, this.state.total).map((notif,id) =>
+                                <div key={id}  ref={(el) => this.notifindex[parseInt(id)] = el }>  
+                                    <DropdownItem  tag={Link} to={{ pathname: '/campaign/requests/',
+                                        state:{ r_status: 'Pending', c_name: notif.campaign_name}
+                                    }}>
+                                    <div className="notif-wrapper">
+                                        <img src={notif.profile_picture ? notif.profile_picture : IMAGES.defaultAvatar}></img>
+                                        <div className="notif-desc"><p><b>{notif.user_name}</b> is interested in your campaign: <b>{notif.campaign_name}</b><br/>{this.formatDate(notif.timestamp,true)}</p></div>
+                                    </div>
+                                    </DropdownItem>
+                                    <DropdownItem divider></DropdownItem>
+                                </div>
+                            )}
+
+
+                            {this.state.count>this.state.total ? (
+                                <div>
+                                    <DropdownItem divider></DropdownItem>
+                                    <div className="notif-wrapper">
+                                        <DropdownItem onClick={this.notifexpand} toggle={false} className="text-center">See More</DropdownItem>
+                                    </div>
+                                </div>
+                            ) : null}
+                        </div>
                     )}
                     </div>
-                    <DropdownItem divider></DropdownItem>
-                    {this.state.count>this.state.total?<div className="notif-wrapper">
-                        <DropdownItem onClick={this.notifexpand} toggle={false} className="text-center">See More</DropdownItem>
-                    </div>:''
-                    }
                 </DropdownMenu>
             </UncontrolledDropdown>
             );

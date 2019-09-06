@@ -55,6 +55,6 @@ class User extends Authenticatable
     }
 
     public function campaigns() {
-      return $this->hasMany('App\UserCampaign');
+      return $this->hasMany('App\UserCampaign','user_id','id');
     }
   }

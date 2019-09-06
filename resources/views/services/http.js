@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API, TOKENIZED_API, API_RAW } from './api';
+import { TOKEN } from '../config/variable';
 
 let httpRequest;
 

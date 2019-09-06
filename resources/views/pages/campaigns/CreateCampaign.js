@@ -25,7 +25,7 @@ export default class CreateCampainpage extends Component {
     state = {
 		loaderShow: true,
 		token: '',
-		
+
 		// forms
 		formData: [
 			{
@@ -49,7 +49,7 @@ export default class CreateCampainpage extends Component {
 				data: [
 					{
 						id: 'vehicle_classification',
-						type: 'select',
+						type: 'radio',
 						label: 'Vehicle Classification',
 						value: '',
 						addonShow: false,
@@ -62,7 +62,7 @@ export default class CreateCampainpage extends Component {
 						]
 					},{
 						id: 'vehicle_type',
-						type: 'select',
+						type: 'radio',
 						label: 'Vehicle Type',
 						value: '',
 						addonShow: false,
@@ -74,7 +74,7 @@ export default class CreateCampainpage extends Component {
 						]
 					},{
 						id: 'vehicle_stickerArea',
-						type: 'select',
+						type: 'radio',
 						label: 'Vehicle Sticker Area',
 						value: '',
 						addonShow: false,
@@ -142,7 +142,7 @@ export default class CreateCampainpage extends Component {
 				]
 			}
 		],
-		
+
 		// google map data
 		polygons: [],
 		google: {},
@@ -223,7 +223,7 @@ export default class CreateCampainpage extends Component {
 				geoLocations.push(defaultGeoLocations.filter(dg => dg.id == parseInt(options[x].value))[0]);
 			}
 		}
-		
+
 		var google = this.state.google,
 			bounds = new google.maps.LatLngBounds(),
 			newPolygons = [];
@@ -236,7 +236,7 @@ export default class CreateCampainpage extends Component {
 					var lat = c.lat,
 						lng = c.lng,
 						loc = new google.maps.LatLng(lat, lng);
-						
+
 					bounds.extend(loc);
 				});
 
@@ -290,7 +290,7 @@ export default class CreateCampainpage extends Component {
 					position: {lat: lat, lng: lng},
 					title: 'Lat: ' + lat + '\nLng: ' + lng,
 					draggable: true,
-				});	
+				});
 			markers.push(marker);
 			marker.addListener('drag', this.markerDrag);
 			this.setState({markers});
@@ -337,7 +337,7 @@ export default class CreateCampainpage extends Component {
 							coordinates: JSON.stringify([paths]),
 							name: this.state.customLocationName
 						};
-					
+
 					HttpRequest.post(config.api.createGeoLocation, form).then(response => {
 						if(response.data.status == 'success') {
 							var { defaultGeoLocations } = this.state;
@@ -363,7 +363,7 @@ export default class CreateCampainpage extends Component {
 					});
 				}
 			}
-				
+
 			this.setState({
 				customLocationError: customLocationName !== '' ? false : true
 			});
@@ -431,7 +431,7 @@ export default class CreateCampainpage extends Component {
 					form.invalid = true;
 				}
 			}
-			
+
 			return form;
 		});
 
@@ -450,8 +450,27 @@ export default class CreateCampainpage extends Component {
 					document.getElementById('createCampaignForm').reset();
 					this.removeCurrentMarkers();
 					this.removeCurrentPaths();
+
+					var { formData,
+						selectedGeoLocationId } = this.state;
+					formData = formData.map(f => {
+						if(f.multipleRow) {
+							var { data } = f;
+							data = data.map(d => {
+								d.value = '';
+								return d;
+							});
+							f.data = data;
+						} else {
+							f.value = '';
+						}
+
+						return f;
+					});
+					selectedGeoLocationId = [];
+					this.setState({ formData, selectedGeoLocationId });
 				}
-				
+
 				alert(response.data.message);
 			}).catch(error => {
 				console.log(error);
@@ -461,6 +480,111 @@ export default class CreateCampainpage extends Component {
 		}
 	}
 	// end submit campaign >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	singleRow = (fd, fdIndex) => {
+		if(fd.type === 'select') {
+			return (
+				<Input
+					type={fd.type}
+					id={fd.id}
+					invalid={fd.invalid}
+					defaultValue=""
+					onChange={(value) => this.state.formData[fdIndex].value = parseInt(value.target.value)}
+				>
+					<option value="" disabled>-- select --</option>
+					{fd.options.map((option, optionIdx) =>
+						<option
+							key={optionIdx}
+							value={optionIdx}
+						>{option}</option>
+					)}
+				</Input>
+			);
+		} else if(fd.type === 'radio') {
+
+		} else {
+			return (
+				<InputGroup>
+					{fd.addonShow ? (
+						<InputGroupAddon addonType="prepend">{fd.addon}</InputGroupAddon>
+					) : null}
+					<Input
+						type={fd.type}
+						id={fd.id}
+						invalid={fd.invalid}
+						step={fd.type == 'number' ? '0.01' : ''}
+						onChange={(value) => this.state.formData[fdIndex].value = value.target.value}
+					/>
+				</InputGroup>
+			);
+		}
+	}
+
+	multipleRow = (fdIndex, data, dataIdx) => {
+		if(data.type === 'select') {
+			return (
+				<Input
+					type={data.type}
+					id={data.id}
+					invalid={data.invalid}
+					defaultValue=""
+					onChange={(value) => this.state.formData[fdIndex].data[dataIdx].value = parseInt(value.target.value)}
+				>
+					<option value="" disabled>-- select --</option>
+					{data.options.map((option, optionIdx) =>
+						<option
+							key={optionIdx}
+							value={optionIdx}
+						>{option}</option>
+					)}
+				</Input>
+			);
+		} else if(data.type === 'radio') {
+			return (
+				<div>
+					<div className="ccs-checkbox-section">
+						{data.options.map((option, optionIdx) =>
+							<FormGroup
+								key={optionIdx}
+								check
+							>
+								<Label>
+									<Input
+										type="radio"
+										value={optionIdx}
+										name={data.label}
+										onChange={(value) => this.state.formData[fdIndex].data[dataIdx].value = parseInt(value.target.value)}
+									/>{' '}
+									{option}
+								</Label>
+							</FormGroup>
+						)}
+
+						{data.invalid ? (
+							<small className="text-danger">
+								Choose {data.label}
+							</small>
+						) : null}
+					</div>
+				</div>
+			);
+		} else {
+			return (
+				<InputGroup>
+					{data.addonShow ? (
+						<InputGroupAddon addonType="prepend">{data.addon}</InputGroupAddon>
+					) : null}
+					<Input
+						type={data.type}
+						id={data.id}
+						invalid={data.invalid}
+						step={data.type == 'number' ? '0.01' : ''}
+						onChange={(value) => this.state.formData[fdIndex].data[dataIdx].value = value.target.value}
+					/>
+				</InputGroup>
+			);
+		}
+	}
 
 	render() {
 		if(this.state.loaderShow) {
@@ -496,36 +620,7 @@ export default class CreateCampainpage extends Component {
 														key={fdIndex}
 													>
 														<Label for={fd.id}>{fd.label}</Label>
-														{fd.type == 'select' ? (
-															<Input
-																type={fd.type}
-																id={fd.id}
-																invalid={fd.invalid}
-																defaultValue=""
-																onChange={(value) => this.state.formData[fdIndex].value = parseInt(value.target.value)}
-															>
-																<option value="" disabled>-- select --</option>
-																{fd.options.map((option, optionIdx) =>
-																	<option
-																		key={optionIdx}
-																		value={optionIdx}
-																	>{option}</option>	
-																)}
-															</Input>
-														) : (
-															<InputGroup>
-																{fd.addonShow ? (
-																	<InputGroupAddon addonType="prepend">{fd.addon}</InputGroupAddon>
-																) : null}
-																<Input
-																	type={fd.type}
-																	id={fd.id}
-																	invalid={fd.invalid}
-																	step={fd.type == 'number' ? '0.01' : ''}
-																	onChange={(value) => this.state.formData[fdIndex].value = value.target.value}
-																/>
-															</InputGroup>
-														)}
+														{this.singleRow(fd, fdIndex)}
 													</FormGroup>
 												) : (
 													<Row
@@ -540,43 +635,14 @@ export default class CreateCampainpage extends Component {
 															>
 																<FormGroup>
 																	<Label for={data.id}>{data.label}</Label>
-																		{data.type == 'select' ? (
-																			<Input
-																				type={data.type}
-																				id={data.id}
-																				invalid={data.invalid}
-																				defaultValue=""
-																				onChange={(value) => this.state.formData[fdIndex].data[dataIdx].value = parseInt(value.target.value)}
-																			>
-																				<option value="" disabled>-- select --</option>
-																				{data.options.map((option, optionIdx) =>
-																					<option
-																						key={optionIdx}
-																						value={optionIdx}
-																					>{option}</option>	
-																				)}
-																			</Input>
-																		) : (
-																			<InputGroup>
-																			{data.addonShow ? (
-																				<InputGroupAddon addonType="prepend">{data.addon}</InputGroupAddon>
-																			) : null}
-																			<Input
-																				type={data.type}
-																				id={data.id}
-																				invalid={data.invalid}
-																				step={data.type == 'number' ? '0.01' : ''}
-																				onChange={(value) => this.state.formData[fdIndex].data[dataIdx].value = value.target.value}
-																			/>
-																		</InputGroup>
-																	)}
+																	{this.multipleRow(fdIndex, data, dataIdx)}
 																</FormGroup>
 															</Col>
 														)}
 													</Row>
 												)
 											)}
-	
+
 											<Label for="googleMap">Location (Metro Manila)</Label>
 											<Card color="light">
 												<CardBody>
@@ -627,7 +693,7 @@ export default class CreateCampainpage extends Component {
 															onInput={this.defaultGeoLocationOnInput}
 															multiple
 														>
-															{this.state.defaultGeoLocations.map(geo => 
+															{this.state.defaultGeoLocations.map(geo =>
 																<option
 																	key={geo.id}
 																	value={geo.id}
@@ -684,7 +750,7 @@ export default class CreateCampainpage extends Component {
 													)}
 												</CardBody>
 											</Card>
-	
+
 											<div
 												className="mt-3"
 											>

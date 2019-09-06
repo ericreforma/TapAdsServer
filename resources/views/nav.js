@@ -18,12 +18,19 @@ export default {
         {
           name:'Create Campaign',
           url: '/campaigns/create',
+
           icon: 'PlusCircle',
         },
         {
           name:'User Requests',
           url: '/campaign/requests/',
           icon: 'Users',
+
+        },
+        {
+          name:'Live Map',
+          url: '/campaigns/livemap',
+
         }
       ]
     },

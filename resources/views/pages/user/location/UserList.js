@@ -8,11 +8,26 @@ import {
 } from 'reactstrap';
 
 export default class UserList extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            checked: true
+        };
+    }
+
     checkUserLength = () => {
         var { users,
             activeCampaign } = this.props;
 
         return users.filter(u => u.campaign_id == activeCampaign).length !== 0 ? true : false;
+    }
+
+    checkChange = (e) => {
+        var { mainSetState } = this.props;
+        this.setState({checked: !this.state.checked});
+        mainSetState({actionChoice: e.target.checked});
+        mainSetState({activeUserId: false});
     }
 
     render() {
@@ -21,7 +36,8 @@ export default class UserList extends Component {
             actionChoice,
             users,
             activeCampaign,
-            activeUserId } = this.props;
+            activeUserId } = this.props,
+            { checked } = this.state;
 
         return (
             <div className="ulc-user-list">
@@ -36,10 +52,8 @@ export default class UserList extends Component {
                         <label className="switch">
                             <input
                                 type="checkbox"
-                                onChange={e => {
-                                    mainSetState({actionChoice: e.target.checked});
-                                    mainSetState({activeUserId: false});
-                                }}
+                                checked={checked}
+                                onChange={this.checkChange}
                             />
                             <span className="slider round"></span>
                         </label>

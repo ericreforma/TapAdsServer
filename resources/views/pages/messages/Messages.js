@@ -10,7 +10,8 @@ import { HttpRequest } from '../../services/http';
 import { Loader } from '../../components';
 import config from '../../config';
 import { dateFormat, conversationBreak } from '../../utils/dateForChat';
-import { TOKEN } from '../../config/variable';
+import { TOKEN, IMAGES } from '../../config/variable';
+import { URL_ROUTES } from '../../config/route';
 
 export default class Messages extends Component {
     constructor(props) {
@@ -18,6 +19,7 @@ export default class Messages extends Component {
 
         this.state = {
             loader: true,
+            initialDataLoad: false,
 
             styleLeftPart: {},
             leftPartToggle: false,
@@ -37,12 +39,13 @@ export default class Messages extends Component {
     }
 
     getUserChat = () => {
-        var { users,
-            nonConvoUsers,
-            messageNotif } = this.props.websocket.messages,
+        var { messages,
+            messageNotif } = this.props.websocket,
+            { users,
+            nonConvoUsers } = messages,
             loaderConversation = false,
-            totalUsers = [],
-            totalNotifCount = messageNotif;
+            totalUsers = [];
+        const totalNotifCount = messageNotif;
 
         users.map(u => {
             totalUsers.push({
@@ -98,13 +101,14 @@ export default class Messages extends Component {
         }
     }
 
-    UNSAFE_componentWillReceiveProps = (nextProps) => {
+    componentDidUpdate = () => {
         var { socketFunctions,
             messages,
-            initialData } = nextProps.websocket,
+            initialData } = this.props.websocket,
             { newMessage,
             updatedFunction } = socketFunctions,
-            { users } = messages;
+            { users } = messages,
+            { initialDataLoad } = this.state;
             
         if(!this.state.loader && updatedFunction !== '') {
             if(updatedFunction == 'online user' || updatedFunction == 'disconnected user') {
@@ -114,8 +118,11 @@ export default class Messages extends Component {
             }
         }
 
-        if(initialData) {
-            this.getUserChat();
+        if(!initialDataLoad) {
+            if(initialData) {
+                this.setState({initialDataLoad: true});
+                this.getUserChat();
+            }
         }
     }
 
@@ -124,10 +131,11 @@ export default class Messages extends Component {
             var loader = false;
             this.setState({loader, users});
         },
-        setUser: (users) => {
+        setUser: (users, socketFunctions) => {
+            this.props.receivedWebsocket();
             this.setState({users});
         },
-        newMessage: (data) => {
+        newMessage: (data, socketFunctions) => {
             var { chat } = data,
                 { user_id,
                 message,
@@ -139,6 +147,7 @@ export default class Messages extends Component {
                 index = users.map(u => u.id).indexOf(user_id),
                 newMessages = users.splice(index, 1);
 
+            this.props.receivedWebsocket();
             newMessages[0].message = message;
             newMessages[0].sender = 0;
             newMessages[0].created_at = created_at;
@@ -197,7 +206,7 @@ export default class Messages extends Component {
                 totalNotifCount,
                 searchValue
             });
-
+            
             this.conversationAlignment(activeUserId);
         }
     }
@@ -279,6 +288,7 @@ export default class Messages extends Component {
                 });
                 this.updateNotif(uid);
                 this.scrollToBottom();
+                
                 this.props.changeMessageNotifCount(totalNotifCount);
             }
         }).catch(error => {
@@ -442,7 +452,7 @@ export default class Messages extends Component {
                 activeUserId } = this.state,
                 user = totalUsers.filter(u => u.id == activeUserId)[0];
     
-            return user.url ? user.url : '/images/default_avatar.png';
+            return user.url ? `${URL_ROUTES.STORAGE_URL}/${user.url}` : IMAGES.defaultAvatar;
         }
     }
 
@@ -490,7 +500,7 @@ export default class Messages extends Component {
                                             <div className="cs-lp-cb-image-container">
                                                 <div className="cs-lp-cb-image-wrapper">
                                                     <img
-                                                        src={u.url ? u.url : '/images/default_avatar.png'}
+                                                        src={u.url ? `${URL_ROUTES.STORAGE_URL}/${u.url}` : IMAGES.defaultAvatar}
                                                     />
                                                 </div>
 
@@ -537,7 +547,7 @@ export default class Messages extends Component {
                                             >
                                                 <div className="cs-lp-nc-w-img-wrapper">
                                                     <img
-                                                        src={nu.url ? nu.url : '/images/default_avatar.png'}
+                                                        src={nu.url ? `${URL_ROUTES.STORAGE_URL}/${nu.url}` : IMAGES.defaultAvatar}
                                                     />
                                                 </div>
 

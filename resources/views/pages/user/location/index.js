@@ -29,7 +29,7 @@ export default class UserLocation extends Component {
 
             campaigns: [],
             activeCampaign: false,
-            actionChoice: false,
+            actionChoice: true,
             activeUserId: false,
             date: {
                 from: '',
@@ -95,27 +95,45 @@ export default class UserLocation extends Component {
 
     loadOnClick = () => {
         var { activeUserId,
-            activeCampaign } = this.state;
+            activeCampaign,
+            actionChoice,
+            date } = this.state;
 
-        if(activeUserId && activeCampaign) {
-            HttpRequest.get(config.api.getTrips(activeUserId, activeCampaign)).then(response => {
-                if(response.data.status == 'success') {
-                    var userTrips = {},
-                        { userTrip,
-                        userTripMap } = response.data.message;
-                    
-                    userTrips.trips = userTrip.map(u => {
-                        u.userTripMap = userTripMap.filter(ut => u.id == ut.user_trip_id);
-                        return u;
-                    });
-                    userTrips.locations = userTripMap;
-                    this.setState({userTrips});
-                    this.plotPolygonMap();
-                }
-            }).catch(error => {
-                console.log(error);
-                setTimeout(() => this.loadOnClick(), 1000);
-            });
+        if(activeCampaign) {
+            var proceed = true;
+
+            if(actionChoice && !activeUserId) {
+                proceed = false;
+                alert('Hello! Select which user to load in order to proceed. Thanks!');
+            }
+            
+            if(proceed) {
+                HttpRequest.post(config.api.getTrips, {
+                    cid: activeCampaign,
+                    uid: activeUserId,
+                    actionChoice,
+                    date,
+                }).then(response => {
+                    if(response.data.status == 'success') {
+                        var userTrips = {},
+                            { userTrip,
+                            userTripMap } = response.data.message;
+                        
+                        userTrips.trips = userTrip.map(u => {
+                            u.userTripMap = userTripMap.filter(ut => u.id == ut.user_trip_id);
+                            return u;
+                        });
+                        userTrips.locations = userTripMap;
+                        this.setState({userTrips});
+                        this.plotPolygonMap();
+                    }
+                }).catch(error => {
+                    console.log(error);
+                    setTimeout(() => this.loadOnClick(), 1000);
+                });
+            }
+        } else {
+            alert('Hi! Choose Campaign in order to proceed. Thanks!');
         }
     }
 

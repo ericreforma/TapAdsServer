@@ -14041,21 +14041,21 @@ img.img-circle {
   font-family: "Avenir LT Std 85 Heavy";
   font-style: normal;
   font-weight: normal;
-  src: local("Avenir LT Std 85 Heavy"), url("/tapads/public/assets/fonts/AvenirLTStd-Heavy.woff") format("woff");
+  src: local("Avenir LT Std 85 Heavy"), url("/TapAdsServer/public/assets/fonts/AvenirLTStd-Heavy.woff") format("woff");
 }
 
 @font-face {
   font-family: "Avenir LT Std 35 Light";
   font-style: normal;
   font-weight: normal;
-  src: local("Avenir LT Std 35 Light"), url("/tapads/public/assets/fonts/AvenirLTStd-Light.woff") format("woff");
+  src: local("Avenir LT Std 35 Light"), url("/TapAdsServer/public/assets/fonts/AvenirLTStd-Light.woff") format("woff");
 }
 
 @font-face {
   font-family: "Avenir LT Std 55 Roman";
   font-style: normal;
   font-weight: normal;
-  src: local("Avenir LT Std 55 Roman"), url("/tapads/public/assets/fonts/AvenirLTStd-Roman.woff") format("woff");
+  src: local("Avenir LT Std 55 Roman"), url("/TapAdsServer/public/assets/fonts/AvenirLTStd-Roman.woff") format("woff");
 }
 
 .mycampaigns_card label,
@@ -15061,6 +15061,15 @@ img.img-circle {
 body {
   scrollbar-face-color: #888;
   scrollbar-track-color: #f1f1f1;
+}
+
+.car {
+  width: 20px;
+  height: 20px;
+  background-color: #2a7ddb;
+  border: 2px solid #fff;
+  border-radius: 100%;
+  box-shadow: 0px 1px 7px #1c1c1c;
 }
 
 .login-container {

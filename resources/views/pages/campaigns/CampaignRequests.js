@@ -18,6 +18,7 @@ import { Loader } from '../../components';
 import config from '../../config';
 import PageAlertContext from '../../components/PageAlert/PageAlertContext';
 import { Link } from 'react-router-dom';
+import { IMAGES } from '../../config/variable';
 
 import { HttpRequest } from '../../services/http';
 
@@ -326,8 +327,18 @@ export default class CampaignRequests extends Component {
                                                 (   ((this.state.currentPage + 1) * this.state.tableRowLength) > id
                                                     && (this.state.currentPage * this.state.tableRowLength) <= id) ? (
                                                 <tr key={id}>
-                                                    <td title="View User"><Link to={"/user/profile/"+request.user_id}><img className="img-round" src={request.user_image}></img>{request.user_name}</Link></td>
-                                                    <td title="View Campaign"><Link to={"/campaign/dashboard/"+request.campaign_id}><img className="img-round" src={request.campaign_image}></img>{request.campaign_name}</Link></td>
+                                                    <td title="View User">
+                                                        <Link to={"/user/profile/"+request.user_id}>
+                                                            <img className="img-round" src={request.user_image ? IMAGES.imgPath(request.user_image) : IMAGES.defaultAvatar} />
+                                                            {request.user_name}
+                                                        </Link>
+                                                    </td>
+                                                    <td title="View Campaign">
+                                                        <Link to={"/campaign/dashboard/"+request.campaign_id}>
+                                                            <img className="img-round" src={request.campaign_image ? IMAGES.imgPath(request.campaign_image) : IMAGES.galleryIcon} />
+                                                            {request.campaign_name}
+                                                        </Link>
+                                                    </td>
                                                     <td>{request.status}</td>
                                                     <td>{this.formatDate(request.timestamp, false)}</td>
                                                     <td>

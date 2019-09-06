@@ -1,20 +1,16 @@
 import React, { Component } from 'react';
 import { Card, CardBody, Table } from 'reactstrap';
 import { Loader } from '../../components';
+import { IMAGES } from '../../config/variable';
 
-const vtype = [
-	require('../../../img/car_small_icon.png'),
-	require('../../../img/car_mid.icon.png'),
-	require('../../../img/car_large_icon.png'),
-	require('../../../img/motorcycle_icon.png')
-]; 
-const sampleimg = require('../../../img/placeholder1.png');
+const {vtype} = IMAGES;
+const sampleimg = IMAGES.placeholder1;
 // configs for api url, apiKey, etc..
 import config from '../../config';
 import { HttpRequest } from '../../services/http';
 
 export default class CampaignList extends Component {
-	constructor(props){
+	constructor(props) {
 		super(props);
 		this.state = {
 			loader: true,
@@ -25,7 +21,7 @@ export default class CampaignList extends Component {
 			currentPage:''
 		}
 	}
-	
+
 	componentDidMount = () => {
 		this.LoadCampaign();
 	}
@@ -38,7 +34,7 @@ export default class CampaignList extends Component {
 				campaigns:res.data.campaigns,
 				locations:res.data.locations
 			});
-			
+
 			this.setState({loader: false});
         }).catch(error => {
 			setTimeout(this.LoadCampaign, 1000);
@@ -58,7 +54,7 @@ export default class CampaignList extends Component {
 		location_disp = location_disp.slice(0, -2);
 		return location_disp;
 	}
-	
+
 	formatDate = (dates, timeInclude) => {
         var d = dates.split(' ')[0],
             time = dates.split(' ')[1],
@@ -77,21 +73,20 @@ export default class CampaignList extends Component {
                     ((hour - 12) < 10 ? '0' + (hour - 12).toString() : (hour - 12)) + ':' + min + ' PM'
                 )
             );
-    
+
         if(timeInclude) {
             return months[month-1] + '. ' + date + ', ' + year + ' - ' +time ;
         } else {
             return months[month-1] + '. ' + date + ', ' + year;
         }
 	}
-	
+
 	render() {
 		if(this.state.loader) {
             return <Loader type="puff" />;
 		} else {
 			return (
-					<Card className="mycampaigns_card">
-					{/* <CardHeader>List</CardHeader> */}
+				<Card className="mycampaigns_card">
 					<CardBody>
 						<Table hover id="mycampaigns">
 						<thead>
@@ -118,9 +113,8 @@ export default class CampaignList extends Component {
 									<td>{this.formatDate(campaign.created_at,true)}</td>
 									<td>
 										<div className="d-flex flex-row justify-content-start align-items-center flex-wrap">
-											<div className="vehicle-type"><img  src={vtype[campaign.vehicle_classification]}></img></div>
+											<div className="vehicle-type"><img src={vtype[campaign.vehicle_classification]}></img></div>
 											<p>{campaign.vehicle_type}</p>
-										{/* <p>{campaign.vehicle_stickerArea}</p> */}
 										</div>
 									</td>
 									<td>{this.getLocation(campaign.location_id)}</td>
@@ -149,8 +143,9 @@ export default class CampaignList extends Component {
 						</tbody>
 						</Table>
 					</CardBody>
-					</Card>
+				</Card>
 			);
 		}
 	}
+
 }

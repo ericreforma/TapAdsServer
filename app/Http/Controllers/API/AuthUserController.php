@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use App\User;
 use Hash;
+use Carbon\Carbon;
 
 class AuthUserController extends Controller
 {
@@ -21,8 +22,12 @@ class AuthUserController extends Controller
       ];
 
       if (auth()->attempt($credentials)) {
+        if (auth()->user()->deleted !== 1) {
           $token = auth()->user()->createToken('tapads')->accessToken;
           return response()->json(['token' => $token], 200);
+        } else {
+          return response()->json(['error' => 'UnAuthorised'], 401);
+        }
       } else {
           return response()->json(['error' => 'UnAuthorised'], 401);
       }
@@ -30,7 +35,13 @@ class AuthUserController extends Controller
     }
 
     public function register (Request $request){
-      $validator = Validator::make($request->all(),[
+
+      $data = json_decode($request->userData, true);
+      $messages = [
+        'required' => ':attribute',
+      ];
+
+      $validator = Validator::make($data,[
         'name' => 'required|string|max:255',
         'username' => 'required|string|max:100',
         'birthdate' => 'required|date',
@@ -38,14 +49,15 @@ class AuthUserController extends Controller
         'email' => 'required|email',
         'password' => 'required',
         'contact_number' => 'required'
-      ]);
+      ], $messages);
 
       if($validator->fails()){
         return response()->json($validator->errors()->all(), 400);
       }
+      $data['email_verified_at'] = Carbon::now()->format('Y-m-d H:i:s');
 
-      $request['password']=Hash::make($request['password']);
-      $user = User::create($request->toArray());
+      $data['password']=Hash::make($data['password']);
+      $user = User::create($data);
 
       $token = $user->createToken('tapads')->accessToken;
       return response()->json(['token' => $token], 200);

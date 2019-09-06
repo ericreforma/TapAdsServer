@@ -1,6 +1,7 @@
 import {USER_TYPE, TOKEN} from '../config/variable';
 
 const basePath = '/TapAdsServer/public';
+const STORAGE_URL = `${basePath}/storage`
 
 export const websocketURI = {
     chat: {
@@ -24,6 +25,7 @@ export const websocketEvents = {
 
 export const URL_ROUTES = {
     basePath,
+    STORAGE_URL,
     dashboard: `/dashboard`,
     login: `/login`,
     signup: `/signup`,

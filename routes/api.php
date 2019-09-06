@@ -18,6 +18,7 @@ Route::middleware('json.response')->group(function(){
   // USER
   Route::prefix('user')->group(function(){
 
+
     Route::post('login', 'API\AuthUserController@login')->name('user_login');
     Route::post('register', 'API\AuthUserController@register')->name('user_register');
 
@@ -27,18 +28,35 @@ Route::middleware('json.response')->group(function(){
       Route::get('logout', 'UserController@logout')->name('user_logout');
 
       // My campaigns
-      Route::get('/campaign/mylist','UserController@getMyCampaigns');
-      Route::post('/campaign/addmylist','UserController@addMyCampaigns');
-
+      Route::get('/campaign/list','UserController@campaign_list');
+      Route::post('/campaign/add','UserController@campaign_add');
       // Campaigns
-      Route::get('/campaign/browse','ClientCampaignController@campaigns');
+      Route::get('/campaign/browse','ClientCampaignController@browse');
+
+      // Trip
+      Route::post('/campaign/trip/add','UserController@trip_create');
+      Route::post('/campaign/trip/map','UserController@trip_map_add');
+      Route::post('/campaign/trip/end', 'UserController@trip_end');
 
       // chat
       Route::prefix('chat')->group(function(){
         Route::get('list', 'UserChatController@getChatList');
         Route::get('{cid}', 'UserChatController@getMessages');
       });
-      
+
+      Route::prefix('update')->group(function(){
+        Route::post('details', 'UserController@update_details');
+        Route::post('photo', 'UserController@update_photo');
+        Route::post('license', 'UserController@update_license');
+        Route::post('password', 'UserController@update_password');
+      });
+
+      Route::prefix('remove')->group(function(){
+        Route::get('photo', 'UserController@remove_photo');
+        Route::get('license', 'UserController@remove_license');
+        Route::post('account', 'UserController@remove_account');
+      });
+
       Route::prefix('websocket')->group(function() {
         Route::get('getUserData', 'UserController@websocketUserData');
         Route::post('message/sent', 'UserController@websocketMessageSent');
@@ -52,11 +70,11 @@ Route::middleware('json.response')->group(function(){
   Route::prefix('client')->group(function(){
 
       Route::get('home', 'API\AuthClientController@index');
-      Route::post('login', 'API\AuthClientController@login');
-      Route::post('register', 'API\AuthClientController@register');
+      Route::post('/login', 'API\AuthClientController@login');
+      Route::post('/register', 'API\AuthClientController@register');
 
       Route::middleware('auth:web_api')->group(function(){
-        
+
         Route::get('/','ClientController@details');
         Route::get('/campaigns','ClientCampaignController@getMyCampaigns'); // >>>> campaign list
         Route::get('/campaigns/requests','ClientCampaignController@getMyCampaignRequests'); // >>>> campaign list
@@ -75,8 +93,7 @@ Route::middleware('json.response')->group(function(){
         Route::get('user/convo/{id}', 'ClientChatController@getUsersConvo');
         Route::post('user/rating', 'UserController@submitUserRating');
         Route::get('user/{id}/profile', 'UserController@viewProfile');
-        Route::get('user/trip/{cid}/{uid}', 'UserController@getUserTrip');
-
+        Route::post('user/trip', 'UserController@getUserTrip');
         Route::get('chat/notif/update/{id}', 'ClientChatController@updateNotif');
         Route::get('chat/usersList', 'ClientChatController@getUserList');
 

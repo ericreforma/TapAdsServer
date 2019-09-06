@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import { IMAGES } from '../../../config/variable';
 
 export default class CardCampaigns extends Component {
     render() {
@@ -8,7 +9,7 @@ export default class CardCampaigns extends Component {
             <div className="ups-fc-card">
                 <div className="ups-fc-c-client-image">
                     <img
-                        src={campaign.media_campaign_url ? campaign.media_campaign_url : '/images/gallery-icon.png'}
+                        src={campaign.media_campaign_url ? IMAGES.imgPath(campaign.media_campaign_url) : IMAGES.galleryIcon}
                         alt={campaign.business_name}
                     />
                 </div>
@@ -19,7 +20,7 @@ export default class CardCampaigns extends Component {
 
                         <img
                             className="ups-fc-c-favorite-icon"
-                            src={'/images/icons/completed_favorite_icon.png'}
+                            src={IMAGES.icons.favorite}
                             alt="Favorite"
                         />
                     </div>

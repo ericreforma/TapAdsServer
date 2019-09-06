@@ -3,6 +3,7 @@ import spin from './styles/spin.svg';
 import bars from './styles/bars.svg';
 import puff from './styles/puff.svg';
 import dots from './styles/dots.svg';
+import {IMAGES} from '../../config/variable';
 
 export default function Loader({ small, type }) {
   let loaderType;
@@ -10,15 +11,15 @@ export default function Loader({ small, type }) {
   const size = small ? 'small' : '';
 
   if (type === 'spin') {
-    loaderType = spin;
+    loaderType = IMAGES.spin;
   } else if (type === 'bars') {
-    loaderType = bars;
+    loaderType = IMAGES.bars;
   } else if (type === 'puff') {
-    loaderType = puff;
+    loaderType = IMAGES.puff;
   } else if (type === 'dots') {
-    loaderType = dots;
+    loaderType = IMAGES.dots;
   } else {
-    loaderType = spin;
+    loaderType = IMAGES.spin;
   }
 
   return (

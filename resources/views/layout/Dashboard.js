@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import { UncontrolledDropdown } from 'reactstrap';
 import { Header, SidebarNav, Footer, PageContent, PageAlert, Page } from '../components';
-import Logo from '../../img/vibe-logo.svg';
+import {IMAGES} from '../config/variable';
 import nav from '../nav';
 import routes from '../route';
 import ContextProviders from '../components/utilities/ContextProviders';
@@ -13,6 +13,7 @@ import { HttpRequest } from '../services/http';
 import config from '../config';
 
 const MOBILE_SIZE = 992;
+const Logo = IMAGES.logoWhite;
 
 export default class Dashboard extends Component {
 	constructor(props) {
@@ -35,19 +36,9 @@ export default class Dashboard extends Component {
 			messages: {
 				users: [],
 				nonConvoUsers: [],
-				totalNotifCount: 0,
 			}
 			//end chat state values
 		};
-	}
-
-	componentWillMount = () => {
-		var { socketFunctions } = this.state,
-			socket = Socket.connect();
-		
-		socketFunctions.socket = socket;
-		this.socketConnection(socket);
-		this.setState({socketFunctions});
 	}
 
 	websocketFunctions = {
@@ -56,7 +47,7 @@ export default class Dashboard extends Component {
 				messages } = this.state,
 				{ users } = messages,
 				onlineIDs = data.map(d => d.id);
-	
+
 			messages.users = users.map(u => {
 				u.online = onlineIDs.indexOf(u.id) !== -1 ? true : false;
 				return u;
@@ -70,7 +61,7 @@ export default class Dashboard extends Component {
 				socketFunctions } = this.state,
 				{ users } = messages,
 				{ id } = data;
-	
+
 			messages.users = users.map(u => {
 				if(u.id == id) {
 					u.online = true;
@@ -86,7 +77,7 @@ export default class Dashboard extends Component {
 				messages } = this.state,
 				{ users } = messages,
 				{ id } = data;
-	
+
 			messages.users = users.map(u => {
 				if(u.id == id) {
 					u.online = false;
@@ -112,7 +103,7 @@ export default class Dashboard extends Component {
 					created_at } = chat,
 					index = users.map(u => u.id).indexOf(user_id),
 					newMessages = users.splice(index, 1);
-	
+
 				newMessages[0].message = message;
 				newMessages[0].sender = 0;
 				newMessages[0].created_at = created_at;
@@ -168,6 +159,13 @@ export default class Dashboard extends Component {
 	componentDidMount() {
 		window.addEventListener('resize', this.handleResize);
 		this.getMessageNotificationCount();
+		
+		var { socketFunctions } = this.state,
+			socket = Socket.connect();
+
+		socketFunctions.socket = socket;
+		this.socketConnection(socket);
+		this.setState({socketFunctions});
 	}
 
 	componentWillUnmount() {
@@ -179,7 +177,7 @@ export default class Dashboard extends Component {
 	};
 
 	changeMessageNotifCount = (messageNotif) => {
-		var { nav, socketFunctions } = this.state;
+		var { nav } = this.state;
 		nav.top = nav.top.map(n => {
 			if(n.hasNotif) {
 				n.notifCount = messageNotif;
@@ -187,10 +185,10 @@ export default class Dashboard extends Component {
 
 			return n;
 		});
-		socketFunctions.updatedFunction = '';
+
+		this.receivedWebsocket();
 		this.setState({
 			messageNotif,
-			socketFunctions,
 			nav
 		});
 	}
@@ -200,14 +198,14 @@ export default class Dashboard extends Component {
 			if(response.data.status == 'success') {
 				var {users,
 					nonConvoUsers } = response.data.message,
-					{messages} = this.state,
+					{ messages } = this.state,
 					initialData = true,
-					totalNotifCount = users.filter(u => u.notif).map(u => u.notif).reduce((a, b) => a + b, 0);
+					messageNotif = users.filter(u => u.notif).map(u => u.notif).reduce((a, b) => a + b, 0);
 				messages.users = users;
 				messages.nonConvoUsers = nonConvoUsers;
-				messages.totalNotifCount = totalNotifCount;
-				this.setState({messages, initialData});
-				this.changeMessageNotifCount(totalNotifCount, true);
+
+				this.setState({messages, initialData, messageNotif});
+				this.changeMessageNotifCount(messageNotif);
 			}
 		}).catch(error => {
 			setTimeout(() => this.getMessageNotificationCount(), 1000);
@@ -215,10 +213,16 @@ export default class Dashboard extends Component {
 		});
 	}
 
+	receivedWebsocket = () => {
+		var {socketFunctions} = this.state;
+		socketFunctions.updatedFunction = '';
+		this.setState({socketFunctions});
+	}
+
 	render() {
 		const { sidebarCollapsed } = this.state;
 		const sidebarCollapsedClass = sidebarCollapsed ? 'side-menu-collapsed' : '';
-		
+
 		return (
 			<ContextProviders>
 				<div className={`app ${sidebarCollapsedClass}`}>
@@ -233,7 +237,7 @@ export default class Dashboard extends Component {
 							toggleSidebar={this.toggleSideCollapse}
 							{...this.props}
 						/>
-						
+
 						<Page>
 							<Header
 								toggleSidebar={this.toggleSideCollapse}
@@ -254,6 +258,7 @@ export default class Dashboard extends Component {
 												<page.component
 													{...props}
 													changeMessageNotifCount={this.changeMessageNotifCount}
+													receivedWebsocket={this.receivedWebsocket}
 													websocket={{
 														socketFunctions: this.state.socketFunctions,
 														messages: this.state.messages,

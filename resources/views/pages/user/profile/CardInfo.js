@@ -6,6 +6,7 @@ import {
     CardBody,
     Button
 } from 'reactstrap';
+import { IMAGES } from '../../../config/variable';
 
 export default class CardInfo extends Component {
     readableDate = (date) => {
@@ -39,7 +40,7 @@ export default class CardInfo extends Component {
             <div className="ups-pi-wrapper">
                 {/* user image */}
                 <div className="ups-pi-user-image">
-                    <img src={userData.url ? userData.url : `/images/default_avatar.png`} />
+                    <img src={userData.url ? IMAGES.imgPath(userData.url) : IMAGES.defaultAvatar} />
                 </div>
 
                 {/* other info */}
@@ -55,11 +56,11 @@ export default class CardInfo extends Component {
                                             {/* star rating */}
                                             <div className="d-flex align-items-center">
                                                 <small className="mr-2 text-muted">Rate:</small>
-                                                {Array(5).fill('/images/icons/').map((star, starIndex) =>
+                                                {Array(5).fill(null).map((star, starIndex) =>
                                                     <img
                                                         key={starIndex}
                                                         className="ups-pi-star-icon"
-                                                        src={star + (starIndex < parseInt(userData.rate) ? 'star_active.png' : 'star_inactive.png')}
+                                                        src={starIndex < parseInt(userData.rate) ? IMAGES.icons.starActive : IMAGES.icons.starInactive}
                                                     />
                                                 )}
                                                 <small className="ml-2 text-muted">({userData.totalRating})</small>

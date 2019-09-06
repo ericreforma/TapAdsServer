@@ -8,15 +8,16 @@ export default class CampaignList extends Component {
     campaignOnChange = (e) => {
         var activeCampaign = parseInt(e.target.value),
             { pagination,
-            activeUserId } = this.props;
+            activeUserId,
+            mainSetState } = this.props;
 
-        this.props.mainSetState({activeCampaign});
+        mainSetState({activeCampaign});
         
         pagination.currPage = 0;
-        this.props.mainSetState({pagination});
+        mainSetState({pagination});
         
         activeUserId = false;
-        this.props.mainSetState({activeUserId});
+        mainSetState({activeUserId});
     }
 
     render() {

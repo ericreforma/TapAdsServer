@@ -18,7 +18,7 @@ class ClientCampaignController extends Controller
 		$this->middleware('auth:api');
 	}
 
-	public function campaigns(Request $request){
+	public function browse(Request $request){
 		if($request->rec){
 			$campaigns = ClientCampaign::inRandomOrder()->limit(5)->get();
 		} else {
@@ -72,12 +72,12 @@ class ClientCampaignController extends Controller
 		}
 
 	}
-	
+
 	public function campaign_show(Request $request, $id) {
 		$campaign = ClientCampaign::where('client_campaign.id', '=', $id)
-															->leftJoin('media as m', 'm.id', 'client_campaign.media_id')
-															->select('client_campaign.*', 'm.url')
-															->first();
+								->leftJoin('media as m', 'm.id', 'client_campaign.media_id')
+								->select('client_campaign.*', 'm.url')
+								->first();
 
 		if($campaign) {
 			$userData = UserCampaign::where('campaign_id', '=', $id)
@@ -85,6 +85,7 @@ class ClientCampaignController extends Controller
 									->leftJoin('media as m', 'm.id', 'u.media_id')
 									->select(
 										'user_campaign.*',
+										'user_campaign.campaign_traveled as distance_traveled',
 										'u.name',
 										'u.username',
 										'u.media_id',
@@ -170,7 +171,7 @@ class ClientCampaignController extends Controller
 				'user.name as user_name',
 				DB::raw('
 					(
-						CASE uc.status 
+						CASE uc.request_status 
 						WHEN 0 THEN "Pending"
 						WHEN 1 THEN "Approved"
 						WHEN 2 THEN "Rejected"
@@ -181,7 +182,7 @@ class ClientCampaignController extends Controller
 				'uc.user_id as user_id',
 				'cc.name as campaign_name',
 				'cc.id as campaign_id',
-				'uc.updated_at as timestamp',
+				'uc.created_at as timestamp',
 				DB::raw("(SELECT url FROM media WHERE cc.media_id = media.id) as campaign_image"),
 				DB::raw("(SELECT url FROM media WHERE user.media_id = media.id) as user_image")
 			)
@@ -197,7 +198,7 @@ class ClientCampaignController extends Controller
 		try {
 		$UserCampaignUpdate = UserCampaign::where('user_id',$uid)
 		->where('campaign_id',$cid)
-		->update(['status'=>$status]);
+		->update(['request_status'=>$status]);
 		}catch (\Illuminate\Database\QueryException $e) {
 			return response()->json([
 				'status' => 'error',

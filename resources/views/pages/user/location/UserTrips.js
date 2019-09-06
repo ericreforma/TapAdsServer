@@ -22,7 +22,7 @@ export default class UserTrips extends Component {
             if(userTrips.trips.length !== 0) {
                 checked = Array(userTrips.trips.length + 1).fill(true);
             }
-
+            
             this.setState({checked});
         }
     }
@@ -52,7 +52,7 @@ export default class UserTrips extends Component {
 	}
 
     render() {
-        const { userTrips } = this.props,
+        const { userTrips, date } = this.props,
             { checked } = this.state;
 
         return (
@@ -107,7 +107,7 @@ export default class UserTrips extends Component {
                         )
                     ) : (
                         <tr>
-                            <td colSpan="2" className="text-center">
+                            <td colSpan="8" className="text-center">
                                 <small className="text-muted">
                                     <i>-- No trips available --</i>
                                 </small>
