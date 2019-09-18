@@ -7,10 +7,10 @@ use App\User;
 use App\Client;
 use App\Chat;
 use App\Media;
-use App\UserVehiclePhoto;
 use App\Vehicle;
-use App\UserCampaign;
+use App\UserVehiclePhoto;
 use App\UserVehicle;
+use App\UserCampaign;
 use App\UserRating;
 use App\UserTrip;
 use App\UserTripMap;
@@ -71,7 +71,7 @@ class UserController extends Controller
 				$user->licenseImage = $um->url;
 			}
 		}
-
+		$user->notificationCount = $this->chat_notification_count($user->id) + $this->campaign_notification_count($user->id);
 		return response()->json($user);
 	}
 
@@ -412,6 +412,89 @@ class UserController extends Controller
 		}
 	}
 
+	public function get_all_vehicle(Request $request) {
+		$vehicles = Vehicle::all();
+		return response()->json($vehicles);
+	}
+
+	public function create_vehicle(Request $request) {
+		$user_vehicle = new UserVehicle;
+		$user_vehicle->user_id = $request->user()->id;
+		$user_vehicle->vehicle_id = Input::get('vehicleId');
+		$user_vehicle->color = Input::get('uploadColor');
+		$user_vehicle->type = Input::get('activeTypeVehicle');
+		$user_vehicle->save();
+
+		foreach(Input::get('vehicleToUpload') as $key=>$v) {
+			list($fileType, $fileExt) = explode('/', $v['type']);
+			$filename = md5(strftime(time())) . $key . '.' . $fileExt;
+			$image = Storage::disk('cars')->put($filename, base64_decode($v['data']));
+			$url = 'images/cars/'.$filename;
+			$media = $this->save_media($filename, $request->user()->id, 1, $url);
+			$user_vehicle_photo = new UserVehiclePhoto;
+			$user_vehicle_photo->user_vehicle_id = $user_vehicle->id;
+			$user_vehicle_photo->media_id = $media->id;
+			$user_vehicle_photo->save();
+		}
+
+		return response()->json(true);
+	}
+
+	public function notification_content(Request $request) {
+		$user = $request->user();
+		$notification_content = DB::table('client')
+								->where('c.seen', '=', 0)
+								->where('c.sender', '=', 1)
+								->leftJoin(
+									DB::raw('
+										(
+											SELECT c1.*
+											FROM chat as c1
+											INNER JOIN (
+												SELECT client_id, max(created_at) as max_timestamp
+												FROM chat
+												WHERE user_id = '.$request->user()->id.'
+												GROUP BY client_id
+											) as c2
+											ON c1.client_id = c2.client_id
+											AND c1.created_at = c2.max_timestamp
+											ORDER BY created_at DESC
+										) as c
+									'), 'c.client_id', 'client.id'
+								)
+								->select(
+									'client.id',
+									'client.business_name as client',
+									'c.created_at',
+									DB::raw('1 as action')
+								)
+								->get()
+								->toArray();
+		$campaign = DB::table('client as c')
+					->leftJoin('client_campaign as cc', 'cc.client_id', 'c.id')
+					->leftJoin('user_campaign as uc', 'uc.campaign_id', 'cc.id')
+					->where('uc.user_id', '=', $request->user()->id)
+					->where('uc.seen', '=', 0)
+					->where('uc.request_status', '!=', 0)
+					->select(
+						'c.id',
+						'c.business_name as client',
+						'uc.request_status',
+						'uc.created_at',
+						DB::raw('2 as action')
+					)
+					->get()
+					->toArray();
+		$payment = [];
+		$data = array_merge($notification_content, $campaign, $payment);
+		usort($data, array($this, 'date_sort'));
+		return response()->json($data);
+	}
+
+	private static function date_sort($a, $b) {
+		return strtotime($a->created_at) - strtotime($b->created_at);
+	}
+
 	private function save_media($filename, $id, $owner, $url) {
 		list($fName, $ext) = explode('.', $filename);
 		$media = new Media;
@@ -423,5 +506,27 @@ class UserController extends Controller
 		$media->url = $url;
 		$media->save();
 		return $media;
+	}
+
+	private function chat_notification_count($id) {
+		return count(
+			Chat::where('user_id', '=', $id)
+				->select('client_id')
+				->where('seen', '=', 0)
+				->where('sender', '=', 1)
+				->groupBy('client_id')
+				->get()
+		);
+	}
+
+	private function campaign_notification_count($id) {
+		return count(
+			UserCampaign::where('user_id', '=', $id)
+						->select('campaign_id')
+						->where('seen', '=', 0)
+						->where('request_status', '!=', 0)
+						->groupBy('campaign_id')
+						->get()
+		);
 	}
 }

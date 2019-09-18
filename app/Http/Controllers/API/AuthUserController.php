@@ -24,12 +24,21 @@ class AuthUserController extends Controller
       if (auth()->attempt($credentials)) {
         if (auth()->user()->deleted !== 1) {
           $token = auth()->user()->createToken('tapads')->accessToken;
-          return response()->json(['token' => $token], 200);
+          return response()->json([
+            'status' => true,
+            'token'  => $token
+          ]);
         } else {
-          return response()->json(['error' => 'UnAuthorised'], 401);
+          return response()->json([
+            "status"  => false,
+            "message" => "Entered account doesn't exist",
+          ]);
         }
       } else {
-          return response()->json(['error' => 'UnAuthorised'], 401);
+          return response()->json([
+            "status"  => false,
+            "message" => "Entered account doesn't exist",
+          ]);
       }
 
     }

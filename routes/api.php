@@ -44,6 +44,7 @@ Route::middleware('json.response')->group(function(){
         Route::get('{cid}', 'UserChatController@getMessages');
       });
 
+      // update
       Route::prefix('update')->group(function(){
         Route::post('details', 'UserController@update_details');
         Route::post('photo', 'UserController@update_photo');
@@ -51,16 +52,28 @@ Route::middleware('json.response')->group(function(){
         Route::post('password', 'UserController@update_password');
       });
 
+      // remove
       Route::prefix('remove')->group(function(){
         Route::get('photo', 'UserController@remove_photo');
         Route::get('license', 'UserController@remove_license');
         Route::post('account', 'UserController@remove_account');
       });
 
+      // create
+      Route::prefix('create')->group(function() {
+        Route::post('vehicle', 'UserController@create_vehicle');
+      });
+      
+      // notification
+      Route::get('notif/content', 'UserController@notification_content');
+
+      // websocket
       Route::prefix('websocket')->group(function() {
         Route::get('getUserData', 'UserController@websocketUserData');
         Route::post('message/sent', 'UserController@websocketMessageSent');
       });
+
+      Route::get('vehicle/all', 'UserController@get_all_vehicle');
 
     });
 

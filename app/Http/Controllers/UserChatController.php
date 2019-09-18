@@ -42,6 +42,7 @@ class UserChatController extends Controller
                                     FROM chat
                                     WHERE seen = 0
                                     AND sender = 1
+                                    AND user_id = '.$request->user()->id.'
                                     GROUP BY client_id
                                 ) as n
                             '), 'n.client_id', 'client.id'
@@ -50,12 +51,15 @@ class UserChatController extends Controller
                         ->select(
                             'client.id',
                             'client.business_name',
+                            'client.media_id',
                             'm.url',
                             'c.message',
                             'c.sender',
                             'c.created_at',
                             'c.user_id',
-                            'n.notif'
+                            'c.seen',
+                            'n.notif',
+                            DB::raw('null as online')
                         )
                         ->orderBy('c.created_at', 'desc')
                         ->get();
@@ -64,6 +68,12 @@ class UserChatController extends Controller
     }
 
     public function getMessages(Request $request, $cid) {
+        $chatUpdate = Chat::where('client_id', '=', $cid)
+                        ->where('user_id', '=', $request->user()->id)
+                        ->where('sender', '=', 1)
+                        ->update([
+                            'seen' => 1
+                        ]);
         $chat = Chat::where('client_id', '=', $cid)
                     ->where('user_id', '=', $request->user()->id)
                     ->get();

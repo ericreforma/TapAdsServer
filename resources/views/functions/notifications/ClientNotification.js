@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import {UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem, Badge } from 'reactstrap';
+import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem, Badge } from 'reactstrap';
 import { Loader } from '../../components';
 import { Link } from 'react-router-dom';
 import config from '../../config';
 import { IMAGES } from '../../config/variable';
+import { URL_ROUTES } from '../../config/route';
 
 import { HttpRequest } from '../../services/http';
-const sampleimg = require('../../../img/placeholder1.png');
 
 export default class ClientNotification extends Component {
     constructor(props){
@@ -106,7 +106,7 @@ export default class ClientNotification extends Component {
                                         state:{ r_status: 'Pending', c_name: notif.campaign_name}
                                     }}>
                                     <div className="notif-wrapper">
-                                        <img src={notif.profile_picture ? notif.profile_picture : IMAGES.defaultAvatar}></img>
+                                        <img src={notif.profile_picture ? `${URL_ROUTES.STORAGE_URL}/${notif.profile_picture}` : IMAGES.defaultAvatar}></img>
                                         <div className="notif-desc"><p><b>{notif.user_name}</b> is interested in your campaign: <b>{notif.campaign_name}</b><br/>{this.formatDate(notif.timestamp,true)}</p></div>
                                     </div>
                                     </DropdownItem>

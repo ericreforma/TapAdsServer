@@ -83,8 +83,8 @@ export default class CampaignDashboard extends Component {
                         totalCost = 0;
 
                     if(distance >= basicPayKm) {
-                        var perKm = Math.floor(distance / addPayKm),
-                            totalCost = (perKm * addPay) + basicPayKm;
+                        var perKm = Math.floor((distance - basicPayKm) / addPayKm),
+                            totalCost = (perKm * addPay) + basicPay;
                     }
 
                     var filteredRating = userRating.filter(rate => rate.user_id == user.user_id),
