@@ -55,6 +55,14 @@ class User extends Authenticatable
     }
 
     public function campaigns() {
-      return $this->hasMany('App\UserCampaign','user_id','id');
+      return $this->hasMany('App\UserCampaign','user_id','id')->where('request_status', '=', 1);
+    }
+
+    public function registered_campaigns() {
+      return $this->hasMany('App\UserCampaign','user_id','id')->where('request_status', '!=', 2);
+    }
+
+    public function bank_details() {
+      return $this->hasOne('App\UserBankDetails', 'user_id', 'id');
     }
   }

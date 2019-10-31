@@ -10,7 +10,10 @@ use App\UserRating;
 use App\Media;
 use App\Client;
 use App\User;
+use App\Vehicle;
 use DB;
+
+use Carbon\Carbon;
 
 class ClientCampaignController extends Controller
 {
@@ -19,25 +22,52 @@ class ClientCampaignController extends Controller
 	}
 
 	public function browse(Request $request){
+		$user = $request->user();
+		$registeredCampaigns = $user->registered_campaigns;
 		if($request->rec){
-			$campaigns = ClientCampaign::inRandomOrder()->limit(5)->get();
+			$userVehicles = $user->vehicles;
+			$vehicleIds = array_unique($userVehicles->pluck('vehicle_id')->all());
+			$type = array_unique($userVehicles->pluck('type')->all());
+			$classification = Vehicle::whereIn('id', $vehicleIds)->pluck('classification');
+
+			$campaigns = ClientCampaign::
+			whereIn('vehicle_classification', $classification)
+			->whereIn('vehicle_type', $type)
+			->whereNotIn('id', $registeredCampaigns->pluck('campaign_id')->all())
+			->inRandomOrder()
+			->limit(5)
+			->get();
+
+			if(count($campaigns) === 0) {
+				$campaigns = ClientCampaign::
+				whereNotIn('id', $registeredCampaigns->pluck('campaign_id')->all())
+				->inRandomOrder()
+				->limit(5)
+				->get();
+			} 
 		} else {
 			$campaigns = ClientCampaign::
 			where('vehicle_classification',$request->cl)
+			->whereNotIn('id', $registeredCampaigns->pluck('campaign_id')->all())
 			->latest()
 			->paginate(4);
 		}
 
 		foreach ($campaigns as $c) {
-			$c->slots_used = 0;
-			$c->photo = Media::where('id',$c->media_id)
-			->select('url')
-			->get()
-			->toArray();
+			$c->slots_used = UserCampaign::
+			where('campaign_id', $c->id)
+			->where('request_status', 1)
+			->count();
 
-			$c->client = Client::where('id',$c->client_id)
-			->get()
-			->toArray();
+			$media = Media::find($c->media_id);
+			$c->photo = $media ? $media->url : null;
+
+			$c->client = Client::find($c->client_id);
+
+			$location = ClientCampaignLocation::whereIn('id', $c->location_id)->get();
+			if(count($location) !== 0) {
+				$c->location = implode(', ', $location->pluck('name')->all());
+			}
 		}
 
 		return response()->json($campaigns);
@@ -191,14 +221,19 @@ class ClientCampaignController extends Controller
 
 		return response()->json($requests);
 	}
+
 	public function UserStatusCampaignUpdate(Request $request){
 		$uid = $request->user_id;
 		$cid = $request->campaign_id;
 		$status = $request->status;
 		try {
 		$UserCampaignUpdate = UserCampaign::where('user_id',$uid)
-		->where('campaign_id',$cid)
-		->update(['request_status'=>$status]);
+										->where('campaign_id',$cid)
+										->update([
+											'request_status' => $status,
+											'seen' => 1,
+											'request_status_updated' => Carbon::now()->format('Y-m-d H:i:s')
+										]);
 		}catch (\Illuminate\Database\QueryException $e) {
 			return response()->json([
 				'status' => 'error',
@@ -209,5 +244,43 @@ class ClientCampaignController extends Controller
 			'status' => 'success',
 			'message' => 'Request Status Updated'
 		]);
+	}
+
+	public function recommendedPage(Request $request) {
+		$user = $request->user();
+		$userVehicles = $user->vehicles;
+		$vehicleIds = array_unique($userVehicles->pluck('vehicle_id')->all());
+		$type = array_unique($userVehicles->pluck('type')->all());
+		$classification = Vehicle::whereIn('id', $vehicleIds)->pluck('classification');
+
+		$campaigns = ClientCampaign::
+		whereIn('vehicle_classification', $classification)
+		->whereIn('vehicle_type', $type)
+		->paginate(7);
+
+		if(count($campaigns) === 0) {
+			$campaigns = ClientCampaign::
+			inRandomOrder()
+			->paginate(7);
+		}
+
+		foreach($campaigns as $c) {
+			$c->slots_used = UserCampaign::
+			where('campaign_id', $c->id)
+			->where('request_status', 1)
+			->count();
+
+			$media = Media::find($c->media_id);
+			$c->photo = $media ? $media->url : null;
+
+			$c->client = Client::find($c->client_id);
+
+			$location = ClientCampaignLocation::whereIn('id', $c->location_id)->get();
+			if(count($location) !== 0) {
+				$c->location = implode(', ', $location->pluck('name')->all());
+			}
+		}
+
+		return response()->json($campaigns);
 	}
 }

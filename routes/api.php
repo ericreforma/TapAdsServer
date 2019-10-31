@@ -18,25 +18,49 @@ Route::middleware('json.response')->group(function(){
   // USER
   Route::prefix('user')->group(function(){
 
-
     Route::post('login', 'API\AuthUserController@login')->name('user_login');
+    Route::post('register/validation', 'API\AuthUserController@register_validation')->name('user_register_validation');
     Route::post('register', 'API\AuthUserController@register')->name('user_register');
+    Route::get('checkPing', 'API\NetworkController@checkPing');
+    Route::get('vehicle/all', 'API\VehicleDatabaseController@get_all_vehicle');
+
+    Route::prefix('password')->group(function() {
+      Route::post('create', 'UserPasswordResetController@create');
+      Route::get('find/{token}', 'UserPasswordResetController@find');
+      Route::post('reset', 'UserPasswordResetController@reset');
+    });
 
     Route::middleware('auth:api')->group(function(){
       // USER details
       Route::get('/', 'UserController@details');
       Route::get('logout', 'UserController@logout')->name('user_logout');
 
-      // My campaigns
-      Route::get('/campaign/list','UserController@campaign_list');
-      Route::post('/campaign/add','UserController@campaign_add');
-      // Campaigns
-      Route::get('/campaign/browse','ClientCampaignController@browse');
+      Route::prefix('campaign')->group(function(){
+        // My campaigns
+        Route::get('list','UserController@campaign_list');
+        Route::post('add','UserController@campaign_add');
 
-      // Trip
-      Route::post('/campaign/trip/add','UserController@trip_create');
-      Route::post('/campaign/trip/map','UserController@trip_map_add');
-      Route::post('/campaign/trip/end', 'UserController@trip_end');
+        // favorite
+        Route::get('favorite/{cid}', 'UserController@campaign_favorite');
+
+        // Campaigns
+        Route::get('browse','ClientCampaignController@browse');
+        Route::get('recommended','ClientCampaignController@recommendedPage');
+
+        Route::prefix('trip')->group(function(){
+          // Trip
+          Route::post('add', 'UserController@trip_create');
+          Route::post('map', 'UserController@trip_map_add');
+          Route::post('end', 'UserController@trip_end');
+          Route::get('info/{tid}', 'UserController@trip_info');
+        });
+
+        // location
+        Route::post('location', 'UserController@get_location');
+
+        Route::get('earnings/history', 'UserController@earnings_history');
+
+      });
 
       // chat
       Route::prefix('chat')->group(function(){
@@ -50,6 +74,8 @@ Route::middleware('json.response')->group(function(){
         Route::post('photo', 'UserController@update_photo');
         Route::post('license', 'UserController@update_license');
         Route::post('password', 'UserController@update_password');
+        Route::post('bank', 'UserController@update_bank_details');
+        Route::post('cars/monthly', 'UserController@update_cars_monthly');
       });
 
       // remove
@@ -69,12 +95,18 @@ Route::middleware('json.response')->group(function(){
 
       // websocket
       Route::prefix('websocket')->group(function() {
-        Route::get('getUserData', 'UserController@websocketUserData');
-        Route::post('message/sent', 'UserController@websocketMessageSent');
+        Route::get('checkAuth', 'Websocket\UserWebsocketController@check_auth');
       });
 
-      Route::get('vehicle/all', 'UserController@get_all_vehicle');
+      // messages
+      Route::prefix('message')->group(function() {
+        Route::post('save', 'UserChatController@save_message');
+      });
 
+      // verify password
+      Route::post('password/verify', 'UserController@verify_password');
+
+      Route::post('payment/withdraw', 'UserController@withdraw');
     });
 
   });
@@ -85,6 +117,12 @@ Route::middleware('json.response')->group(function(){
       Route::get('home', 'API\AuthClientController@index');
       Route::post('/login', 'API\AuthClientController@login');
       Route::post('/register', 'API\AuthClientController@register');
+
+      Route::prefix('password')->group(function() {
+        Route::post('create', 'ClientPasswordResetController@create');
+        Route::get('find/{token}', 'ClientPasswordResetController@find');
+        Route::post('reset', 'ClientPasswordResetController@reset');
+      });
 
       Route::middleware('auth:web_api')->group(function(){
 

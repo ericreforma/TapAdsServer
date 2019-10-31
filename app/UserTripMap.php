@@ -8,14 +8,14 @@ class UserTripMap extends Model
 {
     protected $table = 'user_trip_map';
     public $timestamps = false;
-    public static function boot()
-    {
-        parent::boot();
+    // public static function boot()
+    // {
+    //     parent::boot();
 
-        static::creating(function ($model) {
-            $model->created_at = $model->freshTimestamp();
-        });
-    }
+    //     static::creating(function ($model) {
+    //         $model->created_at = $model->freshTimestamp();
+    //     });
+    // }
     public function client(){
       return $this->belongsTo('App\Client');
     }

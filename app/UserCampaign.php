@@ -20,6 +20,10 @@ class UserCampaign extends Model
       return $this->belongsTo('App\User');
     }
 
+    public function campaign() {
+      return $this->hasOne('App\ClientCampaign', 'id', 'campaign_id');
+    }
+
     public function client(){
       return $this->belongsTo('App\Client');
     }

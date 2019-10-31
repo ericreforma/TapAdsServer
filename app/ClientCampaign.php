@@ -13,6 +13,7 @@ class ClientCampaign extends Model
       'location_id' => 'array'
     ];
     protected $dates = ['created_at'];
+    
     public function client(){
       return $this->belongsTo('App\Client');
     }
@@ -24,5 +25,4 @@ class ClientCampaign extends Model
     public function userTripMap() {
       return $this->hasMany('App\UserTripMap','client_id','id');
     }
-
 }

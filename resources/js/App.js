@@ -4,6 +4,8 @@ import DashboardLayout from '../views/layout/Dashboard';
 import LoginLayout from '../views/pages/auth/Login';
 import SignupLayout from '../views/pages/auth/Signup';
 import LogoutLayout from '../views/pages/auth/Logout';
+import PrivacyPolicy from '../views/pages/terms/PrivacyPolicy';
+import TermsOfUse from '../views/pages/terms/TermsOfUse';
 import { URL_ROUTES } from '../views/config/route';
 import { getToken } from '../views/storage';
 //import Auth from '../views/functions/Authenticate';
@@ -15,6 +17,8 @@ export default function App() {
 			<Switch>
 				<AuthRoutes path={URL_ROUTES.login} component={LoginLayout} />
 				<AuthRoutes path={URL_ROUTES.signup} component={SignupLayout} />
+				<AuthRoutes path={URL_ROUTES.termsAndCondition.privacyPolicy} component={PrivacyPolicy} />
+				<AuthRoutes path={URL_ROUTES.termsAndCondition.termsOfUse} component={TermsOfUse} />
 				<Route path={URL_ROUTES.logout} component={LogoutLayout} />
 				<PrivateRoute component={DashboardLayout} />
 			</Switch>

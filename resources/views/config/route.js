@@ -29,5 +29,9 @@ export const URL_ROUTES = {
     dashboard: `/dashboard`,
     login: `/login`,
     signup: `/signup`,
-    logout: `/logout`
+    logout: `/logout`,
+    termsAndCondition: {
+        privacyPolicy: '/termsAndCondition/privacyPolicy',
+        termsOfUse: '/termsAndCondition/termsOfUse'
+    }
 };

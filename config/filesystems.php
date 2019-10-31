@@ -76,6 +76,13 @@ return [
             'visibility' => 'public',
         ],
 
+        'cars_update' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/images/cars_update'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
+
         'client' => [
             'driver' => 'local',
             'root' => storage_path('app/public/images/client_picture'),

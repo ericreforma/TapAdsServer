@@ -10,11 +10,15 @@ use App\Media;
 use App\Vehicle;
 use App\UserVehiclePhoto;
 use App\UserVehicle;
+use App\UserVehicleUpdate;
 use App\UserCampaign;
 use App\UserRating;
 use App\UserTrip;
 use App\UserTripMap;
+use App\UserBankDetails;
+use App\UserWithdrawal;
 use App\ClientCampaign;
+use App\ClientCampaignLocation;
 use App\UserCurrentLocation;
 
 use Input;
@@ -48,6 +52,15 @@ class UserController extends Controller
 	public function details(Request $request){
 		$media = [];
 		$user = $request->user();
+
+		$bank_details = $user->bank_details;
+		if($bank_details) {
+			$firstPart = substr($bank_details->account_number, 0, 7);
+			$secondPart = substr($bank_details->account_number, 7);
+			$user->account_number = $firstPart.''.implode(array_fill(0, strlen($secondPart), 'x'), "");
+		} else {
+			$user->account_number = '';
+		}
 		$ratings = $user->ratings;
 
 		foreach($user->vehicles as $v){
@@ -71,7 +84,9 @@ class UserController extends Controller
 				$user->licenseImage = $um->url;
 			}
 		}
-		$user->notificationCount = $this->chat_notification_count($user->id) + $this->campaign_notification_count($user->id);
+		$user->notificationCount = $this->chat_notification_count($user->id);
+		$user->notificationCount +=	$this->campaign_notification_count($user->id);
+		$user->notificationCount +=	$this->payment_notification_count($user->id);
 		return response()->json($user);
 	}
 
@@ -80,21 +95,46 @@ class UserController extends Controller
 
 		$mycampaign = $user->campaigns;
 		foreach ($mycampaign as $c) {
-			$c->campaignDetails = ClientCampaign::find($c->campaign_id);
+			$campaignDetails = ClientCampaign::find($c->campaign_id);
+			$location = ClientCampaignLocation::whereIn('id', $campaignDetails->location_id)->get();
+			if(count($location) !== 0) {
+				$campaignDetails->location = implode(', ', $location->pluck('name')->all());
+			}
+			$c->campaignDetails = $campaignDetails;
+
 			$c->client = Client::find($c->campaignDetails->client_id);
-			$c->trips = UserTrip::where('user_campaign_id',$c->id)->get();
+			$c->trips = UserTrip::where('user_campaign_id',$c->id)
+													->where('trip_traveled', '>', 0)
+													->get();
+			$c->messages = Chat::where('client_id', '=', $c->campaignDetails->client_id)
+								->where('user_id', '=', $user->id)
+								->where('sender', '=', 1)
+								->where('seen', '=', 0)
+								->orderBy('created_at', 'DESC')
+								->get();
+			$c->payments = UserWithdrawal::where('campaign_id', '=', $c->campaign_id)
+										->where('user_id', '=', $user->id)
+										->orderBy('created_at', 'asc')
+										->get();
+			$c->vehicleMonthlyUpdate = UserVehicleUpdate::where('campaign_id', $c->campaign_id)
+															->leftJoin('media as m', 'm.id', 'user_vehicle_update.media_id')
+															->where('user_id', $user->id)
+															->select('user_vehicle_update.*', 'm.url')
+															->orderBy('created_at', 'DESC')
+															->get();
 		}
 
 		return response()->json($mycampaign);
 	}
 
 	public function campaign_add(Request $request){
+		$user = $request->user();
 
-		$mycampaign = UserCampaign::where('campaign_id', $request->campaign_id)->count();
+		$mycampaign = UserCampaign::where('campaign_id', $request->campaign_id)
+			->where('user_id', '=', $user->id)
+			->count();
 
 		if($mycampaign == 0){
-			$user = $request->user();
-
 			$userCampaign = new UserCampaign;
 			$userCampaign->campaign_id = $request->campaign_id;
 			$userCampaign->user_id = $user->id;
@@ -115,8 +155,26 @@ class UserController extends Controller
 		$myCampaign->save();
 	}
 
-	public function addToFavorites(Request $request){
+	public function campaign_favorite(Request $request, $cid){
+		$user = $request->user();
+		$userCampaign = UserCampaign::find($cid);
+		$userCampaign->favorite = abs($userCampaign->favorite - 1);
+		$userCampaign->save();
 
+		$mycampaign = $user->campaigns;
+		foreach ($mycampaign as $c) {
+			$c->campaignDetails = ClientCampaign::find($c->campaign_id);
+			$c->client = Client::find($c->campaignDetails->client_id);
+			$c->trips = UserTrip::where('user_campaign_id',$c->id)->get();
+			$c->messages = Chat::where('client_id', '=', $c->campaignDetails->client_id)
+								->where('user_id', '=', $user->id)
+								->where('sender', '=', 1)
+								->where('seen', '=', 0)
+								->orderBy('created_at', 'DESC')
+								->get();
+		}
+
+		return response()->json($mycampaign);
 	}
 
 	public function submitUserRating(Request $request) {
@@ -217,10 +275,10 @@ class UserController extends Controller
 
 	public function trip_end(Request $request){
 		$trip_id = $request->input('trip.trip_id');
+		$date_now = Carbon::now()->format('Y-m-d H:i:s');
 
 		$trip = UserTrip::find($trip_id);
-
-		$trip->ended = Carbon::now()->format('Y-m-d H:i:s');
+		$trip->ended = $date_now;
 		$trip->campaign_traveled = $request->input('trip.campaign_traveled');
 		$trip->trip_traveled = $request->input('trip.trip_traveled');
 		$trip->location_start_address =$request->input('trip.location_start_address');
@@ -232,24 +290,31 @@ class UserController extends Controller
 		$trip->save();
 
 		$userCampaign = UserCampaign::find($request->input('trip.user_campaign_id'));
-		$userCampaign->campaign_traveled = $userCampaign->campaign_traveled + $request->input('trip.campaign_traveled');
+		$total_campaign_traveled = $userCampaign->campaign_traveled + $request->input('trip.campaign_traveled');
+		$userCampaign->campaign_traveled = $total_campaign_traveled;
+		if($userCampaign->campaign->pay_basic_km <= $total_campaign_traveled) {
+			if($userCampaign->completed != 1) {
+				$userCampaign->completed = 1;
+			}
+		}
 		$userCampaign->trip_traveled = $userCampaign->trip_traveled + $request->input('trip.trip_traveled');
 		$userCampaign->save();
 	}
 
 	public function trip_map_add(Request $request){
 		$tripmap = json_decode($request->trip_map, true);
-
-		return $tripmap['user_id'];
-		$userLocation = UserCurrentLocation::firstOrCreate(
+		
+		$userLocation = UserCurrentLocation::updateOrCreate(
 			['user_trip_id' => $tripmap['user_trip_id']],
 			[
+				'client_id' => $tripmap['client_id'],
 				'campaign_id' => $tripmap['campaign_id'],
 				'user_id' => $tripmap['user_id'],
 				'campaign_id' => $tripmap['campaign_id'],
 				'user_campaign_id' => $tripmap['user_campaign_id'],
 				'latitude' => $tripmap['latitude'],
 				'longitude' => $tripmap['longitude'],
+				'heading' => $tripmap['heading'],
 				'speed' => $tripmap['speed'],
 				'timestamp' => Carbon::createFromTimestamp($tripmap['timestamp'])->format('Y-m-d H:i:s'),
 			]
@@ -266,34 +331,29 @@ class UserController extends Controller
 		$trip_map->longitude = $tripmap['longitude'];
 		$trip_map->distance = $tripmap['distance'];
 		$trip_map->speed = $tripmap['speed'];
-
 		$trip_map->save();
+
 		return response()->json(1);
 	}
 
-	public function websocketUserData(Request $request) {
-		$returnData = (object)[
-			'id' => $request->user()->id
-		];
-		return response()->json($returnData);
+	public function trip_info(Request $request, $tid) {
+		$user_trip_map = UserTripMap::where('user_trip_id', $tid)->get();
+		return response()->json($user_trip_map);
 	}
 
-	public function websocketMessageSent(Request $request) {
-		$chat = new Chat;
-		$chat->user_id = $request->user()->id;
-		$chat->client_id = $request->uid;
-		$chat->message = $request->message;
-		$chat->type = $request->type;
-		$chat->sender = 0;
-		$chat->save();
-		$chat = Chat::find($chat->id);
-
-		return response()->json([
-			'status' => 'success',
-			'message' => [
-				'chat' => $chat
-			]
-		]);
+	public function earnings_history(Request $request) {
+		$user = $request->user();
+		$campaigns = $user->campaigns;
+		$withdraws = UserWithdrawal::whereIn('user_withdrawal.campaign_id', $campaigns->pluck('campaign_id')->all())
+								->where('user_withdrawal.user_id', '=', $user->id)
+								->leftJoin('client_campaign as cc', 'cc.id', 'user_withdrawal.campaign_id')
+								->select(
+									'user_withdrawal.*',
+									'cc.name'
+								)
+								->orderBy('user_withdrawal.created_at', 'DESC')
+								->get();
+		return response()->json($withdraws);
 	}
 
 	public function getUserTrip(Request $request) {
@@ -376,6 +436,45 @@ class UserController extends Controller
 		}
 	}
 
+	public function update_bank_details(Request $request) {
+		$user = $request->user();
+		$bank_details = $user->bank_details;
+		if(Hash::check(Input::get('password'), $user->password)) {
+			if($bank_details) { //update bank details
+				UserBankDetails::where('user_id', '=', $user->id)
+								->update([ 'account_number' => Input::get('accountNumber') ]);
+			} else { //create bank details
+				$newBankDetails = new UserBankDetails;
+				$newBankDetails->user_id = $user->id;
+				$newBankDetails->account_number = Input::get('accountNumber');
+				$newBankDetails->save();
+			}
+			return response()->json(true);
+		} else {
+			return response()->json(false);
+		}
+	}
+
+	public function update_cars_monthly(Request $request) {
+		list($fileType, $fileExt) = explode('/', Input::get('type'));
+		$filename = md5(strftime(time())) . '.' . $fileExt;
+		$image = Storage::disk('cars_update')->put($filename, base64_decode(Input::get('file')));
+		$url = 'images/cars_update/'.$filename;
+		$media = $this->save_media($filename, $request->user()->id, 1, $url);
+		$user = $request->user();
+
+		$userVehicleUpdate = new UserVehicleUpdate;
+		$userVehicleUpdate->campaign_id = Input::get('campaignId');
+		$userVehicleUpdate->user_id = $user->id;
+		$userVehicleUpdate->client_id = Input::get('clientId');
+		$userVehicleUpdate->media_id = $media->id;
+		$userVehicleUpdate->created_at = Carbon::now()->format('Y-m-d H:i:s');
+		$userVehicleUpdate->save();
+
+		$userVehicleUpdate->url = $media->url;
+		return response()->json($userVehicleUpdate);
+	}
+
 	public function remove_photo(Request $request) {
 		$user = $request->user();
 		$update = User::where('id', '=', $user->id)->update([ 'media_id' => 0 ]);
@@ -412,16 +511,48 @@ class UserController extends Controller
 		}
 	}
 
+	public function verify_password(Request $request) {
+		if(Hash::check(Input::get('password'), $request->user()->password)) {
+			return response()->json(true);
+		} else {
+			return response()->json(false);
+		}
+	}
+
 	public function get_all_vehicle(Request $request) {
 		$vehicles = Vehicle::all();
 		return response()->json($vehicles);
 	}
 
+	public function withdraw(Request $request) {
+		$user = $request->user();
+		$campaign_id = Input::get('campaignId');
+		$amount = Input::get('amount');
+
+		$user_withdrawal = new UserWithdrawal;
+		$user_withdrawal->user_id = $user->id;
+		$user_withdrawal->campaign_id = $campaign_id;
+		$user_withdrawal->amount = $amount;
+		$user_withdrawal->save();
+
+		return response()->json(true);
+	}
+
 	public function create_vehicle(Request $request) {
+		if(Input::get('newVehicle')) {
+			$vehicle = new Vehicle;
+			$vehicle->manufacturer = Input::get('newVehicle.manufacturer');
+			$vehicle->model = Input::get('newVehicle.model');
+			$vehicle->year = Input::get('newVehicle.year');
+			$vehicle->classification = Input::get('newVehicle.class');
+			$vehicle->save();
+		}
+
 		$user_vehicle = new UserVehicle;
 		$user_vehicle->user_id = $request->user()->id;
-		$user_vehicle->vehicle_id = Input::get('vehicleId');
+		$user_vehicle->vehicle_id = Input::get('vehicleId') ? Input::get('vehicleId') : $vehicle->id;
 		$user_vehicle->color = Input::get('uploadColor');
+		$user_vehicle->plate_number = Input::get('plateNumber');
 		$user_vehicle->type = Input::get('activeTypeVehicle');
 		$user_vehicle->save();
 
@@ -442,53 +573,100 @@ class UserController extends Controller
 
 	public function notification_content(Request $request) {
 		$user = $request->user();
-		$notification_content = DB::table('client')
-								->where('c.seen', '=', 0)
-								->where('c.sender', '=', 1)
-								->leftJoin(
-									DB::raw('
-										(
-											SELECT c1.*
-											FROM chat as c1
-											INNER JOIN (
-												SELECT client_id, max(created_at) as max_timestamp
-												FROM chat
-												WHERE user_id = '.$request->user()->id.'
-												GROUP BY client_id
-											) as c2
-											ON c1.client_id = c2.client_id
-											AND c1.created_at = c2.max_timestamp
-											ORDER BY created_at DESC
-										) as c
-									'), 'c.client_id', 'client.id'
-								)
-								->select(
-									'client.id',
-									'client.business_name as client',
-									'c.created_at',
-									DB::raw('1 as action')
-								)
-								->get()
-								->toArray();
+
+		$chat = DB::table('client')
+			->where('c.seen', '=', 0)
+			->where('c.sender', '=', 1)
+			->leftJoin(
+				DB::raw('
+					(
+						SELECT c1.*
+						FROM chat as c1
+						INNER JOIN (
+							SELECT client_id, max(created_at) as max_timestamp
+							FROM chat
+							WHERE user_id = '.$user->id.'
+							GROUP BY client_id
+						) as c2
+						ON c1.client_id = c2.client_id
+						AND c1.created_at = c2.max_timestamp
+						ORDER BY created_at DESC
+					) as c
+				'), 'c.client_id', 'client.id'
+			)
+			->select(
+				'client.id',
+				'client.business_name as client',
+				'c.created_at',
+				'c.seen',
+				DB::raw('1 as action')
+			)
+			->get()
+			->toArray();
+		if(count($chat) > 0) {
+			$chatSeenUpdate = Chat::where('user_id', '=', $user->id)
+				->where('seen', '=', 0)
+				->where('sender', '=', 1)
+				->update([ 'seen' => 1 ]);
+		}
+
 		$campaign = DB::table('client as c')
-					->leftJoin('client_campaign as cc', 'cc.client_id', 'c.id')
-					->leftJoin('user_campaign as uc', 'uc.campaign_id', 'cc.id')
-					->where('uc.user_id', '=', $request->user()->id)
-					->where('uc.seen', '=', 0)
-					->where('uc.request_status', '!=', 0)
-					->select(
-						'c.id',
-						'c.business_name as client',
-						'uc.request_status',
-						'uc.created_at',
-						DB::raw('2 as action')
-					)
-					->get()
-					->toArray();
-		$payment = [];
-		$data = array_merge($notification_content, $campaign, $payment);
+			->leftJoin('client_campaign as cc', 'cc.client_id', 'c.id')
+			->leftJoin('user_campaign as uc', 'uc.campaign_id', 'cc.id')
+			->where('uc.user_id', '=', $user->id)
+			->where('uc.seen', '=', 0)
+			->where('uc.request_status', '!=', 0)
+			->select(
+				'c.id',
+				'c.business_name as client',
+				'uc.request_status',
+				'uc.created_at',
+				'uc.seen',
+				DB::raw('2 as action')
+			)
+			->get()
+			->toArray();
+		if(count($campaign) > 0) {
+			$campaignSeenUpdated = UserCampaign::where('user_id', $user->id)
+				->where('request_status', '!=', 0)
+				->where('seen', '=', 0)
+				->update([ 'seen' => 1 ]);
+		}
+
+		$payment = DB::table('client as c')
+			->leftJoin('client_campaign as cc', 'cc.client_id', 'c.id')
+			->leftJoin('user_withdrawal as uw', 'uw.campaign_id', 'cc.id')
+			->where('uw.user_id', '=', $user->id)
+			->where('uw.seen', '=', 0)
+			->where('uw.status', '!=', 0)
+			->select(
+				'c.id',
+				'c.business_name as client',
+				'uw.status as request_status',
+				'uw.created_at',
+				'uw.seen',
+				DB::raw('3 as action')
+			)
+			->get()
+			->toArray();
+		if(count($payment) > 0) {
+			$paymentSeenUpdate = UserWithdrawal::where('user_id', $user->id)
+				->where('status', '!=', 0)
+				->where('seen', '=', 0)
+				->update([ 'seen' => 1 ]);
+		}
+
+		$data = array_merge($chat, $campaign, $payment);
 		usort($data, array($this, 'date_sort'));
-		return response()->json($data);
+
+		return response()->json([
+			'notif' => $data
+		]);
+	}
+
+	public function get_location(Request $request) {
+		$locations = ClientCampaignLocation::whereIn('id', Input::get('id'))->get();
+		return response()->json($locations);
 	}
 
 	private static function date_sort($a, $b) {
@@ -522,11 +700,20 @@ class UserController extends Controller
 	private function campaign_notification_count($id) {
 		return count(
 			UserCampaign::where('user_id', '=', $id)
-						->select('campaign_id')
-						->where('seen', '=', 0)
-						->where('request_status', '!=', 0)
-						->groupBy('campaign_id')
-						->get()
+				->select('campaign_id')
+				->where('seen', '=', 0)
+				->where('request_status', '!=', 0)
+				->groupBy('campaign_id')
+				->get()
+		);
+	}
+
+	private function payment_notification_count($id) {
+		return count(
+			UserWithdrawal::where('user_id', '=', $id)
+				->where('seen', '=', 0)
+				->where('status', '!=', 0)
+				->get()
 		);
 	}
 }
