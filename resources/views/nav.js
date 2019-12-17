@@ -7,17 +7,16 @@ export default {
     },
     {
       name: 'Campaigns',
-      //url: '/campaigns',
       icon: 'Bookmark',
       children:[
         {
           name:'Campaign List',
-          url: '/campaigns/list',
+          url: '/campaign/list',
           icon: 'List',
         },
         {
           name:'Create Campaign',
-          url: '/campaigns/create',
+          url: '/campaign/create',
 
           icon: 'PlusCircle',
         },
@@ -25,23 +24,13 @@ export default {
           name:'User Requests',
           url: '/campaign/requests/',
           icon: 'Users',
-
-        },
-        {
-          name:'Live Map',
-          url: '/campaigns/livemap',
-
         }
       ]
-    },
-    {
+    }, {
       name: 'Messages',
-      url: '/messages',
-      hasNotif: true,
-      notifCount: '0',
+      url: '/messages/',
       icon: 'MessageSquare'
-    },
-    {
+    }, {
       name: 'User Location',
       url: '/user/location',
       icon: 'MapPin'
@@ -62,106 +51,9 @@ export default {
   ],
   bottom: [
     {
-      name: 'Theme Samples',
-      icon: 'Package',
-      children: [
-        {
-          name: 'Buttons',
-          url: '/elements/buttons',
-        },
-        {
-          name: 'Grid',
-          url: '/elements/grid',
-        },
-        {
-          name: 'Alerts',
-          url: '/elements/alerts',
-        },
-        {
-          name: 'Typography',
-          url: '/elements/typography',
-        },
-        {
-          name: 'Cards',
-          url: '/elements/cards',
-        },
-        {
-          name: 'Tabs',
-          url: '/elements/tabs',
-        },
-        {
-          name: 'Tables',
-          url: '/elements/tables',
-        },
-        {
-          name: 'Breadcrumbs',
-          url: '/elements/breadcrumbs',
-        },
-        {
-          name: 'Forms',
-          url: '/elements/forms',
-        },
-        {
-          name: 'Modals',
-          url: '/elements/modals',
-        },
-        {
-          name: 'Loaders',
-          url: '/elements/loaders',
-        },
-        {
-          name: 'Avatars',
-          url: '/elements/avatars',
-        },
-        {
-          name: 'Progress Bars',
-          url: '/elements/progressbars',
-        },
-        {
-          name: 'Pagination',
-          url: '/elements/pagination',
-        },
-        {
-          name: 'Blank',
-          url: '/pages/blank',
-        },
-        {
-          name: 'Sub Navigation',
-          url: '/pages/subnav',
-        },
-        {
-          name: '404',
-          url: '/pages/404',
-        },
-        {
-          name: 'Analytics',
-          url: '/apps/analytics',
-        },
-        {
-          name: 'Invoice',
-          url: '/apps/invoice',
-        },
-        {
-          name: 'Activity Feed',
-          url: '/apps/feed',
-        },
-        {
-          name: 'CMS',
-          url: '/apps/cms',
-        },
-        {
-          name: 'Widgets',
-          url: '/widgets',
-          badge: {
-            text: 'NEW',
-          },
-        },
-      ],
-    },
-    {
       name: 'Logout',
       url: '/logout',
       icon: 'Power'
-    },
-  ],
+    }
+  ]
 };

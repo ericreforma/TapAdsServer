@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class UserCampaign extends Model
 {
     protected $table = 'user_campaign';
+    protected $fillable = ['request_status', 'seen', 'request_status_updated'];
+
     public $timestamps = false;
     public static function boot()
     {

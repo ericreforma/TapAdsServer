@@ -12,7 +12,7 @@ import CardInfo from './CardInfo';
 import CardCampaigns from './CardCampaigns';
 import CardRatings from './CardRatings';
 import { Loader } from '../../../components';
-import config from '../../../config';
+import { URL } from '../../../config';
 import { HttpRequest } from '../../../services/http';
 
 export default class ViewProfile extends Component {
@@ -39,7 +39,7 @@ export default class ViewProfile extends Component {
     getUserProfile = () => {
         var { id } = this.props.match.params;
         
-        HttpRequest.get(config.api.userProfileView(id)).then(response => {
+        HttpRequest.get(URL.api.userProfileView(id)).then(response => {
             if(response.data.status == 'success') {
                 var { userData,
                     userCampaigns,

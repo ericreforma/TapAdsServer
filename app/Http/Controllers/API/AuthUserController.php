@@ -74,17 +74,18 @@ class AuthUserController extends Controller
 
       $vehicleData = $request->vehicleData;
       if($vehicleData['newVehicle']) {
+        $newVehicle = $vehicleData['newVehicle'];
         $vehicle = new Vehicle;
-        $vehicle->manufacturer = $vehicleData['newVehicle.manufacturer'];
-        $vehicle->model = $vehicleData['newVehicle.model'];
-        $vehicle->year = $vehicleData['newVehicle.year'];
-        $vehicle->classification = $vehicleData['newVehicle.class'];
+        $vehicle->manufacturer = $newVehicle['manufacturer'];
+        $vehicle->model = $newVehicle['model'];
+        $vehicle->year = $newVehicle['year'];
+        $vehicle->classification = $newVehicle['class'];
         $vehicle->save();
       }
 
       $user_vehicle = new UserVehicle;
       $user_vehicle->user_id = $user->id;
-      $user_vehicle->vehicle_id = $vehicleData['vehicleId'] ? $vehicleData['vehicleId'] : $vehicle->id;
+      $user_vehicle->vehicle_id = isset($vehicleData['vehicleId']) ? $vehicleData['vehicleId'] : $vehicle->id;
       $user_vehicle->color = $vehicleData['uploadColor'];
       $user_vehicle->plate_number = $vehicleData['plateNumber'];
       $user_vehicle->type = $vehicleData['activeTypeVehicle'];
@@ -120,10 +121,10 @@ class AuthUserController extends Controller
 
       $validator = Validator::make($data,[
         'name' => 'required|string|max:255',
-        'username' => 'required|string|max:100',
+        'username' => 'required|string|unique:users,username|max:100',
         'birthdate' => 'required|date',
         'location' => 'required',
-        'email' => 'required|email',
+        'email' => 'required|email|unique:users,email',
         'password' => 'required|string|min:8|confirmed',
         'contact_number' => 'required'
       ], $messages);

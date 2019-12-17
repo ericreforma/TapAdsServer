@@ -62,6 +62,13 @@ return [
             'visibility' => 'public',
         ],
 
+        'campaigns' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/images/campaigns'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
+
         'license' => [
             'driver' => 'local',
             'root' => storage_path('app/public/images/license'),

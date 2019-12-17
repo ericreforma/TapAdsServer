@@ -57,9 +57,10 @@ class UserPasswordResetController extends Controller
 	 * @return [string] message
 	 * @return [json] passwordReset object
 	 */
-	public function find($token) {
+	public function find($token, $email) {
 		$passwordReset = PasswordReset::whereRaw("BINARY token = '$token'")
 		->where('owner', '=', 0)
+		->where('email', '=', $email)
 		->first();
 
 		if(!$passwordReset) {

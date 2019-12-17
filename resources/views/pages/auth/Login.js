@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import { Container, Row, Col, Button, Form, FormGroup, Label, Input, InputGroup } from 'reactstrap';
 import {Link} from 'react-router-dom';
-import config from '../../config';
-import { IMAGES } from '../../config/variable';
 import { RawHttpRequest } from '../../services/http';
-import { URL_ROUTES } from '../../config/route';
+import { URL, IMAGES } from '../../config';
 import { storeToken } from '../../storage';
 
 export default class Login extends Component {
@@ -17,10 +15,10 @@ export default class Login extends Component {
 		}
 		this.login = this.login.bind(this);
 	}
-
+	
 	login = (e) =>{
 		e.preventDefault();
-		RawHttpRequest.post(config.api.auth.login, {
+		RawHttpRequest.post(URL.api.auth.login, {
 			email:this.state.email,
 			password:this.state.password
 		}).then(res => {
@@ -75,7 +73,7 @@ export default class Login extends Component {
 						</FormGroup>
 						<span className="error">{this.state.error}</span>
 						<Button>Log In</Button>
-						<Link to={URL_ROUTES.signup}>Sign Up</Link>
+						<Link to={URL.signup}>Sign Up</Link>
 						</Form>
 					</Col>
 				</Row>

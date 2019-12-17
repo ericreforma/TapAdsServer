@@ -1,7 +1,7 @@
+import { URL } from '../config/route';
 import { TOKEN } from '../config/variable';
-import { URL_ROUTES } from '../config/route';
 
-var baseURL = `${URL_ROUTES.basePath}/api`,
+var baseURL = `${URL.basePath}/api`,
     timeout = 30000,
     headers = {
         'Content-Type': 'application/json',

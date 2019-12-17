@@ -39,18 +39,21 @@
         "laravel-mix": "^4.0.7",
         "lodash": "^4.17.5",
         "popper.js": "^1.12",
-        "react": "^16.2.0",
+        "react": "^16.12.0",
         "react-bootstrap-table": "^4.3.1",
         "react-chartjs-2": "^2.7.6",
+        "react-data-table-component": "^4.0.0",
         "react-dom": "^16.2.0",
         "react-feather": "^1.1.6",
         "react-fontawesome": "^1.6.1",
+        "react-image-gallery": "^0.9.1",
         "react-router-dom": "^5.0.0",
         "react-scripts": "^3.0.1",
-        "reactstrap": "^8.0.0",
+        "reactstrap": "^8.1.1",
         "resolve-url-loader": "^2.3.1",
         "sass": "^1.15.2",
         "sass-loader": "^7.1.0",
-        "socket.io-client": "^2.2.0"
+        "socket.io-client": "^2.2.0",
+        "styled-components": "^4.4.1"
     }
 }

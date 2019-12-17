@@ -1,4 +1,4 @@
-import config from '../config';
+import { KEYS } from '../config';
 
 var CryptoJS = require("crypto-js");
 
@@ -23,11 +23,11 @@ export const removeLocalStorage = () => {
 }
 
 const encryptStringData = (data) => {
-    return CryptoJS.AES.encrypt(data, config.keys.storageKey);
+    return CryptoJS.AES.encrypt(data, KEYS.storage);
 };
 
 const decryptStringData = (data) => {
-    var bytes  = CryptoJS.AES.decrypt(data.toString(), config.keys.storageKey),
+    var bytes  = CryptoJS.AES.decrypt(data.toString(), KEYS.storage),
         plaintext = bytes.toString(CryptoJS.enc.Utf8);
 
     return plaintext;

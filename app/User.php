@@ -43,7 +43,7 @@ class User extends Authenticatable
     }
 
     public function media(){
-      return $this->hasOne('App\Media');
+      return $this->hasOne('App\Media', 'id', 'media_id');
     }
 
     public function vehicles(){
@@ -55,7 +55,7 @@ class User extends Authenticatable
     }
 
     public function campaigns() {
-      return $this->hasMany('App\UserCampaign','user_id','id')->where('request_status', '=', 1);
+      return $this->hasMany('App\UserCampaign','user_id','id');
     }
 
     public function registered_campaigns() {

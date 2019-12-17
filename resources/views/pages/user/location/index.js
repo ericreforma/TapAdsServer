@@ -11,9 +11,8 @@ import GoogleMapReact from 'google-map-react';
 
 import { Loader } from '../../../components';
 import { HttpRequest } from '../../../services/http';
-import config from '../../../config';
 import { GOOGLE_MAPS } from '../../../services/google_maps';
-import { GOOGLE_API } from '../../../config/variable';
+import { GOOGLE_API, URL, KEYS } from '../../../config';
 
 import CampaignList from './CampaignList';
 import UserList from './UserList';
@@ -56,7 +55,7 @@ export default class UserLocation extends Component {
     }
 
     getCampaignLocationData = () => {
-        HttpRequest.get(config.api.getCampaignData).then(response => {
+        HttpRequest.get(URL.api.getCampaignData).then(response => {
             if(response.data.status == 'success') {
                 var loader = false,
                     { campaigns,
@@ -108,7 +107,7 @@ export default class UserLocation extends Component {
             }
             
             if(proceed) {
-                HttpRequest.post(config.api.getTrips, {
+                HttpRequest.post(URL.api.getTrips, {
                     cid: activeCampaign,
                     uid: activeUserId,
                     actionChoice,
@@ -266,7 +265,7 @@ export default class UserLocation extends Component {
                                             }}
                                         >
                                             <GoogleMapReact
-                                                bootstrapURLKeys={{ key: config.apiKey.googleApiKey }}
+                                                bootstrapURLKeys={{ key: KEYS.google }}
                                                 defaultCenter={GOOGLE_API.defaultCenter}
                                                 defaultZoom={GOOGLE_API.defaultZoom}
                                                 yesIWantToUseGoogleMapApiInternals

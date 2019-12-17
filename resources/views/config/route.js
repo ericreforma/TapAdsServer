@@ -1,37 +1,47 @@
-import {USER_TYPE, TOKEN} from '../config/variable';
-
 const basePath = '/TapAdsServer/public';
-const STORAGE_URL = `${basePath}/storage`
+const STORAGE_URL = `${basePath}/storage`;
 
-export const websocketURI = {
-    chat: {
-        client: {
-            message: () => {
-                return `/chat/authentication?token=${TOKEN}&userType=${USER_TYPE.client}`
-            }
-        }
-    }
+export const URL = {
+	basePath,
+	STORAGE_URL,
+	dashboard: `/dashboard`,
+	login: `/login`,
+	signup: `/signup`,
+	logout: `/logout`,
+	termsAndCondition: {
+		privacyPolicy: '/termsAndCondition/privacyPolicy',
+		termsOfUse: '/termsAndCondition/termsOfUse'
+	},
+	api: {
+		createCampaign: `/client/campaign/create`,
+		createGeoLocation: '/client/campaign/new/geolocation',
+		campaignDashboard: (id) => {
+			return `/client/campaign/dashboard/${id}`
+		},
+		getGeoLocation: '/client/campaign/geolocation',
+		getCampaignData: '/client/campaign/location/data',
+		submitRateUser: '/client/user/rating',
+		userProfileView: (id) => {
+			return `/client/user/${id}/profile`
+		},
+		getChat: '/client/user/chats',
+		getConvo: '/client/user/convo/',
+		getTrips: '/client/user/trip',
+		submitRateUser: '/client/user/rating',
+		updateNotif: '/client/chat/notif/update',
+		campaignList:  '/client/campaigns',
+		userRequests: '/client/campaigns/requests',
+		clientNotification: '/client/notifications',
+		getListOfUsers: '/client/chat/usersList',
+		auth: {
+			login: '/client/login',
+			register: '/client/register',
+			logout: '/client/logout'
+		}
+	}
 };
 
-export const websocketEvents = {
-    chat: {
-        ON_CONNECT: 'connect',
-        ONLINE_USERS: 'online users',
-        ONLINE_USER: 'online user',
-        NEW_MESSAGE: 'new message',
-        DC_USER: 'disconnected user'
-    }
-};
-
-export const URL_ROUTES = {
-    basePath,
-    STORAGE_URL,
-    dashboard: `/dashboard`,
-    login: `/login`,
-    signup: `/signup`,
-    logout: `/logout`,
-    termsAndCondition: {
-        privacyPolicy: '/termsAndCondition/privacyPolicy',
-        termsOfUse: '/termsAndCondition/termsOfUse'
-    }
+export const KEYS = {
+	google: 'AIzaSyBwXTceRsEryqeySF0HtM66cVwwWa9rW0w',
+	storage: '6CdP1np01nT D!r3cT m@rk3t!nG 1nC'
 };

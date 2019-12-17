@@ -8,6 +8,7 @@
 @import 'campaign/_campaign_dashboard';
 @import 'campaign/_campaign_requests';
 @import 'campaign/_campaign_notifications';
+@import 'campaign/_campaign_create';
 @import 'sidebar/sidebar';
 @import 'user/viewprofile';
 
@@ -16,9 +17,42 @@
 
 @import 'campaign/_campaignLiveMap';
 
-
 @import 'auth/_client_login';
 @import 'auth/_client_signup';
+
+// import react image gallery scss
+@import "~react-image-gallery/styles/scss/image-gallery.scss";
+// overriding react image gallery scss
+.image-gallery-content {
+    .image-gallery-slide-wrapper {
+        border-radius: 15px;
+        overflow: hidden;
+        .image-gallery-image {
+            background-color: #9aa1a7;
+            img {
+                width: 100%;
+                height: auto;
+            }
+        }
+    }
+    .image-gallery-thumbnail {
+        width: 100px;
+        border-radius: 10px;
+        overflow: hidden;
+        .image-gallery-thumbnail-inner {
+            background-color: #9aa1a7;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            img {
+                height: auto;
+                width: 100%;
+            }
+        }
+    }
+}
+
 body{
     height:100vh;
 }

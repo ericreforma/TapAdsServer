@@ -22,6 +22,15 @@ class Kernel extends HttpKernel
     ];
 
     /**
+     * The application's new command.
+     *
+     * @var array
+     */
+    protected $commands = [
+        Commands\TraitMakeCommand::class,
+    ];
+
+    /**
      * The application's route middleware groups.
      *
      * @var array

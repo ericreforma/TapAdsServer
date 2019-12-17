@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import { Container, Row, Col, Button, Form, FormGroup, Label, Input } from 'reactstrap';
 import {Link} from 'react-router-dom';
-import config from '../../config';
-import { IMAGES } from '../../config/variable';
 import { RawHttpRequest } from '../../services/http';
-import { URL_ROUTES } from '../../config/route';
+import { URL, IMAGES } from '../../config';
 import { storeToken } from '../../storage';
 
 export default class Signup extends Component {
@@ -24,7 +22,7 @@ export default class Signup extends Component {
 
     signup = (e) =>{
         e.preventDefault();
-        RawHttpRequest.post(config.api.auth.register, {
+        RawHttpRequest.post(URL.api.auth.register, {
             name:this.state.name,
             business_name:this.state.business_name,
             business_nature:this.state.business_nature,
@@ -34,7 +32,7 @@ export default class Signup extends Component {
         }).then(res => {
             if(res.data.token){
 				storeToken(res.data.token);
-                this.props.history.push(URL_ROUTES.dashboard);
+                this.props.history.push(URL.dashboard);
             }else{
 
             }
@@ -134,7 +132,7 @@ export default class Signup extends Component {
                         />
                     </FormGroup>
                     <Button>Sign Up</Button>
-                    <Link to={URL_ROUTES.login}>Log In</Link>
+                    <Link to={URL.login}>Log In</Link>
                     </Form>
                 </Col>
                 </Row>

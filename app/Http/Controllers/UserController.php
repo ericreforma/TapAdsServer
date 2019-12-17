@@ -20,6 +20,7 @@ use App\UserWithdrawal;
 use App\ClientCampaign;
 use App\ClientCampaignLocation;
 use App\UserCurrentLocation;
+use App\FirebaseData;
 
 use Input;
 use Storage;
@@ -40,8 +41,13 @@ class UserController extends Controller
 		$this->middleware('auth:api');
 	}
 
-	public function logout (Request $request) {
-
+	public function logout (Request $request, $unique_id) {
+		$user = $request->user();
+		$firebase = FirebaseData::where('owner', '=', 0)
+		->where('owner_id', '=', $user->id)
+		->where('unique_id' ,'=', $unique_id)
+		->delete();
+		
 		$token = $request->user()->token();
 		$token->revoke();
 
@@ -57,18 +63,18 @@ class UserController extends Controller
 		if($bank_details) {
 			$firstPart = substr($bank_details->account_number, 0, 7);
 			$secondPart = substr($bank_details->account_number, 7);
-			$user->account_number = $firstPart.''.implode(array_fill(0, strlen($secondPart), 'x'), "");
+			// $user->account_number = $firstPart.''.implode(array_fill(0, strlen($secondPart), 'x'), "");v
+			$user->account_number = $bank_details->account_number;
 		} else {
 			$user->account_number = '';
 		}
 		$ratings = $user->ratings;
 
 		foreach($user->vehicles as $v){
-			$vehicle_photo_id = UserVehiclePhoto::
-				where('user_vehicle_id',$v->id)
-				->select('media_id')
-				->get()
-				->toArray();
+			$vehicle_photo_id = UserVehiclePhoto::where('user_vehicle_id',$v->id)
+			->select('media_id')
+			->get()
+			->toArray();
 
 			$v->vehicle = Vehicle::where('id',$v->vehicle_id)->first();
 			$v->photo = Media::whereIn('id',$vehicle_photo_id)->get();
@@ -84,10 +90,49 @@ class UserController extends Controller
 				$user->licenseImage = $um->url;
 			}
 		}
-		$user->notificationCount = $this->chat_notification_count($user->id);
-		$user->notificationCount +=	$this->campaign_notification_count($user->id);
-		$user->notificationCount +=	$this->payment_notification_count($user->id);
+		
 		return response()->json($user);
+	}
+
+	public function update_notification(Request $request) {
+		$user = $request->user();
+		if($request->all) {
+			$this->chat_unseen($user->id)->update();
+			$this->campaign_unseen($user->id)->update();
+			$this->payment_unseen($user->id)->update();
+			return response()->json(0);
+		} else {
+			$cid = isset($request->cid) ? $request->cid : false;
+			$chat_count = $this->chat_unseen_count($user->id);
+			$campaign_count = $this->campaign_unseen_count($user->id);
+			$payment_count = $this->payment_unseen_count($user->id);
+			$notif_count = $chat_count + $campaign_count + $payment_count;
+
+			if($request->chat) {
+				$notif_count -= $chat_count;
+				$this->chat_unseen_update($user->id, $cid);
+			}
+
+			if($request->campaign) {
+				$notif_count -= $campaign_count;
+				$this->campaign_unseen_update($user->id, $cid);
+			}
+			
+			if($request->payment) {
+				$notif_count -= $payment_count;
+				$this->payment_unseen_update($user->id, $cid);
+			}
+			
+			return response()->json($notif_count);
+		}
+	}
+
+	public function get_notification(Request $request) {
+		$user = $request->user();
+		$notif_count = $this->chat_unseen_count($user->id);
+		$notif_count += $this->campaign_unseen_count($user->id);
+		$notif_count += $this->payment_unseen_count($user->id);
+		return response()->json($notif_count);
 	}
 
 	public function campaign_list(Request $request){
@@ -99,29 +144,42 @@ class UserController extends Controller
 			$location = ClientCampaignLocation::whereIn('id', $campaignDetails->location_id)->get();
 			if(count($location) !== 0) {
 				$campaignDetails->location = implode(', ', $location->pluck('name')->all());
+			
+				$media = Media::find($campaignDetails->media_id);
+				$campaignDetails->photo = $media ? $media->url : null;
 			}
 			$c->campaignDetails = $campaignDetails;
 
 			$c->client = Client::find($c->campaignDetails->client_id);
 			$c->trips = UserTrip::where('user_campaign_id',$c->id)
-													->where('trip_traveled', '>', 0)
-													->get();
+			->where('trip_traveled', '>', 0)
+			->get();
 			$c->messages = Chat::where('client_id', '=', $c->campaignDetails->client_id)
-								->where('user_id', '=', $user->id)
-								->where('sender', '=', 1)
-								->where('seen', '=', 0)
-								->orderBy('created_at', 'DESC')
-								->get();
+			->where('user_id', '=', $user->id)
+			->where('sender', '=', 1)
+			->where('seen', '=', 0)
+			->orderBy('created_at', 'DESC')
+			->get();
 			$c->payments = UserWithdrawal::where('campaign_id', '=', $c->campaign_id)
-										->where('user_id', '=', $user->id)
-										->orderBy('created_at', 'asc')
-										->get();
+			->where('user_id', '=', $user->id)
+			->orderBy('created_at', 'asc')
+			->get();
 			$c->vehicleMonthlyUpdate = UserVehicleUpdate::where('campaign_id', $c->campaign_id)
-															->leftJoin('media as m', 'm.id', 'user_vehicle_update.media_id')
-															->where('user_id', $user->id)
-															->select('user_vehicle_update.*', 'm.url')
-															->orderBy('created_at', 'DESC')
-															->get();
+			->leftJoin('media as m', 'm.id', 'user_vehicle_update.media_id')
+			->where('user_id', $user->id)
+			->select('user_vehicle_update.*', 'm.url')
+			->orderBy('created_at', 'DESC')
+			->get();
+			
+			$c->vehicle = UserVehicle::where('user_vehicle.id', '=', $c->user_vehicle_id)
+			->leftJoin('vehicle as v', 'v.id', 'user_vehicle.vehicle_id')
+			->select(
+				'user_vehicle.*',
+				'v.manufacturer',
+				'v.model',
+				'v.classification'
+			)
+			->first();
 		}
 
 		return response()->json($mycampaign);
@@ -130,18 +188,31 @@ class UserController extends Controller
 	public function campaign_add(Request $request){
 		$user = $request->user();
 
-		$mycampaign = UserCampaign::where('campaign_id', $request->campaign_id)
-			->where('user_id', '=', $user->id)
+		$user_campaign_instance = UserCampaign::where('campaign_id', $request->campaign_id);
+		$mycampaign = $user_campaign_instance->where('user_id', '=', $user->id)
+			->where('request_status', '!=', 2)
+			->where('end', '=', 0)
 			->count();
 
 		if($mycampaign == 0){
-			$userCampaign = new UserCampaign;
-			$userCampaign->campaign_id = $request->campaign_id;
-			$userCampaign->user_id = $user->id;
-			$userCampaign->user_vehicle_id = $request->user_vehicle_id;
-			$userCampaign->save();
+			$slots_used = $user_campaign_instance->where('request_status', 1)
+			->where('end', 0)
+			->count();
 
-			return response()->json(['status' => 'success', 'message' => 'added on list']);
+			$total_slots = ClientCampaign::find($request->campaign_id)->slots;
+
+			if($total_slots - $slots_used > 0) {
+				$userCampaign = new UserCampaign;
+				$userCampaign->client_id = $request->client_id;
+				$userCampaign->campaign_id = $request->campaign_id;
+				$userCampaign->user_id = $user->id;
+				$userCampaign->user_vehicle_id = $request->user_vehicle_id;
+				$userCampaign->save();
+
+				return response()->json(['status' => 'success', 'message' => 'added on list']);
+			} else {
+				return response()->json(['status' => 'error', 'message' => 'No remaining slot for this campaign']);
+			}
 		} else {
 			return response()->json(['status' => 'error', 'message' => 'Already on list']);
 		}
@@ -556,6 +627,10 @@ class UserController extends Controller
 		$user_vehicle->type = Input::get('activeTypeVehicle');
 		$user_vehicle->save();
 
+		$new_user_vehicle = $user_vehicle;
+		$new_user_vehicle->vehicle = Input::get('vehicleId') ? Vehicle::find(Input::get('vehicleId')) : $vehicle;
+		$new_user_vehicle_photo = [];
+
 		foreach(Input::get('vehicleToUpload') as $key=>$v) {
 			list($fileType, $fileExt) = explode('/', $v['type']);
 			$filename = md5(strftime(time())) . $key . '.' . $fileExt;
@@ -566,9 +641,11 @@ class UserController extends Controller
 			$user_vehicle_photo->user_vehicle_id = $user_vehicle->id;
 			$user_vehicle_photo->media_id = $media->id;
 			$user_vehicle_photo->save();
+			$new_user_vehicle_photo[] = $media;
 		}
 
-		return response()->json(true);
+		$new_user_vehicle->photo = $new_user_vehicle_photo;
+		return response()->json($new_user_vehicle);
 	}
 
 	public function notification_content(Request $request) {
@@ -686,34 +763,76 @@ class UserController extends Controller
 		return $media;
 	}
 
-	private function chat_notification_count($id) {
+	private function chat_unseen_count($id) {
 		return count(
 			Chat::where('user_id', '=', $id)
-				->select('client_id')
-				->where('seen', '=', 0)
-				->where('sender', '=', 1)
-				->groupBy('client_id')
-				->get()
+			->select('client_id')
+			->where('seen', '=', 0)
+			->where('sender', '=', 1)
+			->groupBy('client_id')
+			->get()
 		);
 	}
 
-	private function campaign_notification_count($id) {
+	private function chat_unseen_update($id, $cid) {
+		if($cid) {
+			return Chat::where('user_id', $id)
+			->where('client_id', $cid)
+			->where('sender', '=', 1)
+			->where('seen', '=', 0)
+			->update(['seen' => 1]);
+		} else {
+			return Chat::where('user_id', $id)
+			->where('sender', '=', 1)
+			->where('seen', '=', 0)
+			->update(['seen' => 1]);
+		}
+	}
+
+	private function campaign_unseen_count($id) {
 		return count(
 			UserCampaign::where('user_id', '=', $id)
-				->select('campaign_id')
-				->where('seen', '=', 0)
-				->where('request_status', '!=', 0)
-				->groupBy('campaign_id')
-				->get()
+			->select('campaign_id')
+			->where('seen', '=', 0)
+			->where('request_status', '!=', 0)
+			->groupBy('campaign_id')
+			->get()
+		);
+	}
+	
+	private function campaign_unseen_update($id, $cid) {
+		if($cid) {
+			return UserCampaign::where('user_id', '=', $id)
+			->where('campaign_id', '=', $cid)
+			->where('seen', '=', 0)
+			->where('request_status', '!=', 0)
+			->update(['seen' => 1]);
+		} else {
+			return UserCampaign::where('user_id', '=', $id)
+			->where('seen', '=', 0)
+			->where('request_status', '!=', 0)
+			->update(['seen' => 1]);
+		}
+	}
+
+	private function payment_unseen_count($id) {
+		return count(
+			UserWithdrawal::where('user_id', '=', $id)
+			->where('seen', '=', 0)
+			->where('status', '!=', 0)
+			->get()
 		);
 	}
 
-	private function payment_notification_count($id) {
-		return count(
-			UserWithdrawal::where('user_id', '=', $id)
-				->where('seen', '=', 0)
-				->where('status', '!=', 0)
-				->get()
-		);
+	private function payment_unseen_update($id) {
+		$payment = UserWithdrawal::where('user_id', '=', $id)
+		->where('seen', '=', 0)
+		->where('status', '!=', 0)
+		->pluck('id')
+		->toArray();
+		return $payment;
+
+		// return UserWithdrawal::whereIn('id', $payment_ids)
+		// ->update(['seen' => 1]);
 	}
 }

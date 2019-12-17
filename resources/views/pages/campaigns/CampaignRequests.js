@@ -1,428 +1,472 @@
-import React, { Component } from 'react';
-import { 
-    Label, 
-    Input, 
-    Card, 
-    CardHeader, 
-    CardBody, 
-    Table,
-    ButtonDropdown,
-    DropdownToggle,
-    DropdownMenu,
-    DropdownItem,
-    Pagination,
-    PaginationItem,
-    PaginationLink 
+import React, { Component, useState } from 'react';
+import {
+	Button,
+	Card,
+	CardBody,
+	Modal,
+	ModalHeader,
+	ModalBody,
+	ModalFooter,
+	FormGroup,
+	Row,
+	Col,
+	Label,
+	Alert,
+	Spinner
 } from 'reactstrap';
-import { Loader } from '../../components';
-import config from '../../config';
-import PageAlertContext from '../../components/PageAlert/PageAlertContext';
-import { Link } from 'react-router-dom';
-import { IMAGES } from '../../config/variable';
+import DataTable from 'react-data-table-component';
+import FA from 'react-fontawesome';
+import ImageGallery from 'react-image-gallery';
 
-import { HttpRequest } from '../../services/http';
+import { URL, VEHICLE } from '../../config/';
+import { CampaignController } from '../../controllers';
+import PageLoader from '../../layout/PageLoader';
+
+const vehicleClass = Object.values(VEHICLE.CLASS);
+const vehicleType = Object.values(VEHICLE.TYPE);
 
 export default class CampaignRequests extends Component {
-    constructor(props){
-        super(props);
-        var cname = (this.props.state===undefined)?"All":(this.props.location.state.c_name === undefined || this.props.location.state.c_name === null)?"All":this.props.location.state.c_name;
-        var rstatus = (this.props.state===undefined)?"All":(this.props.location.state.r_status  === undefined || this.props.location.state.r_status === null)?"All":this.props.location.state.r_status;
-        this.state = {
-            loader: false,
-            dropdownOpen:[],
-            campaigns:[],
-            status:[],
-            Requests:[],
-            showRequests:[],
-            c_name: cname,
-            r_status: rstatus,
-            tableRowLength:7,
-            currentPage: 0,
-            paginationLength: 0,
-            sortBy:{column:'timestamp',order:'desc'}
-        }
-        this.toggle = this.toggle.bind(this); 
-    }
-    componentWillMount(){
-        this.getMyCampaignRequests();
-    }
-    getMyCampaignRequests = () => {
-        HttpRequest.get(config.api.userRequests).then( (res) => {
-            var dropdownOpenarr=Array(res.data.length).fill(false);
-            var {campaigns,status} = this.state;
-            res.data.map(campaign =>{
-                if (campaigns.indexOf(campaign.campaign_name) === -1) {
-                    campaigns.push(campaign.campaign_name)
-                }
-                if (status.indexOf(campaign.status) === -1) {
-                    status.push(campaign.status)
-                }
-            });
-            this.setState({
-                Requests:res.data,
-                showRequests:res.data,
-                loader: false,
-                dropdownOpen:dropdownOpenarr,
-                campaigns,
-                status,
-                paginationLength: Math.ceil(dropdownOpenarr.length / this.state.tableRowLength)
-            },()=>{
-                this.ChangeCampaignType(this.state.c_name);
-                this.ChangeRequestType(this.state.r_status);
-            });
+	constructor(props){
+		super(props);
+		this.state = {
+			loading: true,
+			users: [],
+			alertMessage: '',
+			alertVisible: false
+		};
+	}
 
-        }).catch(error => {
-			setTimeout(this.getMyCampaignRequests, 5000);
-        });
-    }
-    formatDate = (dates, timeInclude, datestring) => {
-        var d = dates.split(' ')[0],
-            time = dates.split(' ')[1],
-            year = d.split('-')[0],
-            month = parseInt(d.split('-')[1]),
-            date = d.split('-')[2],
-            hour = parseInt(time.split(':')[0]),
-            min = time.split(':')[1],
-            months = [
-                'JAN', 'FEB', 'MAR', 'APR',
-                'MAY', 'JUN', 'JUL', 'AUG',
-                'SEP', 'OCT', 'NOV', 'DEC'
-            ],
-            time = hour == 0 ? '12:' + min + ' AM' : (
-                hour < 13 ? (hour.length < 10 ? '0' + hour.toString() : hour) + ':' + min + ' AM' : (
-                    ((hour - 12) < 10 ? '0' + (hour - 12).toString() : (hour - 12)) + ':' + min + ' PM'
-                )
-            );
-    
-        if(timeInclude) {
-            return months[month-1] + '. ' + date + ', ' + year + ' - ' +time ;
-        } else {
-            return months[month-1] + '. ' + date + ', ' + year;
-        }
-    }
-    toggle = (index) => () => {
-        var {dropdownOpen} = this.state;
-        var initialstate = dropdownOpen[index];
-        dropdownOpen = Array(this.state.Requests.length).fill(false);
-        dropdownOpen[index] = initialstate? false : true ;
-        this.setState({dropdownOpen});
-    }
-    ChangeStatus = (cid,uid,status) => () => {
-        var s = (status=='Pending')?'0':(status=='Approved')?'1':'2';
-        var formdata={
-            campaign_id:cid,
-            user_id:uid,
-            status:s
-        }
-        this.setState({loader:true});
-        
-        HttpRequest.post(config.api.userRequests,formdata).then( (res) => {
-           console.log(res.data.status);
-           this.getMyCampaignRequests();
-           this.PageAlert(res.data.status,res.data.message,'');
-           this.setState({loader:false});
-           alert('Success');
-        }).catch(error => {
-            alert('Error Occured. Please try again later.');
-            console.log(error);
-            this.setState({loader:false});
-            this.PageAlert('Server Error','','danger');
-        });
-       
-    }
-    ChangeCampaignType = (campaign) => {
-        var {showRequests,Requests,r_status,sortBy} = this.state,
-            CampaignName = campaign;
+	componentDidMount = () => {
+		this.init();
+	}
 
-        sortBy.column = 'unset';
-        sortBy.order = 'unset';
-        showRequests = Requests;
-        showRequests = (CampaignName!='All')?showRequests.filter(m => m.campaign_name.toLowerCase() == CampaignName.toLowerCase()):showRequests;
-        showRequests = (r_status!='All')?showRequests.filter(m => m.status==r_status):showRequests;
+	init = (setAlertVisible = false) => {
+		this.setState({loading: true});
+		CampaignController.requests()
+		.then(res => {
+			this.setState({
+				users: res.data,
+				loading: false
+			});
 
-        this.setState({
-            showRequests,
-            c_name:CampaignName,
-            sortBy,
-            currentPage: 0,
-            paginationLength: Math.ceil(showRequests.length / this.state.tableRowLength)
-        });
+			if(setAlertVisible) {
+				this.setState({alertVisible: true});
+				setTimeout(() => {
+					this.setState({alertVisible: false});
+				}, 5000);
+			}
+		})
+		.catch(error => {
+			console.log(error.response);
+			alert('Server error. Reload the page by clicking the "OK"');
+			location.reload();
+		});
+	}
 
-    }
-    ChangeRequestType = (request) => {
-        var {showRequests,Requests,c_name,sortBy} = this.state,
-            RequestType = request;
-            sortBy.column = 'unset';
-            sortBy.order = 'unset';
+	refreshData = alertMessage => {
+		this.setState({alertMessage});
+		this.init(true);
+	}
 
-        showRequests = Requests;
-        showRequests = (c_name!='All')?showRequests.filter(m => m.campaign_name==c_name):showRequests;   
-        showRequests = (RequestType!='All')?showRequests.filter(m => m.status==RequestType):showRequests;
+	dismissAlert = () => {
+		this.setState({alertVisible: false});
+	}
+	
+	columns = [
+		{
+			name: '',
+			sortable: true,
+			width: '100px',
+			wrap: true,
+			cell: row =>
+				<div
+					style={{
+						width: 80,
+						height: 80,
+						display: 'flex',
+						flex: 1,
+						justifyContent: 'center',
+						alignItems: 'center'
+					}}
+				>
+					<div
+						style={{
+							width: 60,
+							height: 60,
+							borderRadius: 40,
+							overflow: 'hidden'
+						}}
+					>
+						<img
+							src={`${URL.STORAGE_URL}/${row.url}`}
+							style={{
+								width: '100%',
+								height: '100%',
+								objectFit: 'cover',
+								overflow: 'hidden'
+							}}
+						/>
+					</div>
+				</div>
+		}, {
+			name: 'Name',
+			sortable: true,
+			cell: row =>
+				<div>
+					<h5 className="mb-0 font-weight-bold">{row.name}</h5>
+					<h6 className="mb-0">{row.username}</h6>
+				</div>
+		}, {
+			name: 'Campaign',
+			selector: 'campaign_name',
+			sortable: true
+		}, {
+			name: 'Vehicle',
+			sortable: true,
+			ignoreRowClick: true,
+			cell: row =>
+				<VehicleModal
+					buttonLabel='Vehicles'
+					row={row}
+				/>
+		}, {
+			name: 'Vehicle Classification',
+			sortable: true,
+			cell: row => vehicleClass.find(v => v.id === row.vehicle_classification).name
+		}, {
+			name: 'Vehicle Type',
+			sortable: true,
+			cell: row => vehicleType.find(v => v.id === row.vehicle_type).name
+		}, {
+			name: '',
+			right: true,
+			width: '120px',
+			cell: row => <ChangeStatus row={row} refreshData={this.refreshData} />
+		}
+	];
 
-        this.setState({
-            showRequests,
-            r_status: RequestType,
-            sortBy,
-            currentPage: 0,
-            paginationLength: Math.ceil(showRequests.length / this.state.tableRowLength)
-        });
+	render() {
+		const { users } = this.state;
+		const filteredLists = users;
 
-    }
-    PageAlert = (message,status,type) => {
-        type = (status=='success')?'success':'error';
-        return <PageAlertContext.Consumer>
-            { context =>
-                context.setAlert(
-                    status+' '+message,
-                    type,
-                )
-            }
-        </PageAlertContext.Consumer>
-    }
-    paginationClick = (currentPage) => (e) => {
-        this.setState({currentPage});
-    }
+		return (
+			<PageLoader loading={this.state.loading}>
+				<Alert color="success" isOpen={this.state.alertVisible} toggle={this.dismissAlert}>
+					{this.state.alertMessage}
+				</Alert>
 
-    paginationNextPrev = (action) => (e) => {
-        var currentPage = this.state.currentPage;
+				<Card>
+					<CardBody>
+						<DataTable
+							title="User Requests"
+							columns={this.columns}
+							data={filteredLists}
+							pagination={true}
+							highlightOnHover={true}
+						/>
+					</CardBody>
+				</Card>
+			</PageLoader>
+		);
+	}
+}
 
-        if(action == 'next') {
-            currentPage = currentPage == (this.state.paginationLength - 1) ? (this.state.paginationLength - 1) : currentPage + 1;
-        } else if(action == 'previous') {
-            currentPage = currentPage == 0 ? 0 : currentPage - 1;
-        } else if(action == 'first') {
-            currentPage = 0;
-        } else if(action == 'last') {
-            currentPage = this.state.paginationLength - 1;
-        }
+const VehicleModal = props => {
+	const {
+		buttonLabel,
+		className,
+		row
+	} = props;
 
-        this.setState({currentPage});
-    }
-    ChangeSortType = (sorttype) => {
-        var {sortBy} = this.state;
-        if(sortBy.column == sorttype){
-            sortBy.order = (sortBy.order=='asc')?'desc':'asc';
-        }else{
-            sortBy.column = sorttype;
-            sortBy.order = 'desc';
-        }
-        this.setState({
-            sortBy
-        },
-        this.sortFunction()
-        );
-    }
-    sortFunction = () =>{
-        var {showRequests,sortBy} = this.state;
-        var column = sortBy.column;
-        var order = sortBy.order;
-        if(column == 'user'){
-            showRequests.sort((a,b) => {
-                if(order=='asc'){
-                    if (a.user_name < b.user_name) return -1;
-                    if (a.user_name > b.user_name) return 1;
-                }else{
-                    if (a.user_name > b.user_name) return -1;
-                    if (a.user_name < b.user_name) return 1;
-                } 
-            })
-        }else  if(column == 'campaign'){
-            showRequests.sort((a,b) => {
-                if(order=='asc'){
-                    if (a.campaign_name < b.campaign_name) return -1;
-                    if (a.campaign_name > b.campaign_name) return 1;
-                }else{
-                    if (a.campaign_name > b.campaign_name) return -1;
-                    if (a.campaign_name < b.campaign_name) return 1;
-                } 
-            })
-        }else  if(column== 'request'){
-            showRequests.sort((a,b) => {
-                if(order=='asc'){
-                    if (a.status < b.status) return -1;
-                    if (a.status > b.status) return 1;
-                }else{
-                    if (a.status > b.status) return -1;
-                    if (a.status < b.status) return 1;
-                } 
-            })
-        }else{//timestamp
-            showRequests.sort((a,b) => {
-                a = Date.parse(a.timestamp);
-                b = Date.parse(b.timestamp);
-                if(order=='asc'){
-                    return a - b;
-                }else{
-                    return b - a;
-                } 
-            })
-        }
-        this.setState({
-            showRequests
-        });
-    }
-    render(){
-        if(this.state.loader) {
-            return <Loader type="puff" />;
-		}else{
-            return (
-                <Card className="campaign-requests_card">
-                    <CardHeader>
-                        <Label for="CampaignName">Select Campaign</Label>
-                        <Input
-                            type="select"
-                            name="select"
-                            id="CampaignName"
-                            value={this.state.c_name}
-                            onChange={ e => this.ChangeCampaignType(e.target.value)}
-                        >
-                        <option value="All">All Campaigns</option>
-                        {this.state.campaigns.map((c,id) =>
-                            <option key={id} value={c}>{c}</option>
-                        )}
-                        </Input>
-                        <Label for="request">Request Type</Label>
-                        <Input
-                            type="select"
-                            name="select"
-                            id="request"
-                            value={this.state.r_status}
-                            onChange={ e => this.ChangeRequestType(e.target.value)}
-                        >
-                            <option value="All">All</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Rejected">Rejected</option>
-                        </Input>
-                        </CardHeader>
-                        <CardBody>
-                            <Table hover>
-                                <thead>
-                                    <tr>
-                                        <th onClick={ e => this.ChangeSortType('user')}>
-                                            User <i className={(this.state.sortBy.column=='user')?
-                                            (this.state.sortBy.order=='asc')?"fa fa-chevron-up":"fa fa-chevron-down"
-                                            :"fa fa-arrows-alt-v"}/>
-                                        </th>
-                                        <th  onClick={ e => this.ChangeSortType('campaign')}>Campaign <i className={(this.state.sortBy.column=='campaign')?
-                                            (this.state.sortBy.order=='asc')?"fa fa-chevron-up":"fa fa-chevron-down"
-                                            :"fa fa-arrows-alt-v"}/>
-                                        </th>
-                                        <th  onClick={e => this.ChangeSortType('request')}>Request Status <i className={(this.state.sortBy.column=='request')?
-                                            (this.state.sortBy.order=='asc')?"fa fa-chevron-up":"fa fa-chevron-down"
-                                            :"fa fa-arrows-alt-v"}/>
-                                        </th>
-                                        <th  onClick={e => this.ChangeSortType('timestamp')} >Timestamp <i className={(this.state.sortBy.column=='timestamp')?
-                                            (this.state.sortBy.order=='asc')?"fa fa-chevron-up":"fa fa-chevron-down"
-                                            :"fa fa-arrows-alt-v"}/>
-                                        </th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    { 
-                                        this.state.showRequests.length!==0?(
-                                            this.state.showRequests.map(
-                                            (request,id) =>
-                                                (   ((this.state.currentPage + 1) * this.state.tableRowLength) > id
-                                                    && (this.state.currentPage * this.state.tableRowLength) <= id) ? (
-                                                <tr key={id}>
-                                                    <td title="View User">
-                                                        <Link to={"/user/profile/"+request.user_id}>
-                                                            <img className="img-round" src={request.user_image ? IMAGES.imgPath(request.user_image) : IMAGES.defaultAvatar} />
-                                                            {request.user_name}
-                                                        </Link>
-                                                    </td>
-                                                    <td title="View Campaign">
-                                                        <Link to={"/campaign/dashboard/"+request.campaign_id}>
-                                                            <img className="img-round" src={request.campaign_image ? IMAGES.imgPath(request.campaign_image) : IMAGES.galleryIcon} />
-                                                            {request.campaign_name}
-                                                        </Link>
-                                                    </td>
-                                                    <td>{request.status}</td>
-                                                    <td>{this.formatDate(request.timestamp, false)}</td>
-                                                    <td>
-                                                        <div className="d-flex flex-column">
-                                                            {/* <button className="btn btn-success" onClick={e => this.props.history.push(`/campaign/dashboard/${request.campaign_id}`)}>View Campaign</button>
-                                                            <button className="btn btn-primary" onClick={e => this.props.history.push(`/user/profile/${request.user_id}`)}>View User</button> */}
-                                                            <ButtonDropdown className="request-btns" isOpen={this.state.dropdownOpen[id]} toggle={this.toggle(id)}>
-                                                                <DropdownToggle className="btn btn-warning" >
-                                                                Change Status
-                                                                </DropdownToggle>
-                                                                <DropdownMenu>
-                                                                    <DropdownItem disabled={request.status=="Pending"?true:false} onClick={this.ChangeStatus(request.campaign_id,request.user_id,'Pending')}>Pending</DropdownItem>
-                                                                    <DropdownItem divider />
-                                                                    <DropdownItem disabled={request.status=="Approved"?true:false} onClick={this.ChangeStatus(request.campaign_id,request.user_id,'Approved')}>Approved</DropdownItem>
-                                                                    <DropdownItem divider />
-                                                                    <DropdownItem disabled={request.status=="Rejected"?true:false} onClick={this.ChangeStatus(request.campaign_id,request.user_id,'Rejected')}>Rejected</DropdownItem>
-                                                                </DropdownMenu>
-                                                            </ButtonDropdown>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                ):null
-                                            )
-                                        )
-                                        :
-                                        (
-                                            <tr>
-                                                <td colSpan='5' className='text-center'>No Data Found.</td>
-                                            </tr>
-                                        )
-                                    }
-                                </tbody>
-                            </Table>
-                             {/* pagination */}
-                             <div className="p-3">
-                                <Pagination aria-label="Page navigation example">
-                                    <PaginationItem>
-                                        <PaginationLink
-                                            first
-                                            href="javascript:void(0)"
-                                            onClick={this.paginationNextPrev('first')}
-                                        />
-                                    </PaginationItem>
+  const [modal, setModal] = useState(false);
 
-                                    <PaginationItem>
-                                        <PaginationLink
-                                            previous
-                                            href="javascript:void(0)"
-                                            onClick={this.paginationNextPrev('previous')}
-                                        />
-                                    </PaginationItem>
+	const toggle = () => setModal(!modal);
+	
+	const VehicleFormGroup = data => {
+		return (
+			<FormGroup>
+				<Label className="mb-0">{data.label}</Label>
+				<h3>{data.content}</h3>
+			</FormGroup>
+		);
+	}
 
-                                    {Array(this.state.paginationLength).fill(null).map((p, pIndex) =>
-                                        ((pIndex - 1 == this.state.currentPage)
-                                            || (pIndex == 2 && this.state.currentPage == 0)
-                                            || (pIndex == (this.state.currentPage - 2) && this.state.currentPage == (this.state.paginationLength - 1))
-                                            || (pIndex + 1 == this.state.currentPage)
-                                            || (pIndex == this.state.currentPage)) ? (
-                                            <PaginationItem active={this.state.currentPage == pIndex ? true : false} key={pIndex}>
-                                                <PaginationLink href="javascript:void(0)" onClick={this.paginationClick(pIndex)}>{pIndex + 1}</PaginationLink>
-                                            </PaginationItem>
-                                        ) : null
-                                    )}
+	const VehiclePhotosGallery = props => {
+		const images = props.photos.map(p => {
+			return {
+				original: `${URL.STORAGE_URL}/${p.url}`,
+				thumbnail: `${URL.STORAGE_URL}/${p.url}`
+			};
+		});
 
-                                    <PaginationItem>
-                                        <PaginationLink
-                                            next
-                                            href="javascript:void(0)"
-                                            onClick={this.paginationNextPrev('next')}
-                                        />
-                                    </PaginationItem>
+		return (
+			<div
+				style={{
+					marginTop: 25,
+					padding: 10,
+					backgroundColor: '#37abb4',
+					borderRadius: 15,
+					boxShadow: '0px 0px 16px -6px rgba(0,0,0,0.75)'
+				}}
+			>
+				<ImageGallery
+					items={images}
+					showFullscreenButton={false}
+					showPlayButton={false}
+					showBullets={true}
+				/>
+			</div>
+		);
+	}
 
-                                    <PaginationItem>
-                                        <PaginationLink
-                                            last
-                                            href="javascript:void(0)"
-                                            onClick={this.paginationNextPrev('last')}
-                                        />
-                                    </PaginationItem>
-                                </Pagination>
-                            </div>
-                        </CardBody>
-                </Card>
-            );
-        }
-    }
+  return (
+    <div>
+			<div onClick={toggle}>
+				<h6 className="mb-0">{row.vehicle_manufacturer}</h6>
+				<h6 className="mb-0">{row.vehicle_model}</h6>
+				<h6 className="mb-0">{row.vehicle_year}</h6>
+			</div>
+
+      <Modal isOpen={modal} toggle={toggle} className={className}>
+				<ModalHeader toggle={toggle}>
+					<div>
+						<h3 className="mb-0 font-weight-bold">{row.name}</h3>
+						<h5 className="mb-0">{row.campaign_name}</h5>
+					</div>
+				</ModalHeader>
+
+        <ModalBody>
+					<VehicleFormGroup
+						label="Vehicle Manufacturer"
+						content={row.vehicle_manufacturer}
+					/>
+					
+					<VehicleFormGroup
+						label="Vehicle Model"
+						content={row.vehicle_model}
+					/>
+					
+					<VehicleFormGroup
+						label="Vehicle Year"
+						content={row.vehicle_year}
+					/>
+					
+					<VehicleFormGroup
+						label="Plate Number"
+						content={row.vehicle_plate_number}
+					/>
+
+					<hr />
+
+					<VehiclePhotosGallery photos={row.vehicle_photos} />
+				</ModalBody>
+
+        <ModalFooter>
+          <Button color="danger" onClick={toggle}>Close</Button>
+        </ModalFooter>
+      </Modal>
+    </div>
+  );
+}
+
+const ChangeStatus = props => {
+	const { row, refreshData } = props;
+	const statusName = [null, 'ACCEPT', 'REJECT'];
+	const statusColor = [null, 'text-success', 'text-danger'];
+	const buttonText = [null, 'Accept', 'Reject'];
+	const buttonColor = [null, 'success', 'danger'];
+	const [loading, setLoading] = useState(false);
+	const [modalVisible, setModalVisible] = useState(false);
+	const [status, setStatus] = useState(false);
+	const [alertVisible, setAlertVisible] = useState(false);
+	const [alertMessage, setAlertMessage] = useState('');
+	// accept - 1, reject - 2
+
+	const toggle = () => {
+		setModalVisible(false);
+		setAlertVisible(false);
+	}
+
+	const dismissAlert = () => setAlertVisible(false);
+
+	const requestToggle = stat => e => {
+		setStatus(stat);
+		setModalVisible(true);
+	}
+
+	const buttonStatusOnClick = e => {
+		setLoading(true);
+		CampaignController.changeStatus({
+			user_id: row.user_id,
+			campaign_name: row.campaign_name,
+			user_campaign_id: row.user_campaign_id,
+			campaign_id: row.campaign_id,
+			status
+		})
+		.then(res => {
+			setLoading(false);
+			if(res.data.status) {
+				setAlertVisible(false);
+				toggle();
+				refreshData(res.data.message);
+			} else {
+				setAlertVisible(true);
+				setAlertMessage(res.data.message);
+			}
+		})
+		.catch(err => {
+			console.log(err);
+			console.log(err.response);
+			setLoading(false);
+		})
+	}
+
+	return (
+		<div>
+			<Button color="success"	onClick={requestToggle(1)}>
+				<FA name="check" />
+			</Button>
+			&nbsp;&nbsp;
+			<Button color="danger" onClick={requestToggle(2)}>
+				<FA name="times" />
+			</Button>
+			
+      <Modal isOpen={modalVisible} toggle={toggle}>
+				<ModalHeader toggle={toggle}>
+					<div>
+						<h2 className="mb-0">{row.campaign_name}</h2>
+					</div>
+				</ModalHeader>
+
+				<ModalBody>
+					<Alert color="danger" isOpen={alertVisible} toggle={dismissAlert}>
+						{alertMessage}
+					</Alert>
+					
+					<p style={{ textAlign: 'center' }}>
+						Are you sure you want to{' '}
+						<strong className={statusColor[status]}>
+							<u>{statusName[status]}</u>
+						</strong> this request?
+					</p>
+					
+					<Card style={{ backgroundColor: '#f7f7f7' }}>
+						<CardBody>
+							<div
+								style={{
+									display: 'flex',
+									justifyContent: 'space-between',
+									alignItems: 'center'
+								}}
+							>
+								<div>
+									<h5 className="mb-0">
+										<strong>{row.name}</strong>
+									</h5>
+
+									<h6 className="mb-0">
+										{row.username}
+									</h6>
+								</div>
+								
+								<div
+									style={{
+										width: 60,
+										height: 60,
+									}}
+								>
+									<div
+										style={{
+											width: 60,
+											height: 60,
+											borderRadius: 40,
+											overflow: 'hidden'
+										}}
+									>
+										<img
+											src={`${URL.STORAGE_URL}/${row.url}`}
+											style={{
+												width: '100%',
+												height: '100%',
+												objectFit: 'cover',
+												overflow: 'hidden'
+											}}
+										/>
+									</div>
+								</div>
+							</div>
+						</CardBody>
+					</Card>
+					
+					<div className="text-center">
+						<Label>Vehicle</Label>
+					</div>
+					
+					<FormGroup>
+						<Row>
+							<Col sm="6" className="text-center text-sm-left">
+								<Label className="mb-0">Manufacturer</Label>
+							</Col>
+							
+							<Col sm="6" className="text-center text-sm-right">
+								<span>{row.vehicle_manufacturer}</span>
+							</Col>
+						</Row>
+					</FormGroup>
+
+					<FormGroup>
+						<Row>
+							<Col sm="6" className="text-center text-sm-left">
+								<Label className="mb-0">Model</Label>
+							</Col>
+							
+							<Col sm="6" className="text-center text-sm-right">
+								<span>{row.vehicle_model}</span>
+							</Col>
+						</Row>
+					</FormGroup>
+
+					<FormGroup>
+						<Row>
+							<Col sm="6" className="text-center text-sm-left">
+								<Label className="mb-0">Year</Label>
+							</Col>
+							
+							<Col sm="6" className="text-center text-sm-right">
+								<span>{row.vehicle_year}</span>
+							</Col>
+						</Row>
+					</FormGroup>
+
+					<Row>
+						<Col sm="6" className="text-center text-sm-left">
+							<Label className="mb-0">Plate Number</Label>
+						</Col>
+						
+						<Col sm="6" className="text-center text-sm-right">
+							<span>{row.vehicle_plate_number ? row.vehicle_plate_number : <i className="text-muted">-- no plate number --</i>}</span>
+						</Col>
+					</Row>
+				</ModalBody>
+
+        <ModalFooter>
+					{loading ? (
+						<Spinner color="primary" />
+					) : (
+						<div>
+							<Button
+								color={buttonColor[status]}
+								onClick={buttonStatusOnClick}
+							>{buttonText[status]}</Button>
+							&nbsp;&nbsp;
+							<Button
+								color="secondary"
+								onClick={toggle}
+							>Cancel</Button>
+						</div>
+					)}
+        </ModalFooter>
+			</Modal>
+		</div>
+	);
 }
