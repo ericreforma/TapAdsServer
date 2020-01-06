@@ -119,8 +119,8 @@ export default class CampaignList extends Component {
 		const filteredLists = search === ''
 			? filteredListsStatus
 			: filteredListsStatus.filter(l =>
-				(new RegExp(search)).test(l.name) ||
-				(new RegExp(search)).test(l.location) ||
+				(new RegExp(search.toLowerCase())).test(l.name.toLowerCase()) ||
+				(new RegExp(search.toLowerCase())).test(l.location.toLowerCase()) ||
 				(new RegExp(search)).test(l.duration_from) ||
 				(new RegExp(search)).test(l.duration_to)
 			);

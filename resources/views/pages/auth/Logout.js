@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import { Loader } from '../../components';
-import { removeLocalStorage } from '../../storage';
+import { removeLocalStorage, getUserUniqueID } from '../../storage';
 import { HttpRequest } from '../../services/http';
 import { URL } from '../../config';
 
 export default class LogoutLayout extends Component {
     componentDidMount = () => {
-        HttpRequest.get(URL.api.auth.logout).then(res => {
+        const logoutUrl = `${URL.api.auth.logout}/${getUserUniqueID()}`;
+        HttpRequest.get(logoutUrl).then(res => {
             var clearLocalStorage = removeLocalStorage();
             if(clearLocalStorage) {
                 this.props.history.push(URL.login);

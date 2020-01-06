@@ -3,7 +3,7 @@ import reactFeature from '../../img/react-feature.svg';
 import sassFeature from '../../img/sass-feature.svg';
 import bootstrapFeature from '../../img/bootstrap-feature.svg';
 import responsiveFeature from '../../img/responsive-feature.svg';
-import { Card, CardBody, Row, Col } from 'reactstrap';
+import { Card, CardBody, Row, Col, Button } from 'reactstrap';
 
 class Dashboard extends Component {
   render() {

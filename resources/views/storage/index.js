@@ -3,17 +3,29 @@ import { KEYS } from '../config';
 var CryptoJS = require("crypto-js");
 
 export const storeToken = (token) => {
-    var encryptToken = encryptStringData(token);
+    const encryptToken = encryptStringData(token);
+    const date = new Date();
+    const userUniqueID = date.getTime();
     localStorage.setItem('client_token', encryptToken);
+    localStorage.setItem('client_uniqueID', userUniqueID);
 };
 
 export const getToken = () => {
-    var token = localStorage.getItem('client_token');
+    const token = localStorage.getItem('client_token');
     if(!token) {
         return null;
     } else {
-        var decryptToken = decryptStringData(token);
+        const decryptToken = decryptStringData(token);
         return decryptToken;
+    }
+}
+
+export const getUserUniqueID = () => {
+    const uniqueId = localStorage.getItem('client_uniqueID');
+    if(!uniqueId) {
+        return null;
+    } else {
+        return uniqueId;
     }
 }
 

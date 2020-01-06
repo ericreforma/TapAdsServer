@@ -9,6 +9,10 @@ use App\FirebaseData;
 
 class UserFirebaseController extends Controller
 {
+	public function __construct()  {
+		$this->middleware('auth:api');
+	}
+
 	public function updateToken(Request $request) {
 		$user = $request->user();
 		$firebaseData = FirebaseData::updateOrCreate(
@@ -30,6 +34,5 @@ class UserFirebaseController extends Controller
 
 	public function getToken(Request $request) {
 		$user = $request->user();
-
 	}
 }

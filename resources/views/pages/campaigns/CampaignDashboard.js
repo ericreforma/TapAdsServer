@@ -42,10 +42,10 @@ export default class CampaignDashboard extends Component {
 	}
 
 	componentDidMount = () => {
+    console.log(this.props);
 		this.setState({loading: true});
 		CampaignController.dashboard(this.cid)
 		.then(res => {
-			console.log(res.data);
 			this.setState({
 				loading: false,
 				campaign: res.data

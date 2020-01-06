@@ -3,7 +3,8 @@ import { Container, Row, Col, Button, Form, FormGroup, Label, Input, InputGroup 
 import {Link} from 'react-router-dom';
 import { RawHttpRequest } from '../../services/http';
 import { URL, IMAGES } from '../../config';
-import { storeToken } from '../../storage';
+import { storeToken, storeUniqueId } from '../../storage';
+import { FirebaseController } from '../../controllers';
 
 export default class Login extends Component {
 	constructor(props) {
@@ -11,7 +12,8 @@ export default class Login extends Component {
 		this.state = {
 			email:'',
 			password:'',
-			error:''
+			error:'',
+			token: ''
 		}
 		this.login = this.login.bind(this);
 	}
@@ -24,15 +26,27 @@ export default class Login extends Component {
 		}).then(res => {
 			if(res.data.error){
 				this.setState({error:'Invalid Email or Password'});
-			}else{
-				storeToken(res.data.token);
-				window.location.reload();
+			} else {
+				const { token } = res.data;
+				this.setState({token});
+				this.firebaseInit();
 			}
 		}).catch((err) => {
 			console.log(err);
 			this.setState({error:'Invalid Email or Password!'});
 			console.log(err.response);
 		})
+	}
+
+	firebaseInit = () => {
+		FirebaseController.init(async() => {
+			const {token} = this.state;
+			storeToken(token);
+			window.location.reload();
+		}, () => {
+			console.log('Firebase error');
+			setTimeout(() => this.firebaseInit(), 1500);
+		});
 	}
 
 	render(){

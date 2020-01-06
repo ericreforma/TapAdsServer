@@ -51,7 +51,12 @@ class ClientController extends Controller
 		return response()->json($client);
 	}
 
-	public function logout(Request $request) {
+	public function logout(Request $request, $unique_id) {
+		$user = $request->user();
+		$firebase = FirebaseData::where('owner', '=', 1)
+		->where('owner_id', '=', $user->id)
+		->where('unique_id' ,'=', $unique_id)
+		->delete();
 
 		$token = $request->user()->token();
 		$token->revoke();

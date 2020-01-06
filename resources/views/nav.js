@@ -2,7 +2,7 @@ export default {
   top: [
     {
       name: 'Dashboard',
-      url: '/apps/analytics',
+      url: '/dashboard',
       icon: 'Home',
     },
     {
@@ -19,17 +19,16 @@ export default {
           url: '/campaign/create',
 
           icon: 'PlusCircle',
-        },
-        {
-          name:'User Requests',
-          url: '/campaign/requests/',
-          icon: 'Users',
         }
       ]
     }, {
       name: 'Messages',
-      url: '/messages/',
+      url: '/messages',
       icon: 'MessageSquare'
+    }, {
+      name:'User Requests',
+      url: '/campaign/requests/',
+      icon: 'Users',
     }, {
       name: 'User Location',
       url: '/user/location',

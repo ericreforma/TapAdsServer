@@ -68,7 +68,8 @@ class ClientCampaignController extends Controller
 		$file_type = explode(';', $request->campaign_image)[0];
 		$file_ext = explode('/', $file_type)[1];
 		$filename = md5(strftime(time())) . '.' . $file_ext;
-		$image = Storage::disk('campaigns')->put($filename, $request->campaign_image);
+		$imageBase64 = explode('base64,', $request->campaign_image)[1];
+		$image = Storage::disk('campaigns')->put($filename, base64_decode($imageBase64));
 		$url = 'images/campaigns/'.$filename;
 		$media = $this->save_media($filename, $user->id, 2, $url);
 		

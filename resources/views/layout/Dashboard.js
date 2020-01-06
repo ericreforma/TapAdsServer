@@ -1,12 +1,29 @@
 import React, { Component } from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
-import { Button, Badge, NavItem, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
-import { Header, SidebarNav, Footer, PageContent, Avatar, Chat, PageAlert, Page } from '../components';
-import Logo from '../../img/vibe-logo.svg';
-import avatar1 from '../../img/avatar1.png';
+import {
+  Button,
+  Badge,
+  NavItem,
+  UncontrolledDropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem
+} from 'reactstrap';
+import {
+  Header,
+  SidebarNav,
+  Footer,
+  PageContent,
+  Avatar,
+  PageAlert,
+  Page
+} from '../components';
 import nav from '../nav';
 import routes from '../route';
 import ContextProviders from '../components/utilities/ContextProviders';
+
+//firebase
+import { initializeFirebase } from '../firebase';
 
 const MOBILE_SIZE = 992;
 
@@ -19,6 +36,9 @@ export default class Dashboard extends Component {
       sidebarCollapsed: false,
       isMobile: window.innerWidth <= MOBILE_SIZE,
       showChat1: true,
+
+      currentLocation: '',
+      newMessage: 0
     };
   }
 
@@ -38,18 +58,30 @@ export default class Dashboard extends Component {
 
   componentDidMount() {
     window.addEventListener('resize', this.handleResize);
+    this.locationUpdated(this.props.location.pathname);
+
+    this.unlisten = this.props.history.listen(location =>
+      this.locationUpdated(location.pathname)
+    );
+
+    initializeFirebase();
+  }
+
+  locationUpdated = currentLocation => {
+    this.setState({currentLocation});
+    const date = new Date();
+    const millis = date.getTime();
+    console.log(millis);
+    this.setState({ newMessage: millis });
   }
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize);
+    this.unlisten();
   }
 
   toggleSideCollapse = () => {
     this.setState(prevState => ({ sidebarCollapsed: !prevState.sidebarCollapsed }));
-  };
-
-  closeChat = () => {
-    this.setState({ showChat1: false });
   };
 
   render() {
@@ -62,7 +94,7 @@ export default class Dashboard extends Component {
           <div className="app-body">
             <SidebarNav
               nav={nav}
-              logo={Logo}
+              // logo={Logo}
               logoText="TAP ADS"
               isSidebarCollapsed={sidebarCollapsed}
               toggleSidebar={this.toggleSideCollapse}
@@ -80,7 +112,15 @@ export default class Dashboard extends Component {
               <PageContent>
                 <Switch>
                   {routes.map((page, key) => (
-                    <Route path={page.path} component={page.component} key={key} />
+                    <Route
+                      path={page.path}
+                      component={props =>
+                        <page.component
+                          {...props}
+                        />
+                      }
+                      key={key}
+                    />
                   ))}
                   <Redirect from="/" to="/dashboard" />
                 </Switch>
@@ -92,11 +132,6 @@ export default class Dashboard extends Component {
               <a href="#!">Terms</a> | <a href="#!">Privacy Policy</a>
             </span>
           </Footer>
-          {/* <Chat.Container>
-            {this.state.showChat1 && (
-              <Chat.ChatBox name="Messages" status="online" image={avatar1} close={this.closeChat} />
-            )}
-          </Chat.Container> */}
         </div>
       </ContextProviders>
     );

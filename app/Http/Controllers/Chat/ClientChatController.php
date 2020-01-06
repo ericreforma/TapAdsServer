@@ -23,63 +23,30 @@ class ClientChatController extends Controller
 		$this->middleware('auth:web_api');
 	}
     
-	public function getUsersChat(Request $request) {
-		$users = User::leftJoin('media as m', 'm.id', 'users.media_id')
-		->leftJoin(
-			DB::raw('
-				(
-					SELECT c1.*
-					FROM chat as c1
-					INNER JOIN (
-						SELECT user_id, max(created_at) as max_timestamp
-						FROM chat
-						WHERE client_id = '.$request->user()->id.'
-						GROUP BY user_id
-					) as c2
-					ON c1.user_id = c2.user_id
-					AND c1.created_at = c2.max_timestamp
-					ORDER BY created_at DESC
-				) as c
-			'), 'c.user_id', 'users.id'
-		)
-		->leftJoin(
-			DB::raw('
-				(
-					SELECT count(*) as notif, user_id
-					FROM chat
-					WHERE seen = 0
-					AND sender = 0
-					AND client_id = '.$request->user()->id.'
-					GROUP BY user_id
-				) as n
-			'), 'n.user_id', 'users.id'
-		)
-		->where('c.client_id', '=', $request->user()->id)
-		->select(
-			'users.id',
-			'users.name',
-			'm.url',
-			'c.message',
-			'c.sender',
-			'c.created_at',
-			'c.client_id',
-			'n.notif'
-		)
-		->orderBy('c.created_at', 'desc')
-		->get();
-		
-		$nonConvoUsers = $this->getUserList($request->user()->id);
-		
-		return response()->json([
-			'status'  => 'success',
-			'message' => [
-				'users' => $users,
-				'nonConvoUsers' => $nonConvoUsers
-			]
-		]);
+	public function message_list(Request $request) {
+		$user = $request->user();
+		$users = $this->getConvoUsers($user->id);
+		return response()->json($users);
+	}
+
+	public function nonConvoList(Request $request, $search) {
+		$user = $request->user();
+		$users = $this->getConvoUsers($user->id);
+		$nonConvoUsers = $this->getNonConvoUsers(
+			$user->id,
+			$search,
+			$users->pluck('id')->all()
+		);
+		return response()->json($nonConvoUsers);
 	}
 
 	public function getUsersConvo(Request $request, $id) {
+		Chat::where('user_id', '=', $id)
+		->where('client_id', '=', $request->user()->id)
+		->where('sender', '=', 0)
+		->where('seen', '=', 0)
+		->update([ 'seen' => 1 ]);
+
 		$conversation = Chat::where('user_id', '=', $id)
 		->where('client_id', '=', $request->user()->id)
 		->orderBy('created_at', 'asc')
@@ -98,18 +65,68 @@ class ClientChatController extends Controller
 		}
 	}
 
-	private function getUserList($id) {
+	private function getNonConvoUsers($id, $search, $uidList) {
 		$users = DB::table('user_campaign as uc')
 		->leftJoin('client_campaign as cc', 'cc.id', 'uc.campaign_id')
 		->leftJoin('users as u', 'u.id', 'uc.user_id')
 		->leftJoin('media as m', 'm.id', 'u.media_id')
+		->whereNotIn('u.id', $uidList)
 		->where('cc.client_id', '=', $id)
+		->where('u.name', 'like', '%'. $search .'%')
 		->distinct('uc.user_id')
 		->select(
 			'u.id',
 			'u.name',
 			'm.url'
 		)
+		->get();
+
+		return $users;
+	}
+
+	private function getConvoUsers($id) {
+		$users = User::leftJoin('media as m', 'm.id', 'users.media_id')
+		->leftJoin(
+			DB::raw('
+				(
+					SELECT c1.*
+					FROM chat as c1
+					INNER JOIN (
+						SELECT user_id, max(created_at) as max_timestamp
+						FROM chat
+						WHERE client_id = '.$id.'
+						GROUP BY user_id
+					) as c2
+					ON c1.user_id = c2.user_id
+					AND c1.created_at = c2.max_timestamp
+					ORDER BY created_at DESC
+				) as c
+			'), 'c.user_id', 'users.id'
+		)
+		->leftJoin(
+			DB::raw('
+				(
+					SELECT count(*) as notif, user_id
+					FROM chat
+					WHERE seen = 0
+					AND sender = 0
+					AND client_id = '.$id.'
+					GROUP BY user_id
+				) as n
+			'), 'n.user_id', 'users.id'
+		)
+		->where('c.client_id', '=', $id)
+		->select(
+			'users.id',
+			'users.name',
+			'm.url',
+			'c.message',
+			'c.sender',
+			'c.created_at',
+			'c.client_id',
+			'c.seen'
+		)
+		->orderBy('c.created_at', 'desc')
 		->get();
 
 		return $users;

@@ -7,7 +7,7 @@ export default class Login extends Component {
     <Container style={styles.container}>
       <Row>
         <Col sm="12" className="text-center">
-        < h1>Tap Ads Server</h1>
+          <h1>Tap Ads Server</h1>
         </Col>
       </Row>
     </Container>

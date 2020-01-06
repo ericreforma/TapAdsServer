@@ -138,10 +138,9 @@ Route::middleware('json.response')->group(function(){
         Route::get('/campaigns', 'Campaign\ClientCampaignController@getMyCampaigns'); // >>>> campaign list
         Route::get('/campaigns/requests', 'Campaign\ClientCampaignController@getMyCampaignRequests'); // >>>> campaign list
         Route::post('/campaigns/requests', 'Campaign\ClientCampaignController@campaign_request_update'); // >>>> campaign request update
-        Route::get('logout', 'ClientController@logout');
+        Route::get('logout/{unique_id}', 'ClientController@logout');
         
         Route::get('user/chats', 'Chat\ClientChatController@getUsersChat');
-        Route::get('user/convo/{id}', 'Chat\ClientChatController@getUsersConvo');
         Route::post('user/rating', 'UserController@submitUserRating');
         Route::get('user/{id}/profile', 'UserController@viewProfile');
         Route::post('user/trip', 'UserController@getUserTrip');
@@ -168,7 +167,10 @@ Route::middleware('json.response')->group(function(){
 
         //Message
         Route::prefix('message')->group(function() {
+          Route::get('list', 'Chat\ClientChatController@message_list');
+          Route::get('nonConvoList/{search}', 'Chat\ClientChatController@nonConvoList');
           Route::post('save', 'Chat\ClientChatController@save_message');
+          Route::get('convo/{id}', 'Chat\ClientChatController@getUsersConvo');
         });
 
         //Payment
@@ -181,6 +183,11 @@ Route::middleware('json.response')->group(function(){
 
         //Notifications
         Route::get('/notifications', 'ClientController@getMyNotifications'); // >>>> get unseen user campaign status
+      });
+
+      Route::prefix('firebase')->group(function() {
+        Route::post('update', 'Firebase\UserFirebaseController@updateToken');
+        Route::post('getToken', 'Firebase\UserFirebaseController@getToken');
       });
 
   });

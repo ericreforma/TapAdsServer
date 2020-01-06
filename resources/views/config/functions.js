@@ -1,4 +1,4 @@
-import { months } from '../config';
+import { months, days } from '../config';
 
 export const getMonthDiff = (date1, date2) => {
 	if(!date1 || !date2) {
@@ -68,4 +68,31 @@ export const dateTimeString = (date, uppercase = false) => {
 	const day = d.split('-')[2];
 	const m = uppercase ? months.three[month].toUpperCase() : months.three[month];
 	return `${m}. ${day}, ${year}`;
+}
+
+export const getChatTimestamp = d => {
+	const dateChat = new Date(d);
+	const dateNow = new Date();
+	const diffTime = Math.abs(dateNow - dateChat);
+	const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+	if(diffHours < 24)
+		return tConvert(`${d.split(' ')[1].split(':')[0]}:${d.split(' ')[1].split(':')[1]}`);
+
+	const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+	if(diffDays < 7)
+		return days[dateChat.getDay()].toUpperCase().slice(0, 3);
+
+	return `${dateChat.getMonth() + 1}/${dateChat.getDate()}/${dateChat.getFullYear()}`;
+}
+
+const tConvert = (time) => {
+  // Check correct time format and split into components
+  time = time.toString ().match (/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
+
+  if (time.length > 1) { // If time format correct
+    time = time.slice (1);  // Remove full string match value
+    time[5] = +time[0] < 12 ? 'AM' : 'PM'; // Set AM/PM
+    time[0] = +time[0] % 12 || 12; // Adjust hours
+  }
+  return time.join(''); // return adjusted time or original string
 }

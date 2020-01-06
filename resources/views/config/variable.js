@@ -16,6 +16,12 @@ export const months = {
 	]
 };
 
+export const days = [
+	'monday', 'tuesday', 'wednesday',
+	'thursday', 'friday', 'saturday',
+	'sunday'
+];
+
 export const chat = {
 	maxHourBreak: 2
 };
