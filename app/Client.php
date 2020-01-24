@@ -7,6 +7,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
+use DB;
+
 class Client extends Authenticatable
 {
     use HasApiTokens, Notifiable;
@@ -104,6 +106,26 @@ class Client extends Authenticatable
       'm.url',
       'u.name',
       'u.username'
+    )
+    ->get();
+  }
+
+  public function user_campaign_approved($cid) {
+    return $this->hasMany('App\UserCampaign')
+    ->leftJoin('users as u', 'u.id', 'user_campaign.user_id')
+    ->leftJoin('media as m', 'm.id', 'u.media_id')
+    ->where('user_campaign.campaign_id', '=', $cid)
+    ->where('user_campaign.request_status', '=', 1)
+    ->select(
+      'u.id',
+      'u.name',
+      'u.username',
+      'm.url',
+      DB::raw('0 as remaining_distance'),
+      DB::raw('0 as trip_traveled'),
+      DB::raw('0 as campaign_traveled'),
+      DB::raw('0 as vehicle_update'),
+      DB::raw('0.00 as amount_paid')
     )
     ->get();
   }

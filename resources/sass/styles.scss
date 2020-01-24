@@ -20,6 +20,8 @@
 @import 'auth/_client_login';
 @import 'auth/_client_signup';
 
+@import 'dashboard';
+
 // import react image gallery scss
 @import "~react-image-gallery/styles/scss/image-gallery.scss";
 // overriding react image gallery scss

@@ -85,7 +85,7 @@ export const IMAGES = {
 		starInactive: `${URL.basePath}/images/icons/star_inactive.png`,
 		favorite: `${URL.basePath}/images/icons/completed_favorite_icon.png`,
 	},
-
+	defaultCampaign: `${URL.basePath}/images/default_campaign.jpg`,
 	imgPath: (url) => {
 		return `${URL.basePath}/${url}`;
 	}

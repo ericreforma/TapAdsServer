@@ -6,7 +6,10 @@ import {
   CampaignRequests,
   ViewProfile,
   UserLocation,
-  Messages
+  Messages,
+  LiveMap,
+  Payment,
+  Notification
 } from './pages';
 
 const pageList = [
@@ -39,9 +42,17 @@ const pageList = [
     path:'/messages',
     component: Messages
   }, {
-    name: 'User Location',
-    path:'/user/location',
-    component: UserLocation
+    name: 'Live Map',
+    path:'/live/map',
+    component: LiveMap
+  }, {
+    name: 'Payment',
+    path: '/campaign/payment/:id',
+    component: Payment
+  }, {
+    name: 'Notifications',
+    path: '/notification',
+    component: Notification
   }
 ];
 

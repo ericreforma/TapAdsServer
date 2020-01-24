@@ -22,6 +22,11 @@ import { URL, VEHICLE } from '../../config/';
 import { CampaignController } from '../../controllers';
 import PageLoader from '../../layout/PageLoader';
 
+import {
+	UserImage,
+	UserName
+} from '../../components';
+
 const vehicleClass = Object.values(VEHICLE.CLASS);
 const vehicleType = Object.values(VEHICLE.TYPE);
 
@@ -78,44 +83,11 @@ export default class CampaignRequests extends Component {
 			sortable: true,
 			width: '100px',
 			wrap: true,
-			cell: row =>
-				<div
-					style={{
-						width: 80,
-						height: 80,
-						display: 'flex',
-						flex: 1,
-						justifyContent: 'center',
-						alignItems: 'center'
-					}}
-				>
-					<div
-						style={{
-							width: 60,
-							height: 60,
-							borderRadius: 40,
-							overflow: 'hidden'
-						}}
-					>
-						<img
-							src={`${URL.STORAGE_URL}/${row.url}`}
-							style={{
-								width: '100%',
-								height: '100%',
-								objectFit: 'cover',
-								overflow: 'hidden'
-							}}
-						/>
-					</div>
-				</div>
+			cell: row => <UserImage row={row} />
 		}, {
 			name: 'Name',
 			sortable: true,
-			cell: row =>
-				<div>
-					<h5 className="mb-0 font-weight-bold">{row.name}</h5>
-					<h6 className="mb-0">{row.username}</h6>
-				</div>
+			cell: row => <UserName row={row} />
 		}, {
 			name: 'Campaign',
 			selector: 'campaign_name',

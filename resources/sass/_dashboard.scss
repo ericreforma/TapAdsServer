@@ -1,0 +1,12 @@
+.dashboard-section {
+  .ds-user-list {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px 10px;
+    border-radius: 10px;
+    &:hover {
+      background: #eee;
+    }
+  }
+}

@@ -4,7 +4,8 @@ import {Link} from 'react-router-dom';
 import { RawHttpRequest } from '../../services/http';
 import { URL, IMAGES } from '../../config';
 import { storeToken, storeUniqueId } from '../../storage';
-import { FirebaseController } from '../../controllers';
+import { FirebaseFunction, initializeFirebase } from '../../firebase';
+import PageLoader from '../../layout/PageLoader';
 
 export default class Login extends Component {
 	constructor(props) {
@@ -13,40 +14,32 @@ export default class Login extends Component {
 			email:'',
 			password:'',
 			error:'',
-			token: ''
+			loginLoading: false
 		}
 		this.login = this.login.bind(this);
 	}
 	
 	login = (e) =>{
 		e.preventDefault();
+		this.setState({loginLoading: true});
 		RawHttpRequest.post(URL.api.auth.login, {
 			email:this.state.email,
 			password:this.state.password
 		}).then(res => {
 			if(res.data.error){
 				this.setState({error:'Invalid Email or Password'});
+				this.setState({loginLoading: false});
 			} else {
 				const { token } = res.data;
-				this.setState({token});
-				this.firebaseInit();
+				storeToken(token);
+				initializeFirebase();
+				window.location.reload();
 			}
 		}).catch((err) => {
 			console.log(err);
 			this.setState({error:'Invalid Email or Password!'});
 			console.log(err.response);
 		})
-	}
-
-	firebaseInit = () => {
-		FirebaseController.init(async() => {
-			const {token} = this.state;
-			storeToken(token);
-			window.location.reload();
-		}, () => {
-			console.log('Firebase error');
-			setTimeout(() => this.firebaseInit(), 1500);
-		});
 	}
 
 	render(){
@@ -86,8 +79,12 @@ export default class Login extends Component {
 							</InputGroup>
 						</FormGroup>
 						<span className="error">{this.state.error}</span>
-						<Button>Log In</Button>
-						<Link to={URL.signup}>Sign Up</Link>
+
+						<PageLoader loading={this.state.loginLoading} small>
+							<Button>Log In</Button>
+							<Link to={URL.signup}>Sign Up</Link>
+						</PageLoader>
+
 						</Form>
 					</Col>
 				</Row>

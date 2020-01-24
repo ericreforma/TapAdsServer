@@ -89,17 +89,22 @@ class ClientChatController extends Controller
 		->leftJoin(
 			DB::raw('
 				(
-					SELECT c1.*
-					FROM chat as c1
-					INNER JOIN (
-						SELECT user_id, max(created_at) as max_timestamp
+					SELECT *
 						FROM chat
-						WHERE client_id = '.$id.'
-						GROUP BY user_id
-					) as c2
-					ON c1.user_id = c2.user_id
-					AND c1.created_at = c2.max_timestamp
-					ORDER BY created_at DESC
+						WHERE id IN ( 
+							SELECT MAX(c1.id)
+								FROM chat as c1
+								INNER JOIN (
+									SELECT user_id, max(created_at) as max_timestamp
+									FROM chat
+									WHERE client_id = '.$id.'
+									GROUP BY user_id
+								) as c2
+								ON c1.user_id = c2.user_id
+								AND c1.created_at = c2.max_timestamp
+								GROUP BY created_at
+								ORDER BY created_at DESC
+						)
 				) as c
 			'), 'c.user_id', 'users.id'
 		)

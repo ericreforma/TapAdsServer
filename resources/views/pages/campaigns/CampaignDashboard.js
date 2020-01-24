@@ -1,4 +1,8 @@
-import React, { Component, useState, useEffect } from 'react';
+import React, {
+	Component,
+	useState,
+	useEffect
+} from 'react';
 import {
 	Row,
 	Col,
@@ -6,24 +10,39 @@ import {
 	Card,
 	CardHeader,
 	CardBody,
-	Progress,
 	Input,
-	Button
+	Button,
+	Modal,
+	Alert,
+	ModalHeader,
+	ModalBody,
+	ModalFooter
 } from 'reactstrap';
 import DataTable from 'react-data-table-component';
-import FA from 'react-fontawesome';
-import { Doughnut, Line } from 'react-chartjs-2';
+import {
+	FaTimesCircle,
+	FaCheckCircle
+} from 'react-icons/fa';
+import {Line} from 'react-chartjs-2';
+import * as Feather from 'react-feather';
 
-import { Switch } from '../../components';
-import { CampaignController } from '../../controllers';
+import {CampaignController} from '../../controllers';
 import {
 	URL,
 	getTotalPay,
 	getTotalDistance,
 	dateTimeString,
+	getTotalColumn,
+	getDateRange,
+	defaultLine,
 	numberWithCommas
 } from '../../config';
 
+import {
+	UserName,
+	UserImage,
+	Loader
+} from '../../components';
 import PageLoader from '../../layout/PageLoader';
 
 export default class CampaignDashboard extends Component {
@@ -37,18 +56,20 @@ export default class CampaignDashboard extends Component {
 
 		this.state = {
 			loading: true,
-			campaign: {}
+			campaign: {},
+			users: []
 		};
 	}
 
 	componentDidMount = () => {
-    console.log(this.props);
 		this.setState({loading: true});
 		CampaignController.dashboard(this.cid)
 		.then(res => {
+			const {campaign, users} = res.data;
 			this.setState({
 				loading: false,
-				campaign: res.data
+				campaign,
+				users
 			});
 		})
 		.catch(err => {
@@ -67,19 +88,62 @@ export default class CampaignDashboard extends Component {
 			}
 		});
 	}
+
+	campaignUsersUpdate = users => {
+		const {campaign} = this.state;
+		campaign.users = users;
+		this.setState({campaign});
+	}
 	
 	render() {
 		return (
-			<PageLoader loading={this.state.loading}>
-				<CampaignContainer>
-					<CampaignInfoCard campaign={this.state.campaign} />
-					<CampaignUsers campaign={this.state.campaign} />
-				</CampaignContainer>
-				
-				<CampaignGraph />
-			</PageLoader>
+			<div className="campaign-dashboard-section">
+				<PageLoader loading={this.state.loading}>
+					<h1 className="mb-0">{this.state.campaign.name}</h1>
+					<h5 className="text-muted mb-3">
+						Location: {this.state.campaign.location
+							? this.state.campaign.location.map(l => l.name).join(', ')
+							: null}
+					</h5>
+					
+					<Card style={{ backgroundColor: '#f7f7f7' }}>
+						<CardBody>
+							<p className="mb-0 text-muted">
+								{this.state.campaign.description}
+							</p>
+						</CardBody>
+					</Card>
+
+					<CampaignContainer>
+						<CampaignInfoCard campaign={this.state.campaign} />
+						<CampaignUsers
+							campaign={this.state.campaign}
+							updateCampaign={this.campaignUsersUpdate}
+							cid={this.cid}
+							history={this.props.history}
+						/>
+					</CampaignContainer>
+					
+					<CampaignGraph
+						cid={this.cid}
+						users={this.state.users}
+					/>
+				</PageLoader>
+			</div>
 		);
 	}
+}
+
+const NavForUserData = ({children}) => {
+	return (
+		<div
+			style={{
+				display: 'flex',
+				flexDirection: 'row',
+				alignItems: 'center'
+			}}
+		>{children}</div>
+	)
 }
 
 const CampaignContainer = ({children}) => {
@@ -159,28 +223,8 @@ const CampaignInfoCard = ({campaign}) => {
 				</div>
 
 				<CardBody>
-					<h4 className="mb-0">{campaign.name}</h4>
-					<h6 className="text-muted mb-3">
-						Location: {campaign.location.map(l => l.name).join(', ')}
-					</h6>
-
-					<Card style={{ backgroundColor: '#f7f7f7' }}>
-						<CardBody>
-							<p
-								className="text-muted"
-								style={{
-									lineHeight: '1rem',
-									marginBottom: 0,
-								}}
-							>
-								{campaign.description}
-							</p>
-						</CardBody>
-					</Card>
-
-					<hr />
-
 					<FormGroup>
+						<h4 className="text-center">Campaign Details</h4>
 						<Row>
 							<Col md="4" className="text-center">
 								<DashboardText.Label text="Total Pay" />
@@ -254,8 +298,13 @@ const CampaignAdditionalInfo = ({text}) => {
 	)
 }
 
-const CampaignUsers = ({campaign}) => {
-	const [userData, setUserData] = useState(campaign.users);
+const CampaignUsers = props => {
+	const {campaign, updateCampaign, cid} = props;
+	const [userData, setUserData] = useState([]);
+
+	useEffect(() => {
+		setUserData(campaign.users);
+	}, [campaign.users]);
 
 	const dropdownValues = [
 		'All', 'Pending', 'Accepted',
@@ -270,44 +319,11 @@ const CampaignUsers = ({campaign}) => {
 			sortable: true,
 			width: '100px',
 			wrap: true,
-			cell: row =>
-				<div
-					style={{
-						width: 80,
-						height: 80,
-						display: 'flex',
-						flex: 1,
-						justifyContent: 'center',
-						alignItems: 'center'
-					}}
-				>
-					<div
-						style={{
-							width: 60,
-							height: 60,
-							borderRadius: 40,
-							overflow: 'hidden'
-						}}
-					>
-						<img
-							src={`${URL.STORAGE_URL}/${row.url}`}
-							style={{
-								width: '100%',
-								height: '100%',
-								objectFit: 'cover',
-								overflow: 'hidden'
-							}}
-						/>
-					</div>
-				</div>
+			cell: row => <UserImage row={row} />
 		}, {
 			name: 'Name',
 			sortable: true,
-			cell: row =>
-				<div>
-					<h5 className="mb-0 font-weight-bold">{row.name}</h5>
-					<h6 className="mb-0">{row.username}</h6>
-				</div>
+			cell: row => <UserName row={row} />
 		}, {
 			name: 'Campaign Traveled',
 			sortable: true,
@@ -316,12 +332,6 @@ const CampaignUsers = ({campaign}) => {
 			name: 'Trip Traveled',
 			sortable: true,
 			selector: 'trip_traveled',
-		}, {
-			name: '',
-			width: '50px',
-			right: true,
-			compact: true,
-			cell: row => <div><FA name="eye" className="text-dark" /></div>
 		}
 	];
 
@@ -378,6 +388,25 @@ const CampaignUsers = ({campaign}) => {
 			<Card>
 				<CardBody>
 					<FormGroup>
+						<NavForUserData>
+							<EditUsersButton
+								users={userData}
+								updateCampaign={updateCampaign}
+								cid={cid}
+							/>
+
+							<Button
+								color="warning"
+								onClick={() =>
+									props.history.push(`/campaign/payment/${cid}`)
+								}
+							>
+								Payment
+							</Button>
+						</NavForUserData>
+					</FormGroup>
+
+					<FormGroup>
 						<Input
 							type="select"
 							defaultValue={0}
@@ -392,6 +421,405 @@ const CampaignUsers = ({campaign}) => {
 						</Input>
 					</FormGroup>
 
+					<FormGroup>
+						<DataTable
+							title="Users"
+							columns={columns}
+							data={userData}
+							pagination={true}
+							highlightOnHover={true}
+						/>
+					</FormGroup>
+				</CardBody>
+			</Card>
+		</div>
+	)
+}
+
+const CampaignGraph = ({cid, users}) => {
+	return (
+		<div>
+			<Row>
+				<Col xl={4}>
+					<ClientTotalAmount users={users} />
+				</Col>
+
+				<Col xl={4}>
+					<ClientTotalDistance users={users} />
+				</Col>
+
+				<Col xl={4}>
+					<ClientTotalTrip users={users} />
+				</Col>
+			</Row>
+
+			<Row>
+				<Col xl={8}>
+					<DashboardGraph cid={cid} />
+				</Col>
+
+				<Col xl={4}>
+					<UserTopDistanceList users={users} />
+				</Col>
+			</Row>
+		</div>
+	);
+}
+
+const ClientTotalAmount = ({users}) => {
+  const totalAmount = users.length !== 0 ? getTotalColumn(users, 'amount') : 0;
+
+  return (
+    <Card>
+      <CardHeader>
+        Total Amount{' '}&nbsp;
+        <Feather.TrendingUp className="text-success" />
+        {/* <Button size="sm" className="pull-right">
+          View
+        </Button> */}
+      </CardHeader>
+      <CardBody>
+        <Card className="mb-0 bg-light">
+          <CardBody>
+            <h2 className="mb-0 inline-block">
+              <span>₱ {numberWithCommas(totalAmount)}</span>
+            </h2>
+          </CardBody>
+        </Card>
+      </CardBody>
+    </Card>
+  )
+}
+
+const ClientTotalDistance = ({users}) => {
+  const totalDistance = users.length !== 0 ? getTotalColumn(users, 'campaign_traveled') : 0;
+
+  return (
+    <Card>
+      <CardHeader>
+        Total Campaign Traveled{' '}&nbsp;
+        <Feather.Compass className="text-primary" />
+        {/* <Button size="sm" className="pull-right">
+          View
+        </Button> */}
+      </CardHeader>
+      <CardBody>
+        <Card className="mb-0 bg-light">
+          <CardBody>
+            <h2 className="mb-0 inline-block">
+              <span>{numberWithCommas(totalDistance)} km</span>
+            </h2>
+          </CardBody>
+        </Card>
+      </CardBody>
+    </Card>
+  )
+}
+
+const ClientTotalTrip = ({users}) => {
+  const totalTrip = users.length !== 0 ? getTotalColumn(users, 'trip_traveled') : 0;
+
+  return (
+    <Card>
+      <CardHeader>
+        Total Trips Traveled{' '}&nbsp;
+        <Feather.Map className="text-danger" />
+        {/* <Button size="sm" className="pull-right">
+          View
+        </Button> */}
+      </CardHeader>
+      <CardBody>
+        <Card className="mb-0 bg-light">
+          <CardBody>
+            <h2 className="mb-0 inline-block">
+              <span>{numberWithCommas(totalTrip)} km</span>
+            </h2>
+          </CardBody>
+        </Card>
+      </CardBody>
+    </Card>
+  )
+}
+
+const DashboardGraph = ({cid}) => {
+  const [init, setInit] = useState(false);
+  const [line, setLine] = useState(defaultLine([], []));
+  const [searchLoading, setSearchLoading] = useState(true);
+  
+  useEffect(() => {
+    if(!init) {
+      setInit(true);
+      getGraphData();
+    }
+  });
+
+  const getGraphData = (value = 0) => {
+    const dateRange = getDateRange(value);
+    const l = dateRange.map(dr => dr.label);
+		const ds = dateRange.map(dr => dr.dataset);
+		
+		CampaignController.graph({
+			cid,
+      date_from: ds[0],
+      date_to: ds[ds.length - 1]
+		})
+		.then(res => {
+      const {data} = res;
+      const dsToSend = ds.map((dsData, index) => {
+        const fromDateData = new Date(dsData).getTime();
+        const toDateData = index === (ds.length - 1) ? null : new Date(ds[index + 1]).getTime();
+        const filteredData = data.map(resData => {
+          const filteredDateData = new Date(resData.started).getTime();
+          if(fromDateData <= filteredDateData)
+            if(!toDateData || toDateData > filteredDateData)
+              return parseFloat(resData.campaign_traveled);
+              
+          return 0;
+        });
+
+        return filteredData.length !== 0
+          ? filteredData.reduce((total, elem) => total + elem)
+          : 0;
+      });
+
+      setLine(defaultLine(l, dsToSend));
+			setSearchLoading(false);
+		})
+		.catch(err => {
+			console.log(err);
+			console.log(err.response);
+			setSearchLoading(false);
+		});
+  }
+
+  const selectDateRange = e => {
+    const range = parseInt(e.currentTarget.value);
+    setSearchLoading(true);
+    getGraphData(range);
+  }
+
+  return (
+    <Card>
+      <CardHeader className="d-flex justify-content-between align-items-center">
+        Campaign Graph
+        <div className="float-right">
+          <Input
+            type="select"
+            onChange={selectDateRange}
+            defaultValue="0"
+          >
+            <option value="0">week</option>
+            <option value="1">month</option>
+            <option value="2">year</option>
+          </Input>
+        </div>
+      </CardHeader>
+      <CardBody>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          {searchLoading ? (
+            <Loader type="spin" />
+          ) : (
+            <Line
+              data={line.data}
+              width={2068}
+              height={846}
+              legend={{ display: false }}
+              options={line.options}
+            />
+          )}
+        </div>
+      </CardBody>
+    </Card>
+  )
+}
+
+const UserTopDistanceList = ({users}) => {
+  return (
+    <Card>
+      <CardHeader>Top Distance Users (km)</CardHeader>
+      <CardBody>
+        <UserContainer>
+          <UserList users={users} />
+        </UserContainer>
+      </CardBody>
+    </Card>
+  )
+}
+
+const UserContainer = ({children}) => {
+  return (
+    <div
+      style={{
+        height: '405px'
+      }}
+    >{children}</div>
+  )
+}
+
+const UserList = ({users}) => {
+  if(users.length !== 0) {
+    return users.map((u, uIdx) =>
+      <div
+        key={uIdx}
+        className="cds-user-list"
+      >
+        <div
+          style={{
+            width: 40
+          }}
+        >
+          <h5 className="mb-0">{uIdx + 1}.</h5>
+        </div>
+
+        <UserImage row={u} />
+
+        <UserName
+          row={u}
+          style={{
+            padding: '0px 15px',
+            flex: 2
+          }}
+        />
+
+        <div
+          style={{
+            flex: 1
+          }}
+        >
+          <h5 className="mb-0 font-weight-bold">{u.campaign_traveled}</h5>
+        </div>
+      </div>
+    )
+  } else {
+    return (
+      <div className="text-center">
+        <i>-- no users available --</i>
+      </div>
+    )
+  }
+}
+
+const EditUsersButton = props => {
+	const {users, updateCampaign, cid} = props;
+	const [modalVisible, setModalVisible] = useState(false);
+	const [userData, setUserData] = useState([]);
+	const [dataToSubmit, setDataToSubmit] = useState([]);
+	const [alertVisible, setAlertVisible] = useState(false);
+	const [alertColor, setAlertColor] = useState('success');
+	const [alertMessage, setAlertMessage] = useState('');
+
+	useEffect(() => {
+		setUserData(users.filter(u => u.request_status !== 0 && u.end !== 1));
+	}, [users]);
+
+	const toggle = () => setModalVisible(!modalVisible);
+
+	const toggleAlert = (visible = false) => setAlertVisible(visible);
+
+	const checkboxToggle = (userCampaign, value, column_name) => {
+		const userClickedIndex = dataToSubmit.findIndex(d => d.user_campaign_id === userCampaign.id && d.column_name=== column_name);
+		const columnValue = users.find(u => u.id === userCampaign.id)[column_name];
+		const newDataToSubmit = dataToSubmit;
+
+		if(userClickedIndex !== -1) {
+			if(columnValue === value) {
+				newDataToSubmit.splice(userClickedIndex, 1);
+			} else {
+				newDataToSubmit[userClickedIndex].value = value;
+			}
+		} else {
+			if(columnValue !== value)
+				newDataToSubmit.push({
+					user_campaign_id: userCampaign.id,
+					column_name,
+					value
+				});
+		}
+		setDataToSubmit(newDataToSubmit);
+	}
+
+	const saveEditedUsers = () => {
+		if(dataToSubmit.length !== 0) {
+			CampaignController.updateUserData({formData: dataToSubmit, cid})
+			.then(res => {
+				setDataToSubmit([]);
+				updateCampaign(res.data);
+				setAlertColor('success');
+				setAlertMessage('User updated successfully');
+				toggleAlert(true);
+			})
+			.catch(err => {
+				console.log(err);
+				console.log(err.response);
+				setAlertColor('danger');
+				setAlertMessage('Server Error: Please try again later.');
+				toggleAlert(true);
+			});
+		}
+	}
+
+	const backBtnClicked = () => {
+		toggleAlert(false);
+		toggle(false);
+	}
+
+	const columns = [
+		{
+			name: '',
+			sortable: true,
+			width: '100px',
+			wrap: true,
+			cell: row => <UserImage row={row} />
+		}, {
+			name: 'Name',
+			sortable: true,
+			cell: row => <UserName row={row} />
+		}, {
+			name: 'Completed',
+			center: true,
+			cell: row =>
+				<CheckboxIcon
+					row={row}
+					col="completed"
+					checkboxToggle={checkboxToggle}
+				/>
+		}, {
+			name: 'Installed',
+			center: true,
+			cell: row => 
+				<CheckboxIcon
+					row={row}
+					col="installed"
+					checkboxToggle={checkboxToggle}
+				/>
+		}
+	];
+
+	return (
+		<div className="pr-3">
+			<Button color="primary" onClick={e => toggle()}>
+				Edit Users
+			</Button>
+
+			<Modal isOpen={modalVisible} toggle={backBtnClicked} size="xl">
+				<ModalHeader toggle={backBtnClicked}>
+					Edit User Data
+				</ModalHeader>
+
+				<ModalBody>
+					<Alert
+						color={alertColor}
+						isOpen={alertVisible}
+						toggle={() => toggleAlert()}
+					>{alertMessage}</Alert>
+
 					<DataTable
 						title="Users"
 						columns={columns}
@@ -399,228 +827,59 @@ const CampaignUsers = ({campaign}) => {
 						pagination={true}
 						highlightOnHover={true}
 					/>
-				</CardBody>
-			</Card>
+				</ModalBody>
+
+				<ModalFooter>
+					<Button color="success" onClick={saveEditedUsers}>Save</Button>
+					<Button color="danger" onClick={backBtnClicked}>Back</Button>
+				</ModalFooter>
+			</Modal>
 		</div>
 	)
 }
 
-const CampaignGraph = ({campaign}) => {
-	const [facebook, setFacebook] = useState(true);
-	const [twitter, setTwitter] = useState(false);
+const CheckboxIcon = props => {
+	const {row, col, checkboxToggle} = props;
+	const [checkbox, setCheckbox] = useState(false);
 
-	const chartColors = {
-		red: 'rgb(233, 30, 99)',
-		danger: 'rgb(233, 30, 99)',
-		dangerTransparent: 'rgba(233, 30, 99, .8)',
-		orange: 'rgb(255, 159, 64)',
-		yellow: 'rgb(255, 180, 0)',
-		green: 'rgb(34, 182, 110)',
-		blue: 'rgb(68, 159, 238)',
-		primary: 'rgb(68, 159, 238)',
-		primaryTransparent: 'rgba(68, 159, 238, .8)',
-		purple: 'rgb(153, 102, 255)',
-		grey: 'rgb(201, 203, 207)',
+	useEffect(() => {
+		const newCheckbox = row[col] ? true : false;
+		setCheckbox(newCheckbox);
+	}, [row]);
 
-		primaryShade1: 'rgb(68, 159, 238)',
-		primaryShade2: 'rgb(23, 139, 234)',
-		primaryShade3: 'rgb(14, 117, 202)',
-		primaryShade4: 'rgb(9, 85, 148)',
-		primaryShade5: 'rgb(12, 70, 117)'
-	};
-	const donutData = {
-		labels: ['Q1', 'Q2', 'Q3'],
-		datasets: [
-			{
-				data: [300, 50, 100],
-				backgroundColor: [
-					chartColors.primaryShade1,
-					chartColors.primaryShade2,
-					chartColors.primaryShade3
-				],
-				hoverBackgroundColor: [
-					chartColors.primaryShade4,
-					chartColors.primaryShade4,
-					chartColors.primaryShade4
-				]
-			}
-		]
-	};
-	const line = {
-		data: {
-			labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-			datasets: [
-				{
-					label: '# of Votes',
-					data: [3, 6, 4, 10, 8, 12],
-					borderColor: 'transparent',
-					backgroundColor: chartColors.primary,
-					pointBackgroundColor: 'rgba(0,0,0,0)',
-					pointBorderColor: 'rgba(0,0,0,0)',
-					borderWidth: 4
-				}
-			]
-		},
-		options: {
-			scales: {
-				xAxes: [
-					{
-						display: false
-					}
-				],
-				yAxes: [
-					{
-						display: false
-					}
-				]
-			},
-			legend: {
-				display: false
-			},
-			tooltips: {
-				enabled: false
-			}
-		}
-	};
+	const checkToggle = e => {
+		setCheckbox(true);
+		checkboxToggle(row, 1, col);
+	}
+
+	const timesToggle = e => {
+		setCheckbox(false);
+		checkboxToggle(row, 0, col);
+	}
 
 	return (
-		<div>
-			<Row>
-				<Col md={4} xs={12}>
-					<Card>
-						<CardHeader>
-							Page Views{' '}
-							<Button size="sm" className="pull-right">
-								View
-							</Button>
-						</CardHeader>
-						<CardBody>
-							<h2 className="m-b-20 inline-block">
-								<span>13K</span>
-							</h2>{' '}
-							<i
-								className="fa fa-caret-down text-danger"
-								aria-hidden="true"
-							/>
-							<Progress value={77} color="warning" />
-						</CardBody>
-					</Card>
-				</Col>
-				<Col md={4} xs={12}>
-					<Card>
-						<CardHeader>
-							Product Sold{' '}
-							<Button size="sm" className="pull-right">
-								View
-							</Button>
-						</CardHeader>
-						<CardBody>
-							<h2 className="m-b-20 inline-block">
-								<span>1,890</span>
-							</h2>{' '}
-							<i className="fa fa-caret-up text-danger" aria-hidden="true" />
-							<Progress value={77} color="success" />
-						</CardBody>
-					</Card>
-				</Col>
-				<Col md={4} xs={12}>
-					<Card>
-						<CardHeader>
-							Server Capacity{' '}
-							<Button size="sm" className="pull-right">
-								View
-							</Button>
-						</CardHeader>
-						<CardBody>
-							<h2 className="inline-block">
-								<span>14%</span>
-							</h2>
-							<Progress value={14} color="primary" />
-						</CardBody>
-					</Card>
-				</Col>
-			</Row>
-
-			<Row>
-				<Col md={8} sm={12}>
-					<Card>
-						<CardHeader>Traffic</CardHeader>
-						<CardBody>
-							<div className="full-bleed">
-								<Line
-									data={line.data}
-									width={2068}
-									height={846}
-									legend={{ display: false }}
-									options={line.options}
-								/>
-							</div>
-						</CardBody>
-					</Card>
-				</Col>
-				<Col md={4} sm={12}>
-					<Card>
-						<CardHeader>Product Views</CardHeader>
-						<CardBody>
-							<Doughnut
-								data={donutData}
-								width={908}
-								height={768}
-								legend={{ display: false }}
-							/>
-						</CardBody>
-					</Card>
-				</Col>
-			</Row>
-
-			<Row>
-				<Col md={8} sm={12}>
-					<Card>
-						<CardHeader>Conversions</CardHeader>
-						<CardBody>
-							<Row className="m-b-md">
-								<Col xs={4}>
-									<h5>Added to Cart</h5>
-									<div className="h2">4.30%</div>
-									<small className="text-muted">23 Visitors</small>
-								</Col>
-								<Col xs={4}>
-									<h5>Reached Checkout</h5>
-									<div className="h2">2.93</div>
-									<small className="text-muted">12 Visitors</small>
-								</Col>
-								<Col xs={4}>
-									<h5>Pruchased</h5>
-									<div className="h2">10</div>
-									<small className="text-muted">10 Customers</small>
-								</Col>
-							</Row>
-						</CardBody>
-					</Card>
-				</Col>
-				<Col md={4} xs={12}>
-					<Card>
-						<CardHeader>Integrations</CardHeader>
-						<CardBody>
-							<Switch
-								enabled={facebook}
-								toggle={() => setFacebook(!facebook)}
-							/>
-							<span className="text-facebook pull-right">
-								Facebook
-							</span>
-							<hr />
-							<Switch
-								enabled={twitter}
-								toggle={() => setTwitter(!twitter)}
-							/>
-							<span className="text-twitter pull-right">
-								Twitter
-							</span>
-						</CardBody>
-					</Card>
-				</Col>
-			</Row>
+		<div className="icon-checkbox-container">
+			<div className="icon-checkbox">
+				<FaCheckCircle
+					style={{
+						color: checkbox ? '#1c7430' : '#7d7d7d',
+						height: checkbox ? 26 : 20,
+						width: checkbox ? 26 : 20
+					}}
+					onClick={checkToggle}
+				/>
+			</div>
+			
+			<div className="icon-checkbox">
+				<FaTimesCircle
+					style={{
+						color: checkbox ? '#7d7d7d' : '#b21f2d',
+						height: checkbox ? 20 : 26,
+						width: checkbox ? 20 : 26
+					}}
+					onClick={timesToggle}
+				/>
+			</div>
 		</div>
 	);
 }

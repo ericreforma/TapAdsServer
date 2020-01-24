@@ -1,27 +1,13 @@
-import Avatar from './utilities/Avatar/Avatar';
-import Footer from './Footer/Footer';
-import Header from './Header/Header';
-import Loader from './Loader/Loader';
-import Page from './Page/Page';
-import PageContent from './Page/PageContent';
-import PageLoader from './PageLoader/PageLoader';
-import PageAlert from './PageAlert/PageAlert';
-import SidebarNav from './SidebarNav/SidebarNav';
-import SubNavigation from './Page/SubNavigation';
-import Switch from './utilities/Switch/Switch';
-import Chat from './Chat/Chat';
-
-export {
-  Avatar,
-  Footer,
-  Header,
-  Loader,
-  Page,
-  PageContent,
-  SidebarNav,
-  Switch,
-  SubNavigation,
-  Chat,
-  PageLoader,
-  PageAlert
-};
+export {default as Avatar} from './utilities/Avatar/Avatar';
+export {default as Footer} from './Footer/Footer';
+export {default as Header} from './Header/Header';
+export {default as Loader} from './Loader/Loader';
+export {default as Page} from './Page/Page';
+export {default as PageContent} from './Page/PageContent';
+export {default as PageLoader} from './PageLoader/PageLoader';
+export {default as PageAlert} from './PageAlert/PageAlert';
+export {default as SidebarNav} from './SidebarNav/SidebarNav';
+export {default as SubNavigation} from './Page/SubNavigation';
+export {default as Switch} from './utilities/Switch/Switch';
+export {default as Chat} from './Chat/Chat';
+export * from './User';

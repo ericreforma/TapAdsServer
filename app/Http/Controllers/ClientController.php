@@ -16,6 +16,9 @@ use App\UserCampaign;
 use App\UserTripMap;
 use App\UserWithdrawal;
 use App\FirebaseData;
+use App\User;
+use App\UserRating;
+use App\UserVehicle;
 
 use Carbon\Carbon;
 use Hash;
@@ -30,8 +33,7 @@ class ClientController extends Controller
 	 *
 	 * @return void
 	 */
-	public function __construct()
-	{
+	public function __construct() {
 		$this->middleware('auth:web_api');
 	}
 
@@ -40,12 +42,11 @@ class ClientController extends Controller
 	 *
 	 * @return \Illuminate\Contracts\Support\Renderable
 	 */
-	public function index()
-	{
+	public function index() {
 		return view('home');
 	}
 
-	public function details(Request $request){
+	public function details(Request $request) {
 		$client = $request->user();
 
 		return response()->json($client);
@@ -65,7 +66,7 @@ class ClientController extends Controller
 		return response($response, 200);
 	}
 
-	public function getMyNotifications(Request $request){
+	public function getMyNotifications(Request $request) {
 		$client_id = $request->user()->id;
 
 		$notifs = DB::table('client_campaign')
@@ -92,59 +93,13 @@ class ClientController extends Controller
 		return response()->json($notifs);
 	}
 
-	public function campaignGetLiveMap(Request $request){
+	public function campaignGetLiveMap(Request $request) {
 		$client = $request->user();
 		$campaign = ClientCampaign::find($request->campaign_id);
 
 		$userTrips = UserTripMap::select('latitude','longitude')
 											->get();
 		return $userTrips;
-	}
-
-	public function payment_update(Request $request) {
-		$uwid = $request->user_withdrawal_id;
-		$cid = $request->campaign_id;
-		$uid = $request->user_id;
-		$status = $request->status;
-		$user = $request->user();
-		$user->url = $user->media->url;
-
-		$campaign = ClientCampaign::where('client_id', '=', $user->id)
-		->where('id', '=', $cid)
-		->first();
-
-		if($campaign) {
-			$withdraw_update = UserWithdrawal::where('id', '=', $uwid)
-			->update([
-				'seen' => 0,
-				'status' => $status,
-				'request_status_updated' => Carbon::now()->format('Y-m-d H:i:s')
-			]);
-
-			$firebase = FirebaseData::where('owner', '=', 0)
-			->where('owner_id', '=', $uid)
-			->get();
-
-			if(count($firebase) !== 0) {
-				$message = $status === 1 ? 'accepted' : 'rejected';
-				$this->sendNotification(
-					[
-						'receiverData' => $firebase,
-						'title' => $user->business_name,
-						'body' => $campaign->name,
-						'page' => 'Profile',
-						'name' => 'Payment'
-					],
-					$user,
-					$status,
-					'withdrawal request '.$message
-				);
-			}
-			
-			return response()->json(true);
-		} else {
-			return response()->json(['message' => 'unauthorized'], 401);
-		}
 	}
 
 	public function push_notification(Request $request) {
@@ -182,5 +137,62 @@ class ClientController extends Controller
 		}
 
 		return response()->json(true);
+	}
+
+	public function user_profile(Request $request, $id) {
+		$userData = User::leftJoin('media as m', 'm.id', 'users.media_id')
+		->where('users.id', '=', $id)
+		->select(
+			'users.*',
+			'm.url'
+		)
+		->first();
+
+		$userCampaigns = UserCampaign::where('user_id', '=', $id)
+		->leftJoin('client_campaign as cc', 'cc.id', 'user_campaign.campaign_id')
+		->leftJoin('client as c', 'c.id', 'cc.client_id')
+		->leftJoin('media as mclient', 'mclient.id', 'c.media_id')
+		->leftJoin('media as mcampaign', 'mcampaign.id', 'cc.media_id')
+		->select(
+			'user_campaign.*',
+			'cc.name as campaign_name',
+			'cc.description as campaign_description',
+			'cc.client_id',
+			'c.business_name',
+			'c.business_nature',
+			'mclient.url as media_client_url',
+			'mcampaign.url as media_campaign_url'
+		)
+		->get();
+
+		$userRating = UserRating::leftJoin('client as c', 'c.id', 'user_rating.client_id')
+		->where('user_id', '=', $id)
+		->leftJoin('media as m', 'm.id', 'c.media_id')
+		->select(
+			'user_rating.*',
+			'c.business_name',
+			'c.business_nature',
+			'm.url'
+		)
+		->get();
+
+		$userVehicle = UserVehicle::where('user_id', '=', $id)->get();
+
+		if($userData) {
+			return response()->json([
+				'status'  => 'success',
+				'message' => [
+					'userData' 		=> $userData,
+					'userCampaigns' => $userCampaigns,
+					'userRating' 	=> $userRating,
+					'userVehicle'	=> $userVehicle
+				]
+			]);
+		} else {
+			return response()->json([
+				'status'  => 'error',
+				'message' => 'Error occured! Try again later.'
+			]);
+		}
 	}
 }

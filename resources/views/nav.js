@@ -28,24 +28,17 @@ export default {
     }, {
       name:'User Requests',
       url: '/campaign/requests/',
-      icon: 'Users',
+      icon: 'Users'
     }, {
-      name: 'User Location',
-      url: '/user/location',
+      name: 'Live Map',
+      url: '/live/map',
       icon: 'MapPin'
-    },
-    // {
-    //   name: 'Gallery',
-    //   url: '/gallery',
-    //   icon: 'Image'
-    // },
-    // {
-    //   name: 'Settings',
-    //   url: '/settings',
-    //   icon: 'Settings'
-    // },
-    {
+    }, {
       divider: true,
+    // }, {
+    //   name: 'Notification',
+    //   url: '/notification',
+    //   icon: 'Globe'
     }
   ],
   bottom: [

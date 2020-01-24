@@ -21,11 +21,11 @@ import {
 import nav from '../nav';
 import routes from '../route';
 import ContextProviders from '../components/utilities/ContextProviders';
-
-//firebase
-import { initializeFirebase } from '../firebase';
+import PageLoader from './PageLoader';
 
 const MOBILE_SIZE = 992;
+
+import { initializeFirebase, FirebaseFunction } from '../firebase';
 
 export default class Dashboard extends Component {
   constructor(props) {
@@ -36,10 +36,11 @@ export default class Dashboard extends Component {
       sidebarCollapsed: false,
       isMobile: window.innerWidth <= MOBILE_SIZE,
       showChat1: true,
-
-      currentLocation: '',
-      newMessage: 0
+      firebaseRetries: 0,
+      loading: true
     };
+    
+    initializeFirebase();
   }
 
   handleResize = () => {
@@ -58,82 +59,88 @@ export default class Dashboard extends Component {
 
   componentDidMount() {
     window.addEventListener('resize', this.handleResize);
-    this.locationUpdated(this.props.location.pathname);
-
-    this.unlisten = this.props.history.listen(location =>
-      this.locationUpdated(location.pathname)
-    );
-
-    initializeFirebase();
-  }
-
-  locationUpdated = currentLocation => {
-    this.setState({currentLocation});
-    const date = new Date();
-    const millis = date.getTime();
-    console.log(millis);
-    this.setState({ newMessage: millis });
+    this.firebaseInit();
+    // this.setState({loading: false});
   }
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize);
-    this.unlisten();
   }
 
   toggleSideCollapse = () => {
     this.setState(prevState => ({ sidebarCollapsed: !prevState.sidebarCollapsed }));
-  };
+  }
+  
+	firebaseInit = () => {
+		FirebaseFunction.init(async() => {
+      this.setState({loading: false});
+		}, err => {
+      console.log('Firebase error');
+      const firebaseRetries = this.state.firebaseRetries + 1;
+
+      if(firebaseRetries < 3) {
+        setTimeout(() => {this.firebaseInit();}, 1500);
+      } else {       
+        this.setState({loading: false});
+        alert(err);
+      }
+      
+      this.setState({firebaseRetries});
+		});
+	}
 
   render() {
     const { sidebarCollapsed } = this.state;
     const sidebarCollapsedClass = sidebarCollapsed ? 'side-menu-collapsed' : '';
     return (
-      <ContextProviders>
-        <div className={`app ${sidebarCollapsedClass}`}>
-          <PageAlert />
-          <div className="app-body">
-            <SidebarNav
-              nav={nav}
-              // logo={Logo}
-              logoText="TAP ADS"
-              isSidebarCollapsed={sidebarCollapsed}
-              toggleSidebar={this.toggleSideCollapse}
-              {...this.props}
-            />
-            <Page>
-              <Header
-                toggleSidebar={this.toggleSideCollapse}
+      <PageLoader loading={this.state.loading}>
+        <ContextProviders>
+          <div className={`app ${sidebarCollapsedClass}`}>
+            <PageAlert />
+            <div className="app-body">
+              <SidebarNav
+                nav={nav}
+                // logo={Logo}
+                logoText="TAP ADS"
                 isSidebarCollapsed={sidebarCollapsed}
-                routes={routes}
+                toggleSidebar={this.toggleSideCollapse}
                 {...this.props}
-              >
-                <HeaderNav />
-              </Header>
-              <PageContent>
-                <Switch>
-                  {routes.map((page, key) => (
-                    <Route
-                      path={page.path}
-                      component={props =>
-                        <page.component
-                          {...props}
-                        />
-                      }
-                      key={key}
-                    />
-                  ))}
-                  <Redirect from="/" to="/dashboard" />
-                </Switch>
-              </PageContent>
-            </Page>
+              />
+              <Page>
+                <Header
+                  toggleSidebar={this.toggleSideCollapse}
+                  isSidebarCollapsed={sidebarCollapsed}
+                  routes={routes}
+                  {...this.props}
+                >
+                  <HeaderNav />
+                </Header>
+                <PageContent>
+                  <Switch>
+                    {routes.map((page, key) => (
+                      <Route
+                        path={page.path}
+                        component={props =>
+                          <page.component
+                            {...props}
+                          />
+                        }
+                        key={key}
+                      />
+                    ))}
+                    <Redirect from="/" to="/dashboard" />
+                  </Switch>
+                </PageContent>
+              </Page>
+            </div>
+            <Footer>
+              <span>
+                <a href="#!">Terms</a> | <a href="#!">Privacy Policy</a>
+              </span>
+            </Footer>
           </div>
-          <Footer>
-            <span>
-              <a href="#!">Terms</a> | <a href="#!">Privacy Policy</a>
-            </span>
-          </Footer>
-        </div>
-      </ContextProviders>
+        </ContextProviders>
+      </PageLoader>
     );
   }
 }

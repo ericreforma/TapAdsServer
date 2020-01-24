@@ -14,7 +14,10 @@ export default class LogoutLayout extends Component {
             }
         }).catch(error => {
             console.log(error);
-            // this.props.history.push(URL.login);
+            var clearLocalStorage = removeLocalStorage();
+            if(clearLocalStorage) {
+                this.props.history.push(URL.login);
+            }
         });
     }
 

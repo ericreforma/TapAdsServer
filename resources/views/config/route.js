@@ -27,7 +27,6 @@ export const URL = {
 		getChat: '/client/user/chats',
 		getConvo: '/client/user/convo/',
 		getTrips: '/client/user/trip',
-		submitRateUser: '/client/user/rating',
 		updateNotif: '/client/chat/notif/update',
 		campaignList:  '/client/campaigns',
 		userRequests: '/client/campaigns/requests',

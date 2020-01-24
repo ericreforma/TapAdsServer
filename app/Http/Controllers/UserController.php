@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+
+// traits
+use App\Traits\Firebase\ClientFirebaseController;
+
 use App\User;
 use App\Client;
 use App\Chat;
@@ -21,16 +25,17 @@ use App\ClientCampaign;
 use App\ClientCampaignLocation;
 use App\UserCurrentLocation;
 use App\FirebaseData;
+use App\UserVehicleRequest;
 
 use Input;
 use Storage;
 use Hash;
-
 use DB;
 use Carbon\Carbon;
 
 class UserController extends Controller
 {
+	use ClientFirebaseController;
 	/**
 		 * Create a new controller instance.
 		 *
@@ -69,15 +74,20 @@ class UserController extends Controller
 			$user->account_number = '';
 		}
 		$ratings = $user->ratings;
+		$user->vehicles = $user->vehicles();
 
 		foreach($user->vehicles as $v){
 			$vehicle_photo_id = UserVehiclePhoto::where('user_vehicle_id',$v->id)
 			->select('media_id')
 			->get()
 			->toArray();
-
 			$v->vehicle = Vehicle::where('id',$v->vehicle_id)->first();
 			$v->photo = Media::whereIn('id',$vehicle_photo_id)->get();
+
+			$v->campaigns = UserCampaign::where('user_vehicle_id', $v->id)
+			->leftJoin('client_campaign as cc', 'cc.id', 'user_campaign.campaign_id')
+			->select('cc.name', 'cc.id')
+			->get();
 		};
 
 		$user_media = Media::whereIn('id', [$request->user()->media_id, $request->user()->license_media_id])->get();
@@ -187,35 +197,49 @@ class UserController extends Controller
 
 	public function campaign_add(Request $request){
 		$user = $request->user();
+		$cid = $request->campaign_id;
 
-		$user_campaign_instance = UserCampaign::where('campaign_id', $request->campaign_id);
-		$mycampaign = $user_campaign_instance->where('user_id', '=', $user->id)
+		$campaign = ClientCampaign::find($cid);
+		if($campaign) {
+			$uc_instance = UserCampaign::where('campaign_id', $cid)
 			->where('request_status', '!=', 2)
 			->where('end', '=', 0)
-			->count();
+			->get();
 
-		if($mycampaign == 0){
-			$slots_used = $user_campaign_instance->where('request_status', 1)
-			->where('end', 0)
-			->count();
+			$user_campaign = $uc_instance->where('user_id', '=', $user->id)->count();
+			if($user_campaign === 0) {
+				$slots_used = $uc_instance->where('request_status', '=', 1)->count();
 
-			$total_slots = ClientCampaign::find($request->campaign_id)->slots;
+				if($slots_used < $campaign->slots) {
+					$userCampaign = new UserCampaign;
+					$userCampaign->client_id = $request->client_id;
+					$userCampaign->campaign_id = $request->campaign_id;
+					$userCampaign->user_id = $user->id;
+					$userCampaign->user_vehicle_id = $request->user_vehicle_id;
+					$userCampaign->save();
+	
+					return response()->json([
+						'status' => 'success',
+						'message' => 'added on list'
+					]);
+				}
 
-			if($total_slots - $slots_used > 0) {
-				$userCampaign = new UserCampaign;
-				$userCampaign->client_id = $request->client_id;
-				$userCampaign->campaign_id = $request->campaign_id;
-				$userCampaign->user_id = $user->id;
-				$userCampaign->user_vehicle_id = $request->user_vehicle_id;
-				$userCampaign->save();
-
-				return response()->json(['status' => 'success', 'message' => 'added on list']);
-			} else {
-				return response()->json(['status' => 'error', 'message' => 'No remaining slot for this campaign']);
+				return response()->json([
+					'status' => 'error',
+					'message' => 'No remaining slot for this campaign'
+				]);
 			}
-		} else {
-			return response()->json(['status' => 'error', 'message' => 'Already on list']);
+
+			return response()->json([
+				'status' => 'error',
+				'message' => 'Already on the list'
+			]);
 		}
+
+		return response()->json([
+			'status' => 'error',
+			'message' => 'Campaign does not exist'
+		]);
 	}
 
 	public function campaign_trip_update(Request $request){
@@ -376,7 +400,9 @@ class UserController extends Controller
 		$tripmap = json_decode($request->trip_map, true);
 		
 		$userLocation = UserCurrentLocation::updateOrCreate(
-			['user_trip_id' => $tripmap['user_trip_id']],
+			[
+				'user_trip_id' => $tripmap['user_trip_id']
+			],
 			[
 				'client_id' => $tripmap['client_id'],
 				'campaign_id' => $tripmap['campaign_id'],
@@ -471,9 +497,10 @@ class UserController extends Controller
 		$url = 'images/user_picture/'.$filename;
 		$media = $this->save_media($filename, $request->user()->id, 1, $url);
 		$user = User::where('id', '=', $request->user()->id)
-					->update([
-						'media_id' => $media->id
-					]);
+		->update([
+			'media_id' => $media->id
+		]);
+
 		return response()->json([
 			'imageResponse' => $image,
 			'media' => $media
@@ -544,6 +571,93 @@ class UserController extends Controller
 
 		$userVehicleUpdate->url = $media->url;
 		return response()->json($userVehicleUpdate);
+	}
+
+	public function update_request_pnumber(Request $request) {
+		$user_vehicle_id = $request->uvid;
+		$plate_number = $request->pnumber;
+		$user = $request->user();
+
+		$user_vehicle = UserVehicle::where('id', $user_vehicle_id)
+		->where('user_id', $user->id)
+		->first();
+
+		if($user_vehicle) {
+			$user_vehicle_request = new UserVehicleRequest;
+			$user_vehicle_request->user_vehicle_id = $user_vehicle_id;
+			$user_vehicle_request->plate_number = $plate_number;
+			$user_vehicle_request->save();
+	
+			$client = Client::where('admin', 1)->first();
+	
+			if($client) {
+				$firebase = FirebaseData::where('owner', '=', 1)
+				->where('owner_id', '=', $client->id)
+				->get();
+	
+				if(count($firebase) !== 0) {
+					$this->clientSendNotification(
+						[
+							'receiverData' => $firebase, //receiver data
+							'title' => $user->name,
+							'body' => 'Plate number edit request'
+						],
+						$user
+					);
+				}
+			}
+	
+			return response()->json([
+				'status'  => true,
+				'message' => 'Request for vehicle update sent'
+			]);
+		}
+		
+		return response()->json([
+			'status'  => false,
+			'message' => 'User unauthorized to change vehicle info'
+		]);
+	}
+
+	public function update_vehicle_photo(Request $request) {
+		$new_vehicle_photos = $request->new_vehicle_photos;
+		$delete_vehicle_photos = $request->delete_vehicle_photos;
+		$user_vehicle_id = $request->user_vehicle_id;
+		$user = $request->user();
+
+		$user_vehicle = UserVehicle::where('id', $user_vehicle_id)
+		->where('user_id', $user->id)
+		->first();
+
+		if($user_vehicle) {
+			$new_user_vehicle_photo = [];
+			foreach($new_vehicle_photos as $key=>$v) {
+				list($fileType, $fileExt) = explode('/', $v['type']);
+				$filename = md5(strftime(time())) . $key . '.' . $fileExt;
+				$image = Storage::disk('cars')->put($filename, base64_decode($v['data']));
+				$url = 'images/cars/'.$filename;
+				$media = $this->save_media($filename, $user->id, 1, $url);
+				$user_vehicle_photo = new UserVehiclePhoto;
+				$user_vehicle_photo->user_vehicle_id = $user_vehicle_id;
+				$user_vehicle_photo->media_id = $media->id;
+				$user_vehicle_photo->save();
+				$new_user_vehicle_photo[] = $media;
+			}
+
+			if(count($delete_vehicle_photos) !== 0)
+				UserVehiclePhoto::whereIn('media_id', $delete_vehicle_photos)->delete();
+
+			return response()->json([
+				'status'  => true,
+				'message' => 'Editing photo successful',
+				'data' => $new_user_vehicle_photo
+			]);
+		}
+		
+		return response()->json([
+			'status'  => false,
+			'message' => 'User unauthorized to change vehicle info'
+		]);
 	}
 
 	public function remove_photo(Request $request) {

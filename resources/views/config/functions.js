@@ -96,3 +96,120 @@ const tConvert = (time) => {
   }
   return time.join(''); // return adjusted time or original string
 }
+
+export const getDayDiff = (date1, date2) => {
+	const d1 = new Date(date1);
+	const d2 = new Date(date2);
+	const diffTime = Math.abs(d2 - d1);
+	const diffDay = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+	return diffDay;
+}
+
+export const getDateRange = (e = 0) => {
+  var dFromWeek = new Date();
+  const dFromYear = dFromWeek.getFullYear();
+  const dFromMonth = dFromWeek.getMonth();
+
+  const weekData = Array(7).fill(false).map((d, dIdx) => {
+    dFromWeek.setDate(dFromWeek.getDate() - (6 - dIdx));
+    const dDate = dFromWeek.getDate();
+    const dMonth = dFromWeek.getMonth();
+    const dYear = dFromWeek.getFullYear();
+    const wLabel = `${months.three[dMonth]} ${dDate}`;
+    const wDataset = `${dYear}-${(`0${dMonth + 1}`).slice(-2)}-${(`0${dDate}`).slice(-2)}`;
+    dFromWeek.setDate(dFromWeek.getDate() + (6 - dIdx));
+    
+    return {
+      label: wLabel,
+      dataset: wDataset
+    };
+  });
+
+  const m = new Date(dFromYear, dFromMonth + 1, 0);
+  const monthData = Array(m.getDate()).fill(null).map((d, dIdx) => {
+    dFromWeek.setDate(dFromWeek.getDate() - ((m.getDate() - 1) - dIdx));
+    const dDate = dFromWeek.getDate();
+    const dMonth = dFromWeek.getMonth();
+    const dYear = dFromWeek.getFullYear();
+    const wLabel = `${months.three[dMonth]} ${dDate}`;
+    const wDataset = `${dYear}-${(`0${dMonth + 1}`).slice(-2)}-${(`0${dDate}`).slice(-2)}`;
+    dFromWeek.setDate(dFromWeek.getDate() + ((m.getDate() - 1) - dIdx));
+    
+    return {
+      label: wLabel,
+      dataset: wDataset
+    };
+  });
+
+  const yearData = Array(12).fill(null).map((d, dIdx) => {
+    dFromWeek.setMonth(dFromWeek.getMonth() - (11 - dIdx));
+    const dDate = dFromWeek.getDate();
+    const dMonth = dFromWeek.getMonth();
+    const dYear = dFromWeek.getFullYear();
+    const wLabel = `${months.three[dMonth]} ${dYear}`;
+    const wDataset = `${dYear}-${(`0${dMonth + 1}`).slice(-2)}-01`;
+    dFromWeek.setMonth(dFromWeek.getMonth() + (11 - dIdx));
+    
+    return {
+      label: wLabel,
+      dataset: wDataset
+    };
+  });
+
+  const retValue = [weekData, monthData, yearData];
+  return retValue[e];
+}
+
+export const getTotalColumn = (data, column) => {
+  return data.map(d =>
+    parseFloat(d[column])
+  ).reduce((total, a) =>
+    total + a
+  ).toFixed(2);
+}
+
+export const defaultLine = (labels, dataset) => {
+  return ({
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Distance in (km)',
+          data: dataset,
+          borderColor: 'transparent',
+          backgroundColor: 'rgb(68, 159, 238)',
+          pointBackgroundColor: 'rgba(0,0,0,0)',
+          pointBorderColor: 'rgba(0,0,0,0)',
+          borderWidth: 4
+        }
+      ]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true,
+            callback(value, index) {
+              if(index % 2 == 0) return '';
+              return value;
+            }
+          }
+        }],
+        xAxes: [{
+          ticks: {
+            beginAtZero: true,
+            callback(value, index) {
+              if(index % 2 == 0) return '';
+              return value;
+            }
+          },
+          gridLines: {
+            color: "rgba(0, 0, 0, 0)",
+            drawBorder: false,
+            display: false
+          }
+        }]
+      },
+    }
+  });
+}

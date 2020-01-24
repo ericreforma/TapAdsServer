@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 // traits
-use App\Traits\Firebase\FirebaseController;
+use App\Traits\Firebase\ClientFirebaseController;
 
 // models
 use App\Chat;
@@ -20,7 +20,7 @@ use Input;
 
 class UserChatController extends Controller
 {
-	use FirebaseController;
+	use ClientFirebaseController;
 	//
 
 	public function __construct()  {
@@ -32,17 +32,22 @@ class UserChatController extends Controller
 		->leftJoin(
 			DB::raw('
 				(
-					SELECT c1.*
-					FROM chat as c1
-					INNER JOIN (
-						SELECT client_id, max(created_at) as max_timestamp
+					SELECT *
 						FROM chat
-						WHERE user_id = '.$request->user()->id.'
-						GROUP BY client_id
-					) as c2
-					ON c1.client_id = c2.client_id
-					AND c1.created_at = c2.max_timestamp
-					ORDER BY created_at DESC
+						WHERE id IN (
+							SELECT MAX(c1.id)
+								FROM chat as c1
+								INNER JOIN (
+									SELECT client_id, max(created_at) as max_timestamp
+									FROM chat
+									WHERE user_id = '.$request->user()->id.'
+									GROUP BY client_id
+								) as c2
+								ON c1.client_id = c2.client_id
+								AND c1.created_at = c2.max_timestamp
+								GROUP BY created_at
+								ORDER BY created_at DESC
+						)
 				) as c
 			'), 'c.client_id', 'client.id'
 		)
@@ -160,9 +165,9 @@ class UserChatController extends Controller
 		->get();
 
 		if(count($firebase) !== 0) {
-			$this->sendNotification(
+			$this->clientSendNotification(
 				[
-					'receivedData' => $firebase, //receiver data
+					'receiverData' => $firebase, //receiver data
 					'title' => $user->name,
 					'body' => $message, //body
 					'page' => 'Messenger',

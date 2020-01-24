@@ -14,7 +14,8 @@ import {
 import * as firebase from 'firebase/app';
 import '@firebase/messaging';
 
-import { MessageController, FirebaseController } from '../../controllers';
+import { MessageController } from '../../controllers';
+import { FirebaseFunction } from '../../firebase';
 import { URL, getChatTimestamp } from '../../config';
 
 import PageLoader from '../../layout/PageLoader';
@@ -23,10 +24,14 @@ export default class Messages extends Component {
   constructor(props) {
     super(props);
 
+    const {state} = this.props.location;
+    this.uid = state ? state.id : false;
+
     this.state = {
       users: [],
       loading: true,
       messages: [],
+      init: true,
       activeUserData: {},
       activeLoading: true
     };
@@ -34,27 +39,48 @@ export default class Messages extends Component {
 
   componentDidMount = () => {
     this.getUserList();
-    this.notificationListener = firebase.messaging().onMessage(payload => {
-      console.log(payload);
-    });
-
-    this.onTokenRefresh = firebase.messaging().onTokenRefresh(fcmToken => {
-      FirebaseController.updateToken(fcmToken);
-    });
+    this.firebaseFunctions();
   }
 
   componentWillUnmount = () => {
+    this.notificationListener();
+    this.onTokenRefresh();
     console.log('leave message page');
+  }
+
+  firebaseFunctions = () => {
+    this.notificationListener = firebase.messaging().onMessage(payload => {
+      this.getUserList();
+      const {data} = payload.data;
+      const senderData = JSON.parse(data);
+      const {activeUserData} = this.state;
+      if(Object.keys(activeUserData).length !== 0)
+        if(activeUserData.id === senderData.sender_id)
+          this.getConvo();
+    });
+
+    this.onTokenRefresh = firebase.messaging().onTokenRefresh(fcmToken => {
+      FirebaseFunction.updateToken(fcmToken);
+    });
   }
 
   getUserList = () => {
     MessageController.userList()
     .then(res => {
+      var activeUserData = {};
+      if(this.uid) activeUserData = res.data.find(d => d.id === this.uid);
+
       this.setState({
         users: res.data,
         loading: false,
-        activeLoading: false
+        activeLoading: this.uid ? true : false,
+        activeUserData
       });
+
+      if(this.uid && this.state.init)
+        setTimeout(() => {
+          this.getConvo(activeUserData);
+        }, 500);
     })
     .catch(err => {
       console.log(err);
@@ -63,8 +89,11 @@ export default class Messages extends Component {
   }
 
   getActiveConvo = user => {
-    this.setState({ activeLoading: true });
+    this.setState({ activeLoading: true, activeUserData: user, init: false });
+    this.getConvo(user);
+  }
 
+  getConvo = (user = this.state.activeUserData) => {
     MessageController.getMessages(user.id)
     .then(res => {
       const { status, message } = res.data;
@@ -79,9 +108,9 @@ export default class Messages extends Component {
         }
         
         this.setState({
-          messages: message.convo,
-          activeUserData: user
+          messages: message.convo
         });
+
       } else {
         alert(`${status}: ${message}`);
       }
@@ -95,7 +124,8 @@ export default class Messages extends Component {
   }
 
   sendMessage = dataToSend => {
-    if(dataToSend.message !== '') {
+    dataToSend.message = dataToSend.message.trim();
+    if(dataToSend.message !== '' && /\S/.test(dataToSend.message)) {
       MessageController.sendMessage(dataToSend)
       .then(res => {
         const { messages, users, activeUserData } = this.state;
@@ -117,9 +147,10 @@ export default class Messages extends Component {
           users.splice(userIndex, 1);
 
         messages.push(chat);
+        const newMessages = messages;
         users.unshift(user);
         
-        this.setState({messages});
+        this.setState({newMessages});
       })
       .catch(err => {
         console.log(err);
@@ -136,6 +167,7 @@ export default class Messages extends Component {
           <MessageListContainer
             users={this.state.users}
             getActiveConvo={this.getActiveConvo}
+            uid={this.uid}
           />
 
           <MessageConvoContainer
@@ -163,7 +195,8 @@ const MessageContainer = ({children}) => {
   )
 }
 
-const MessageListContainer = ({users, getActiveConvo}) => {
+const MessageListContainer = props => {
+  const {users, getActiveConvo, uid} = props;
   const [searchText, setSearchText] = useState('');
 
   return (
@@ -187,6 +220,7 @@ const MessageListContainer = ({users, getActiveConvo}) => {
         searchText={searchText}
         getActiveConvo={getActiveConvo}
         resetSearch={() => setSearchText('')}
+        uid={uid}
       />
     </div>
   )
@@ -194,14 +228,23 @@ const MessageListContainer = ({users, getActiveConvo}) => {
 
 const MessageList = props => {
   const {
+    uid,
     users,
     searchText,
     resetSearch,
     getActiveConvo
   } = props;
 
+  const [init, setInit] = useState(false);
   const [list, setList] = useState(users);
   const [activeConvo, setActiveConvo] = useState(false);
+
+  useEffect(() => {
+    if(!init) {
+      setInit(true);
+      setActiveConvo(uid);
+    }
+  });
 
   useEffect(() => {
     const newConvoUsers = !searchText
@@ -212,6 +255,11 @@ const MessageList = props => {
 
     setList(newConvoUsers);
   }, [searchText]);
+
+  useEffect(() => {
+    if(!searchText)
+      setList(users);
+  }, [users]);
 
   const setActive = user => {
     setActiveConvo(user.id);
@@ -539,7 +587,7 @@ const MessageConvoContainerBody = props => {
     if(messageList.length > 0) {
       endMessage.current.scrollIntoView();
     }
-  }, [messageList]);
+  }, [messageList, messages]);
 
   return (
     <div

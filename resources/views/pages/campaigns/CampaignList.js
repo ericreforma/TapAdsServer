@@ -9,7 +9,6 @@ import {
 	Label,
 } from 'reactstrap';
 import DataTable from 'react-data-table-component';
-import FA from 'react-fontawesome';
 
 import {
 	getMonthDiff,
@@ -70,12 +69,6 @@ const columns = [
 			<span className={'p-1 rounded text-white ' + colors[checkDurationDate(row.duration_from, row.duration_to)]}>
 				{text[checkDurationDate(row.duration_from, row.duration_to)]}
 			</span>
-	}, {
-		name: '',
-		width: '50px',
-		right: true,
-		compact: true,
-		cell: row => <div><FA name="eye" className="text-dark" /></div>
 	}
 ];
 
@@ -107,6 +100,16 @@ export default class CampaignList extends Component {
 			alert('Server error. Reload the page by clicking the "OK"');
 			location.reload();
 		});
+	}
+
+	rowClicked = row => {
+		const durationDate = checkDurationDate(row.duration_from, row.duration_to);
+		
+		if(durationDate === 0) {
+			alert('This campaign is not yet published');
+		} else {
+			this.props.history.push(`/campaign/dashboard/${row.id}`);
+		}
 	}
 
 	render() {
@@ -171,7 +174,7 @@ export default class CampaignList extends Component {
 							data={filteredLists}
 							pagination={true}
 							highlightOnHover={true}
-							onRowClicked={row => this.props.history.push(`/campaign/dashboard/${row.id}`)}
+							onRowClicked={this.rowClicked}
 						/>
 					</CardBody>
 				</Card>

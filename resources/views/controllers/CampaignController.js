@@ -12,5 +12,11 @@ export const CampaignController = {
   },
   dashboard: cid => {
     return HttpRequest.get(`/client/campaign/dashboard/${cid}`)
+  },
+  updateUserData: form => {
+    return HttpRequest.post('/client/campaign/user/update', form);
+  },
+  graph: form => {
+    return HttpRequest.post('/client/campaign/graph', form)
   }
 };

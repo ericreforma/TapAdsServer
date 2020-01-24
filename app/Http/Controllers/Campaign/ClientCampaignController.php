@@ -62,7 +62,7 @@ class ClientCampaignController extends Controller
 		return response()->json($campaigns);
 	}
 
-	public function campaign_store(Request $request){
+	public function campaign_store(Request $request) {
 		$user = $request->user(); 
 
 		$file_type = explode(';', $request->campaign_image)[0];
@@ -115,8 +115,46 @@ class ClientCampaignController extends Controller
 			foreach($campaign->users as $u) {
 				$u->ratings = UserRating::where('user_id', '=', $u->user_id)->get();
 			}
+			
+			$users = DB::table('user_campaign as uc')
+			->leftJoin('users as u', 'u.id', 'uc.user_id')
+			->leftJoin('media as m', 'm.id', 'u.media_id')
+			->leftJoin(
+				DB::raw('
+					(
+						SELECT
+							SUM(amount) as amount,
+							user_id
+						FROM user_withdrawal
+						GROUP BY user_id
+					) as uw
+				'), 'uw.user_id', 'uc.user_id'
+			)
+			->where('uc.client_id', $user->id)
+			->where('uc.request_status', '=', 1)
+			->where('uc.campaign_id', $id)
+			->select(
+				'u.id',
+				'u.name',
+				'u.username',
+				'm.url',
+				DB::raw('ifnull(uw.amount, 0) as amount'),
+				DB::raw('SUM(campaign_traveled) as campaign_traveled'),
+				DB::raw('SUM(trip_traveled) as trip_traveled')
+			)
+			->groupBy(
+				'u.id',
+				'u.name',
+				'u.username',
+				'm.url',
+				'uw.amount'
+			)
+			->get();
 
-			return response()->json($campaign);
+			return response()->json([
+				'campaign' => $campaign,
+				'users' => $users
+			]);
 		} else {
 			return response()->json([
 				'status' => 'error',
@@ -125,7 +163,31 @@ class ClientCampaignController extends Controller
 		}
 	}
 
-	public function getMyCampaigns (Request $request){
+	public function campaign_graph(Request $request) {
+		$user = $request->user();
+		$date_from = $request->date_from;
+		$date_to = $request->date_to;
+		$cid = $request->cid;
+
+		$data = DB::table('user_trip as ut')
+		->leftJoin('client_campaign as cc', 'cc.id', 'ut.campaign_id')
+		->where('cc.client_id', $user->id)
+		->whereDate('ut.started', '>=', $date_from)
+		->whereDate('ut.started', '>=', $date_from)
+		->where('ut.started', '<=', $date_to)
+		->where('cc.id', '=', $cid)
+		->whereNotNull('ut.ended')
+		->select(
+			'ut.started',
+			'ut.campaign_traveled',
+			'ut.trip_traveled'
+		)
+		->get();
+
+		return response()->json($data);
+	}
+
+	public function getMyCampaigns (Request $request) {
 		$client_id = $request->user()->id;
 		$mycampaigns = ClientCampaign::where('client_id','=',$client_id)
 									->leftJoin('media as m','m.id','client_campaign.media_id')
@@ -162,7 +224,7 @@ class ClientCampaignController extends Controller
 		return response()->json($arr_response);
 	}
 
-	public function getMyCampaignRequests(Request $request){
+	public function getMyCampaignRequests(Request $request) {
 		$client_id = $request->user()->id;
 		$requests = DB::table('client_campaign as cc')
 			->join(
@@ -196,7 +258,7 @@ class ClientCampaignController extends Controller
 		return response()->json($requests);
 	}
 
-	public function campaign_request_update(Request $request){
+	public function campaign_request_update(Request $request) {
 		$uid = $request->user_id;
 		$campaign_name = $request->campaign_name;
 		$status = $request->status;
@@ -258,6 +320,25 @@ class ClientCampaignController extends Controller
 			'status' => false,
 			'message' => 'Campaign does not exist'
 		]);
+	}
+
+	public function campaign_user_data_update(Request $request) {
+		$user = $request->user();
+		$data = $request->formData;
+		$cid = $request->cid;
+
+		foreach($data as $d) {
+			$campaign = UserCampaign::where('id', $d['user_campaign_id'])
+			->update([ $d['column_name'] => $d['value'] ]);
+			
+			$campaign->location = ClientCampaignLocation::whereIn('id', $campaign->location_id)->get();
+			foreach($campaign->users as $u) {
+				$u->ratings = UserRating::where('user_id', '=', $u->user_id)->get();
+			}
+		}
+		
+		$users = $user->user_campaign($cid);
+		return response()->json($users);
 	}
 
 	private function save_media($filename, $id, $owner, $url) {

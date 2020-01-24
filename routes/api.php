@@ -35,8 +35,8 @@ Route::middleware('json.response')->group(function(){
       Route::get('/', 'UserController@details');
       Route::get('logout/{unique_id}', 'UserController@logout')->name('user_logout');
 
+      // My campaigns
       Route::prefix('campaign')->group(function(){
-        // My campaigns
         Route::get('list','UserController@campaign_list');
         Route::post('add','UserController@campaign_add');
 
@@ -47,8 +47,8 @@ Route::middleware('json.response')->group(function(){
         Route::get('browse','Campaign\UserCampaignController@browse');
         Route::get('recommended','Campaign\UserCampaignController@recommendedPage');
 
+        // Trip
         Route::prefix('trip')->group(function(){
-          // Trip
           Route::post('add', 'UserController@trip_create');
           Route::post('map', 'UserController@trip_map_add');
           Route::post('end', 'UserController@trip_end');
@@ -57,7 +57,6 @@ Route::middleware('json.response')->group(function(){
 
         // location
         Route::post('location', 'UserController@get_location');
-
         Route::get('earnings/history', 'UserController@earnings_history');
 
       });
@@ -79,6 +78,8 @@ Route::middleware('json.response')->group(function(){
         Route::post('bank', 'UserController@update_bank_details');
         Route::post('cars/monthly', 'UserController@update_cars_monthly');
         Route::post('notifications', 'UserController@update_notification');
+        Route::post('vehicle_photo', 'UserController@update_vehicle_photo');
+        Route::post('request/pnumber', 'UserController@update_request_pnumber');
       });
 
       // get
@@ -122,73 +123,105 @@ Route::middleware('json.response')->group(function(){
   // CLIENT
   Route::prefix('client')->group(function(){
 
-      Route::get('home', 'API\AuthClientController@index');
-      Route::post('/login', 'API\AuthClientController@login');
-      Route::post('/register', 'API\AuthClientController@register');
+    Route::get('home', 'API\AuthClientController@index');
+    Route::post('/login', 'API\AuthClientController@login');
+    Route::post('/register', 'API\AuthClientController@register');
 
-      Route::prefix('password')->group(function() {
-        Route::post('create', 'ClientPasswordResetController@create');
-        Route::get('find/{token}', 'ClientPasswordResetController@find');
-        Route::post('reset', 'ClientPasswordResetController@reset');
+    Route::prefix('password')->group(function() {
+      Route::post('create', 'ClientPasswordResetController@create');
+      Route::get('find/{token}', 'ClientPasswordResetController@find');
+      Route::post('reset', 'ClientPasswordResetController@reset');
+    });
+
+    Route::middleware('auth:web_api')->group(function(){
+      Route::get('/', 'ClientController@details');
+      Route::get('logout/{unique_id}', 'ClientController@logout');
+
+      //Dashboard
+      Route::prefix('dashboard')->group(function() {
+        Route::get('/', 'DashboardController@dashboard_data');
+        Route::post('graph', 'DashboardController@dashboard_graph');
       });
 
-      Route::middleware('auth:web_api')->group(function(){
-
-        Route::get('/', 'ClientController@details');
-        Route::get('/campaigns', 'Campaign\ClientCampaignController@getMyCampaigns'); // >>>> campaign list
-        Route::get('/campaigns/requests', 'Campaign\ClientCampaignController@getMyCampaignRequests'); // >>>> campaign list
-        Route::post('/campaigns/requests', 'Campaign\ClientCampaignController@campaign_request_update'); // >>>> campaign request update
-        Route::get('logout/{unique_id}', 'ClientController@logout');
-        
-        Route::get('user/chats', 'Chat\ClientChatController@getUsersChat');
-        Route::post('user/rating', 'UserController@submitUserRating');
-        Route::get('user/{id}/profile', 'UserController@viewProfile');
-        Route::post('user/trip', 'UserController@getUserTrip');
-        Route::get('chat/notif/update/{id}', 'Chat\ClientChatController@updateNotif');
-        Route::get('chat/usersList', 'Chat\ClientChatController@getUserList');
-
-        //Campaign
-        Route::prefix('campaign')->group(function() {
-          Route::get('list', 'Campaign\ClientCampaignController@campaign_list');
-          Route::post('create', 'Campaign\ClientCampaignController@campaign_store'); // >>>> create campaign
-          Route::get('dashboard/{id}', 'Campaign\ClientCampaignController@campaign_dashboard'); // >>>> campaign details for dashboard
-          
-          //Campaign-Location
-          Route::post('new/geolocation', 'LocationController@geo_location_new'); // >>>> create custom geo location
-          Route::get('geolocation', 'LocationController@geo_location_get'); // >>>> get all geo location
-          Route::get('location/data', 'LocationController@for_location_data'); // >>>> get all geo location
-
-          //Campaign-requests-update
-          Route::prefix('request')->group(function() {
-            Route::get('/', 'Campaign\ClientCampaignController@campaign_request');
-            Route::post('update', 'Campaign\ClientCampaignController@campaign_request_update'); // >>>> campaign request update
-          });
-        });
-
-        //Message
-        Route::prefix('message')->group(function() {
-          Route::get('list', 'Chat\ClientChatController@message_list');
-          Route::get('nonConvoList/{search}', 'Chat\ClientChatController@nonConvoList');
-          Route::post('save', 'Chat\ClientChatController@save_message');
-          Route::get('convo/{id}', 'Chat\ClientChatController@getUsersConvo');
-        });
-
-        //Payment
-        Route::prefix('payment')->group(function() {
-          Route::post('update', 'ClientController@payment_update');
-        });
-
-        //custom push notification
-        Route::post('push/notification', 'ClientController@push_notification');
-
-        //Notifications
-        Route::get('/notifications', 'ClientController@getMyNotifications'); // >>>> get unseen user campaign status
+      //Campaigns
+      Route::prefix('campaigns')->group(function() {
+        Route::get('/', 'Campaign\ClientCampaignController@getMyCampaigns'); // >>>> campaign list
+        Route::get('requests', 'Campaign\ClientCampaignController@getMyCampaignRequests'); // >>>> campaign list
+        Route::post('requests', 'Campaign\ClientCampaignController@campaign_request_update'); // >>>> campaign request update
       });
 
+      //Users
+      Route::prefix('user')->group(function() {
+        Route::get('chats', 'Chat\ClientChatController@getUsersChat');
+        Route::post('rating', 'UserController@submitUserRating');
+        Route::get('{id}/profile', 'ClientController@user_profile');
+        Route::post('trip', 'UserController@getUserTrip');
+
+        //Location
+        Route::prefix('location')->group(function() {
+          Route::get('live', 'Location\ClientLocationController@user_live_location');
+        });
+      });
+
+      //Chats
+      Route::prefix('chat')->group(function() {
+        Route::get('notif/update/{id}', 'Chat\ClientChatController@updateNotif');
+        Route::get('usersList', 'Chat\ClientChatController@getUserList');
+      });
+
+      //Campaign
+      Route::prefix('campaign')->group(function() {
+        Route::get('list', 'Campaign\ClientCampaignController@campaign_list');
+        Route::post('create', 'Campaign\ClientCampaignController@campaign_store'); // >>>> create campaign
+        Route::get('dashboard/{id}', 'Campaign\ClientCampaignController@campaign_dashboard'); // >>>> campaign details for dashboard
+        Route::post('graph', 'Campaign\ClientCampaignController@campaign_graph');
+
+        //Campaign-Location
+        Route::post('new/geolocation', 'LocationController@geo_location_new'); // >>>> create custom geo location
+        Route::get('geolocation', 'LocationController@geo_location_get'); // >>>> get all geo location
+        Route::get('location/data', 'LocationController@for_location_data'); // >>>> get all geo location
+
+        //Campaign-requests-update
+        Route::prefix('request')->group(function() {
+          Route::get('/', 'Campaign\ClientCampaignController@campaign_request');
+          Route::post('update', 'Campaign\ClientCampaignController@campaign_request_update'); // >>>> campaign request update
+        });
+
+        //User Data edit
+        Route::prefix('user')->group(function() {
+          Route::post('update', 'Campaign\ClientCampaignController@campaign_user_data_update');
+          Route::get('{cid}', 'Campaign\ClientCampaignController@campaign_users');
+        });
+      });
+
+      //Message
+      Route::prefix('message')->group(function() {
+        Route::get('list', 'Chat\ClientChatController@message_list');
+        Route::get('nonConvoList/{search}', 'Chat\ClientChatController@nonConvoList');
+        Route::post('save', 'Chat\ClientChatController@save_message');
+        Route::get('convo/{id}', 'Chat\ClientChatController@getUsersConvo');
+      });
+
+      //Payment
+      Route::prefix('payment')->group(function() {
+        Route::get('{cid}', 'PaymentController@payment_users');
+        Route::prefix('user')->group(function() {
+          Route::get('data', 'PaymentController@payment_user_data');
+          Route::post('update', 'PaymentController@payment_user_update');
+        });
+      });
+
+      //custom push notification
+      Route::post('push/notification', 'ClientController@push_notification');
+
+      //Notifications
+      Route::get('/notifications', 'ClientController@getMyNotifications'); // >>>> get unseen user campaign status
+
+      //Firebase
       Route::prefix('firebase')->group(function() {
-        Route::post('update', 'Firebase\UserFirebaseController@updateToken');
-        Route::post('getToken', 'Firebase\UserFirebaseController@getToken');
+        Route::post('update', 'Firebase\ClientFirebaseController@updateToken');
+        Route::post('getToken', 'Firebase\ClientFirebaseController@getToken');
       });
-
+    });
   });
 });
