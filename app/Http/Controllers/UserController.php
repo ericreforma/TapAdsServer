@@ -199,7 +199,10 @@ class UserController extends Controller
 		$user = $request->user();
 		$cid = $request->campaign_id;
 
-		$campaign = ClientCampaign::find($cid);
+		$campaign = ClientCampaign::where('id', $cid)
+		->where('duration_from', '<=', Carbon::today())
+		->where('duration_to', '>=', Carbon::today())
+		->first();
 		if($campaign) {
 			$uc_instance = UserCampaign::where('campaign_id', $cid)
 			->where('request_status', '!=', 2)
