@@ -11,15 +11,17 @@ use App\UserCampaign;
 use App\Media;
 use App\Client;
 use App\Vehicle;
+
+use Carbon\Carbon;
 use DB;
 
 class UserCampaignController extends Controller
 {
 	public function __construct() {
 		$this->middleware('auth:api');
-    }
+	}
     
-	public function browse(Request $request){
+	public function browse(Request $request) {
 		$user = $request->user();
 		$registered_campaigns = $user->registered_campaigns;
 		if($request->rec){
@@ -53,6 +55,8 @@ class UserCampaignController extends Controller
 				)'
 			)
 			->whereNotIn('client_campaign.id', $registered_campaigns->pluck('campaign_id')->all())
+			->where('client_campaign.duration_from', '<=', Carbon::today())
+			->where('client_campaign.duration_to', '>=', Carbon::today())
 			->select(
 				'client_campaign.*',
 				'm.url as photo',
@@ -86,6 +90,8 @@ class UserCampaignController extends Controller
 					)'
 				)
 				->whereNotIn('client_campaign.id', $registered_campaigns->pluck('campaign_id')->all())
+				->where('client_campaign.duration_from', '<=', Carbon::today())
+				->where('client_campaign.duration_to', '>=', Carbon::today())
 				->select(
 					'client_campaign.*',
 					'm.url as photo',
@@ -120,6 +126,8 @@ class UserCampaignController extends Controller
 				)'
 			)
 			->whereNotIn('client_campaign.id', $registered_campaigns->pluck('campaign_id')->all())
+			->where('client_campaign.duration_from', '<=', Carbon::today())
+			->where('client_campaign.duration_to', '>=', Carbon::today())
 			->select(
 				'client_campaign.*',
 				'm.url as photo',
@@ -174,6 +182,8 @@ class UserCampaignController extends Controller
 			)'
 		)
 		->whereNotIn('client_campaign.id', $registered_campaigns->pluck('campaign_id')->all())
+		->where('client_campaign.duration_from', '<=', Carbon::today())
+		->where('client_campaign.duration_to', '>=', Carbon::today())
 		->select(
 			'client_campaign.*',
 			'm.url as photo',
@@ -205,6 +215,8 @@ class UserCampaignController extends Controller
 				)'
 			)
 			->whereNotIn('client_campaign.id', $registered_campaigns->pluck('campaign_id')->all())
+			->where('client_campaign.duration_from', '<=', Carbon::today())
+			->where('client_campaign.duration_to', '>=', Carbon::today())
 			->select(
 				'client_campaign.*',
 				'm.url as photo',

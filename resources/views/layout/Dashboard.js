@@ -59,8 +59,8 @@ export default class Dashboard extends Component {
 
   componentDidMount() {
     window.addEventListener('resize', this.handleResize);
-    this.firebaseInit();
-    // this.setState({loading: false});
+    // this.firebaseInit();
+    this.setState({loading: false});
   }
 
   componentWillUnmount() {
