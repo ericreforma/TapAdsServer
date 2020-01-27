@@ -23,32 +23,37 @@ class AuthUserController extends Controller
       auth()->setDefaultDriver('api_auth');
     }
 
-    public function login(Request $request){
-      $credentials = [
+    public function login(Request $request) {
+      if(filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
+        $credentials = [
           'email' => $request->email,
           'password' => $request->password
-      ];
+        ];
+      } else {
+        $credentials = [
+          'username' => $request->email,
+          'password' => $request->password
+        ];
+      }
 
-      if (auth()->attempt($credentials)) {
-        if (auth()->user()->deleted !== 1) {
+      if(auth()->attempt($credentials)) {
+        if(auth()->user()->deleted !== 1) {
           $token = auth()->user()->createToken('tapads')->accessToken;
           return response()->json([
             'status' => true,
             'token'  => $token
           ]);
-        } else {
-          return response()->json([
-            "status"  => false,
-            "message" => "Entered account doesn't exist",
-          ]);
         }
-      } else {
-          return response()->json([
-            "status"  => false,
-            "message" => "Entered account doesn't exist",
-          ]);
+        
+        return response()->json([
+          "status"  => false,
+          "message" => "Entered account doesn't exist",
+        ]);
       }
-
+      return response()->json([
+        "status"  => false,
+        "message" => "Entered account doesn't exist",
+      ]);
     }
 
     public function register (Request $request){
