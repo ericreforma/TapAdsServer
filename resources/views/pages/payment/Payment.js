@@ -10,6 +10,7 @@ import {
   Button,
   Badge,
   Card,
+  Label,
   Alert,
   CardBody,
   FormGroup,
@@ -92,8 +93,11 @@ export default class Payment extends Component {
     });
   }
  
-  submitPayment = (amount, callback) => {
+  submitPayment = (form, callback) => {
+    const amount = form.paymentAmount;
+    const {bonus} = form;
     const {selectedMonth, selectedUsers} = this.state;
+    
     if(!selectedMonth) {
       callback();
       this.setAlert('danger', 'Please select the date in the dropdown below');
@@ -102,6 +106,7 @@ export default class Payment extends Component {
       this.setAlert('danger', `Please select users to pay`);
     } else {
       PaymentController.sendPayment({
+        bonus,
         amount,
         cid: this.cid,
         date: selectedMonth,
@@ -354,6 +359,7 @@ const UserTable = props => {
 
 const PaymentSection = ({submitPayment, setAlert}) => {
   const [paymentAmount, setPaymentAmount] = useState('');
+  const [bonus, setBonus] = useState(false);
   const [paymentPrevent, setPaymentPrevent] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -373,8 +379,9 @@ const PaymentSection = ({submitPayment, setAlert}) => {
   const submitButtonOnClick = () => {
     if(paymentAmount !== '' && paymentAmount > 0) {
       setLoading(true);
-      submitPayment(paymentAmount, () => {
+      submitPayment({paymentAmount, bonus}, () => {
         setLoading(false);
+        setBonus(false);
       });
     } else {
       setAlert('danger', 'Please put the amount of payment. Thank you!');
@@ -396,6 +403,20 @@ const PaymentSection = ({submitPayment, setAlert}) => {
             />
             <InputGroupAddon addonType="append">.00</InputGroupAddon>
           </InputGroup>
+
+          <div className="form-check mt-2">
+            <Input
+              className="form-check-input"
+              type="checkbox"
+              id="gridCheck"
+              checked={bonus}
+              onChange={() => setBonus(!bonus)} />
+            <Label
+              className="form-check-label"
+              for="gridCheck" >
+              Bonus Payment
+            </Label>
+          </div>
         </Col>
       </Row>
 

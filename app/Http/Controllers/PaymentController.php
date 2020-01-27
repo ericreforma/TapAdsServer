@@ -76,6 +76,7 @@ class PaymentController extends Controller
 		$cid = $request->cid;
 		$users = $request->users;
 		$amount = $request->amount;
+		$bonus = $request->bonus;
 		list($date_from, $date_to) = explode('/', $request->date);
 		$row_data = array(
 			'user_id' => 0,
@@ -83,6 +84,7 @@ class PaymentController extends Controller
 			'amount' => $amount,
 			'date_from' => $date_from,
 			'date_to' => $date_to,
+			'bonus' => $bonus ? 1 : null,
 			'status' => 1,
 			'seen' => 0,
 		);
