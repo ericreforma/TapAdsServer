@@ -108,6 +108,16 @@ export const VEHICLE = {
       name: 'Motorcycle',
       description: 'Motorcycle'
     },
+    vans: {
+      id: 3,
+      name: 'Vans',
+      description: null,
+    },
+    truck: {
+      id: 4,
+      name: 'Truck',
+      description: null,
+    }
   },
   TYPE: {
     private: {
